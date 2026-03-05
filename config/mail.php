@@ -8,12 +8,19 @@ return [
     'mailers' => [
 
         'smtp' => [
+            // 'transport' => 'smtp',
+            // 'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
+            // 'port' => env('MAIL_PORT', 587),
+            // 'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+            // 'username' => env('MAIL_USERNAME'),
+            // 'password' => env('MAIL_PASSWORD'),
+            // 'timeout' => null,
             'transport' => 'smtp',
-            'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
-            'port' => env('MAIL_PORT', 587),
-            'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASSWORD'),
+            'host' => env('MAIL_HUAWEI_HOST'),
+            'port' => env('MAIL_HUAWEI_PORT'),
+            'encryption' => env('MAIL_HUAWEI_ENCRYPTION'),
+            'username' => env('MAIL_HUAWEI_USERNAME'),
+            'password' => env('MAIL_HUAWEI_PASSWORD'),
             'timeout' => null,
         ],
 

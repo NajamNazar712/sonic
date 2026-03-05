@@ -458,7 +458,7 @@ class AdminFinanceController extends Controller
                         return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $station_deposit_note->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
 
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl('station_deposit_notes/' . $station_deposit_note->deposit_slip, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/station_deposit_notes/' . $station_deposit_note->deposit_slip, now()->addMinutes(5));
                         return '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
                 } else {
@@ -8456,7 +8456,7 @@ class AdminFinanceController extends Controller
             'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 
             'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 
             'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 
-            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory', 'done_payments.tax_status', 'r.name as region', 'creator.name as created_by')
+            'done_payments.updated_at as updated_at','sts.status as star_status','u.payment_cycle_days as payment_cycle_days','pc.name as payment_cycle', 'pc.id as payment_cycle_id', 'dpc.sms_charges as total_sms_charges','done_payments.arrival_shipment as arrival_shipment_shipments_count','done_payments.arrival_shipment', 'sale_admin.name as sale_person_name','wu.id as wallet_user' , 'done_payments.is_wallet_payment', 'wu.finova_account_type as finova_account_type' ,'dpc.cod_sst as total_cod_sst','t.name as territory', 'done_payments.tax_status', 'r.name as region', 'creator.name as created_by','ubi.iban')
             ->where(function($query){
                 $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
                 if (!empty($idsToExclude)) {
@@ -9794,6 +9794,10 @@ class AdminFinanceController extends Controller
                             <tr>
                               <td class="color secondary"><strong>Total WHT Amount (PKR)</strong></td>
                               <td>' . number_format($total_wht, 2) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total SST Amount (PKR)</strong></td>
+                              <td>' . number_format($total_cod_sst, 2) . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
@@ -20141,7 +20145,7 @@ class AdminFinanceController extends Controller
 
                     $wht = 0;
                     $cod_sst = 0;
-                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
+                    if(in_array($shipment->shipper_status_id, [14, 30, 31, 36, 37]) && $shipment->amount > 0) {
                         
                         $wht = self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                         $cod_sst = self::cod_sst($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
@@ -21789,7 +21793,7 @@ class AdminFinanceController extends Controller
                     // }
                     $wht = 0;
                     $cod_sst = 0;
-                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
+                    if(in_array($shipment->shipper_status_id, [14, 30, 31, 36, 37]) && $shipment->amount > 0) {
 
                         $wht = self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                         $cod_sst = self::cod_sst($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
@@ -22166,7 +22170,7 @@ class AdminFinanceController extends Controller
                     // }
                     $wht = 0;
                     $cod_sst = 0;
-                    if(in_array($shipment->shipper_status_id, [14, 31, 36, 37]) && $shipment->amount > 0) {
+                    if(in_array($shipment->shipper_status_id, [14, 30, 31, 36, 37]) && $shipment->amount > 0) {
 
                         $wht += self::wht($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);
                         $cod_sst = self::cod_sst($shipment->user_id, $shipment->amount, $shipment->packaging_material_request, $shipment->id);

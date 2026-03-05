@@ -43,8 +43,8 @@ class TicketDraftingCRM extends Command
                 ->latest('created_at') // or 'id' if that's the auto-increment
                 ->first();
             if(!in_array($days, $rangeArray)  && in_array($list->shipment->shipper_status_id, $ticketDraftShipmentStatus)){
-                if($crmRequestCheck?->status_id != 1){
-                    CRMController::add(1, 2, 5, 1, 5100, 4, $list->shipment->id, $list->shipment->user_id, 5100, NULL);
+                if($crmRequestCheck?->status_id == 4){
+                    CRMController::add(1, 2, 5, 1, 5321, 4, $list->shipment->id, $list->shipment->user_id, 5321, NULL);
                 }
 
                 $list->status = 1;

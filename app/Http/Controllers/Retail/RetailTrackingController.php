@@ -42,6 +42,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 use DB;
+use App\Models\RetailShipmentFlyerNumber;
 
 class RetailTrackingController extends Controller
 {
@@ -224,6 +225,7 @@ class RetailTrackingController extends Controller
                                 }
                             }
 
+                            $details['order_information']['flyer_count'] = RetailShipmentFlyerNumber::where('shipment_id', $shipment->id)->count();
                             $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
                             $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 

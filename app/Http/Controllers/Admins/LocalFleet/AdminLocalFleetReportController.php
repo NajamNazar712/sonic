@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins\LocalFleet;
 
+use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\Controller;
 use App\Models\LocalFleetVehicle;
 use App\Models\LocalFleetVehicleTrip;
@@ -9,6 +10,7 @@ use App\Models\LocalTripJobReference;
 use App\Models\LocalTripVehicleCost;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
@@ -25,6 +27,7 @@ class AdminLocalFleetReportController extends Controller
     }
     public function trip_list(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),841);
         $data = LocalFleetVehicleTrip::join('local_fleet_vehicles as lfv', 'lfv.id', '=', 'local_fleet_vehicle_trips.vehicle_id')
             ->join('cities as c','c.id','=','lfv.city_id')
             ->select(
@@ -171,6 +174,7 @@ class AdminLocalFleetReportController extends Controller
     }
     public function consolidated_trips_list(Request $request)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),842);
         $data = LocalFleetVehicleTrip::join('local_fleet_vehicles as lfv', 'lfv.id', '=', 'local_fleet_vehicle_trips.vehicle_id')
             ->join('cities as c', 'c.id', '=', 'lfv.city_id')
             ->select(

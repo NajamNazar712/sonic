@@ -82,7 +82,7 @@
                                     <th class="border-primary border-darken-1">Department</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
-                                    <th class="border-primary border-darken-1">Availed Leaves</th>
+                                    <!-- <th class="border-primary border-darken-1">Availed Leaves</th> -->
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Leave Purpose</th>
                                     <th class="border-primary border-darken-1">Leave Type</th>
@@ -514,7 +514,7 @@
                             head.push('Department');
                             head.push('Employee Type');
                             head.push('CNIC');
-                            head.push('Availed Leaves');
+                            // head.push('Availed Leaves');
                             head.push('Status');
                             head.push('Leave Purpose');
                             head.push('Leave Type');
@@ -536,7 +536,7 @@
                                 row.push(values.department);
                                 row.push(values.employee_type);
                                 row.push(values.cnic);
-                                row.push(values.availed_leaves);
+                                // row.push(values.availed_leaves);
                                 row.push(values.status);
                                 row.push(values.applied_reason);
                                 row.push(values.leave_type);
@@ -619,13 +619,13 @@
                         class: 'align-middle employee_type'
                     },
                     {data: 'cnic', name: 'e.cnic', class: 'align-middle cnic', searchable: false},
-                    {
-                        data: 'availed_leaves',
-                        name: 'availed_leaves',
-                        class: 'align-middle leave_count',
-                        orderable: false,
-                        searchable: false
-                    },
+                    // {
+                    //     data: 'availed_leaves',
+                    //     name: 'availed_leaves',
+                    //     class: 'align-middle leave_count',
+                    //     orderable: false,
+                    //     searchable: false
+                    // },
                     {data: 'status', name: 'ls.id', class: 'align-middle status'},
                     {
                         data: 'applied_reason',

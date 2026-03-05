@@ -4655,6 +4655,7 @@ class ReturnController extends Controller
         $return_note = ReturnNote::where('id', $request->id);
         if ($return_note->exists()) {
             $total_shipments = 0;
+            $total_weight=0;
             $total_users = 0;
             $try_and_buy_total_users = 0;
             $replacement_total_users = 0;
@@ -4882,6 +4883,7 @@ class ReturnController extends Controller
                 foreach ($filtered_shipments as $shipment) {
                     if ($shipment->user_id == $filtered_shipments_user->user_id) {
                         $total_shipments++;
+                        $total_weight+= (float) $shipment->actual_weight;
                         $class = null;
                         if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
                             $class = 'complaint';
@@ -4989,6 +4991,10 @@ class ReturnController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Total Shipments</strong></td>
                             <td>' . $total_shipments . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Weight (Kg)</strong></td>
+                            <td>' . $total_weight . '</td>
                           </tr>
                         
                         </tbody>
@@ -5423,8 +5429,8 @@ class ReturnController extends Controller
                     $created = date("F d Y H:i:s.", filemtime($file));
                     $file_name = pathinfo($file);
                     if ($now->diffInDays($created) > 1) {
-                        Storage::disk('s3')->put('return_note_images/' . $file_name['basename'], file_get_contents($file));
-                        $exists = Storage::disk('s3')->exists('return_note_images/' . $file_name['basename']);
+                        Storage::disk('s3')->put('sonic-archive/return_note_images/' . $file_name['basename'], file_get_contents($file));
+                        $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $file_name['basename']);
                         if ($exists) {
                             File::delete($file);
                         }
@@ -5442,8 +5448,8 @@ class ReturnController extends Controller
                     $created = date("F d Y H:i:s.", filemtime($file));
                     $file_name = pathinfo($file);
                     if ($now->diffInDays($created) > 1) {
-                        Storage::disk('s3')->put('return_note_images/' . $file_name['basename'], file_get_contents($file));
-                        $exists = Storage::disk('s3')->exists('return_note_images/' . $file_name['basename']);
+                        Storage::disk('s3')->put('sonic-archive/return_note_images/' . $file_name['basename'], file_get_contents($file));
+                        $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $file_name['basename']);
                         if ($exists) {
                             File::delete($file);
                         }
@@ -6374,9 +6380,9 @@ class ReturnController extends Controller
                     if (file_exists($url)) {
                         $img_url = asset('uploads/return_notes/' . $return->image);
                     } else {
-                        $exists = Storage::disk('s3')->exists('return_note_images/' . $return->image);
+                        $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $return->image);
                         if ($exists) {
-                            $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/' . $return->image, now()->addMinutes(5));
+                            $img_url = Storage::disk('s3')->temporaryUrl('sonic-archive/return_note_images/' . $return->image, now()->addMinutes(5));
                         }
                     }
 
@@ -6402,9 +6408,9 @@ class ReturnController extends Controller
                                 if ($exists) {
                                     $img_url = asset('storage/uploads/return_notes/' . $return_note_image->image);
                                 } else {
-                                    $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note_image->image);
+                                    $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $return_note_image->image);
                                     if ($exists) {
-                                        $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/' . $return_note_image->image, now()->addMinutes(5));
+                                        $img_url = Storage::disk('s3')->temporaryUrl('sonic-archive/return_note_images/' . $return_note_image->image, now()->addMinutes(5));
                                     }
                                 }
                             }
@@ -6423,9 +6429,9 @@ class ReturnController extends Controller
                                 if ($exists) {
                                     $img_url = asset('storage/uploads/return_notes/' . $return_note_image->image);
                                 } else {
-                                    $exists = Storage::disk('s3')->exists('return_note_images/' . $return_note_image->image);
+                                    $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $return_note_image->image);
                                     if ($exists) {
-                                        $img_url = Storage::disk('s3')->temporaryUrl('return_note_images/' . $return_note_image->image, now()->addMinutes(5));
+                                        $img_url = Storage::disk('s3')->temporaryUrl('sonic-archive/return_note_images/' . $return_note_image->image, now()->addMinutes(5));
                                     }
                                 }
                             }
@@ -6617,7 +6623,7 @@ class ReturnController extends Controller
                     if ($exists) {
                         $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->picture_path)) . '"><i class="la la-image"></i> View</button></div>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl($shipments->picture_path, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$shipments->picture_path, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
 
@@ -6633,7 +6639,7 @@ class ReturnController extends Controller
                     if ($exists) {
                         $image .= '<div class="text-center"><button type="button" class="btn btn-primary btn-sm picture" data-link="' . asset(Storage::url($shipments->pod_image)) . '"><i class="la la-image"></i> View</button></div>';
                     } else {
-                        $img = Storage::disk('s3')->temporaryUrl($shipments->pod_image, now()->addMinutes(5));
+                        $img = Storage::disk('s3')->temporaryUrl('sonic-archive/'.$shipments->pod_image, now()->addMinutes(5));
                         $image = '<a class="btn btn-sm btn-outline-info align-middle" href="' . $img . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                     }
 

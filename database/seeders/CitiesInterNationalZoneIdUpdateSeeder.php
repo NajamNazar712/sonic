@@ -19,7 +19,7 @@ class CitiesInterNationalZoneIdUpdateSeeder extends Seeder
     public function run()
     {
         //
-        $filePath = storage_path('app/ZoneDHLLIST.xlsx');
+        $filePath = storage_path('app/ZonesListCities.xlsx');
 
         // Load Excel file
         $spreadsheet = IOFactory::load($filePath);
@@ -36,7 +36,6 @@ class CitiesInterNationalZoneIdUpdateSeeder extends Seeder
 
             if (!empty($zoneid)) {
                 $model = City::where('name', $countryData)->first();
-
                 if ($model) {
                     $oldData = $model->getOriginal();
 

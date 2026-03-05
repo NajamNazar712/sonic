@@ -34,7 +34,7 @@ class ArchiveAwsBucket extends Command
                     $fileName   = $file->getBasename();
 
                     // Destination path in S3
-                    $s3Path = "sonic_storage_archieve/{$monthFolder}/{$fileName}";
+                    $s3Path = "sonic-archive/sonic_storage_archieve/{$monthFolder}/{$fileName}";
 
                     $stream = fopen($filePath, 'r+');
                     Storage::disk('s3')->put($s3Path, $stream);

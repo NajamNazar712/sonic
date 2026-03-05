@@ -659,6 +659,8 @@
                             <th class="border-primary border-darken-1">Employee Rejoin</th>
                             <th class="border-primary border-darken-1">Pin Update</th>
                             <th class="border-primary border-darken-1">Blacklist</th>
+                            <th class="border-primary border-darken-1">Changes</th>
+                            <th class="border-primary border-darken-1">Screen</th>
                             <th class="border-primary border-darken-1">Updated By</th>
                             <th class="border-primary border-darken-1">Updated At</th>
                         </tr>
@@ -2089,6 +2091,8 @@
                                     <td>${value.rejoin_employee}</td>
                                     <td>${value.pin_update}</td>
                                     <td>${value.blacklist}</td>
+                                    <td>${value.log_data}</td>
+                                    <td>${value.screen}</td>
                                     <td>${value.updated_by}</td>
                                     <td>${value.updated_at}</td>
 
