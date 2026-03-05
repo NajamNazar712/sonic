@@ -1549,7 +1549,7 @@ class RetailAdminUserManagementController extends Controller
             $trax_center->insurance = $request->edit_insurance;
             $trax_center->updated_by = Auth::id();
             $changes = $trax_center->getDirty();
-            
+
             $fieldNames = [
                 'name' => 'Name',
                 'phone_no' => 'Phone No',
@@ -4220,10 +4220,11 @@ class RetailAdminUserManagementController extends Controller
 
     public static function updatePickupAddress($changes,$id, $hub_name){
 
+        $change_name = $changes['name']  ?? '';
         $record = UserShippingInfo::where('id',$id)->first();
         if($record){
             $record->poc = $changes['name'] ?? $record->poc;
-            $record->pickup_address = $changes['name'] . ' - ' . $hub_name;
+            $record->pickup_address = $change_name . ' - ' . $hub_name;
             $record->phone = '021-111-118-729';
             $record->email = 'info@slgtrax.com';
             $record->location_latitude = $changes['location_latitude']  ?? $record->location_latitude;
