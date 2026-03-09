@@ -544,7 +544,7 @@ class APIController extends Controller
         $user_type = User::where('id', $user_id)->first();
 
         //adding this for the process of document re-upload from shipper
-        if(in_array($user_type->document_status , [0,3]) && Carbon::now()->gt(Carbon::parse('2026-03-08 23:59:59'))){
+        if(in_array($user_type->document_status , [0,3]) && Carbon::now()->gt(Carbon::parse('2026-03-31 23:59:59'))){
             return response()->json([
                 'status' => 1,
                 'message' => "Please login to Sonic Portal and upload required documents to enable booking"

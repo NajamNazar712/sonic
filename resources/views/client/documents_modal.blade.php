@@ -6,7 +6,7 @@
     $id = $authUser->id;
     $shipper = $authUser->name;
         
-    $deadlinePassed = \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse('2026-03-08 23:59:59'));
+    $deadlinePassed = \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse('2026-03-31 23:59:59'));
 @endphp
 
 @if($document_status == 0 || $document_status == 3)
