@@ -35,7 +35,7 @@
                         <p>
                             This activity is being conducted for the submission of revised and updated documents.
                             All shippers are required to upload the requested documents by <strong>31st March 2026.</strong>
-                            Failure to comply by this deadline may result in restrictions on booking services until the required documents are submitted and approved.
+                            Failure to comply by this deadline may result in restrictions on booking services until the required documents are submitted and approved. Please contact your Sales Person for further assistance.
                         </p>
 
                         @if($document_status == 3)
