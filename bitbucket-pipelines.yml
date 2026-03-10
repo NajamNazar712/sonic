@@ -18,4 +18,4 @@ pipelines:
           deployment: Production
           script:
             - echo "Deploying to production server..."
-            - ssh -o StrictHostKeyChecking=no $PRODUCTION_HOST "cd /var/www/html/sonic && ./deploy.sh"
+            - ssh -p "$PRODUCTION_PORT" -o StrictHostKeyChecking=no $PRODUCTION_HOST "cd /var/www/html/sonic && ./deploy.sh"
