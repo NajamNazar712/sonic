@@ -3315,5 +3315,178 @@ class ShipperDashboardController extends Controller
 
     }
 
+    public function documents_index()
+    {
+        $id =  session('user_id');
+        $documents = UserDocumentAttachment::where('user_id', $id)->first();
 
+        $user = User::find($id);
+        if ($documents == null) {
+            $documents = false;
+        }
+        return view('client.documents')->with(['id' => $id, 'documents' => $documents, 'document_status' => $user->documents_status, 'shipper' => $user->name, 'reason' => $user->documents_status_reason]);
+    }
+
+    public function viewUserDocuments($id, $check, $pdf)
+    {
+        $user_documents = UserDocumentAttachment::where('user_id', $id)->first();
+        if ($check == 'filled_and_signed_pdf') {
+            $file = $user_documents->filled_and_signed_pdf;
+        } elseif ($check == 'signed_acknowledgement_pdf') {
+            $file = $user_documents->signed_acknowledgement_pdf;
+        } elseif ($check == 'cnic_front_image') {
+            $file = $user_documents->cnic_front_image;
+        } elseif ($check == 'cnic_back_image') {
+            $file = $user_documents->cnic_back_image;
+        } elseif ($check == 'blank_cheque_image') {
+            $file = $user_documents->blank_cheque_image;
+        } elseif ($check == 'e_sign_image') {
+            $file = $user_documents->e_sign_image;
+        } else {
+            return redirect()->back()->with('error', 'File not found!');
+        }
+        $url = Storage::url('users_attached_documents/' . $id . '/' . $file);
+        return view('admin.profile.documents_view')->with(['url' => $url, 'pdf' => $pdf]);
+    }
+
+    public function userDocumentsEdit(Request $request)
+    {
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if ($user_attachment) {
+            return response()->json(['status' => 1, 'user_attachment' => $user_attachment]);
+        } else {
+            return response()->json(['status' => 0]);
+        }
+    }
+
+    public function uploadDocuments(Request $request)
+    {
+        $validation = [
+            'filled_and_signed_pdf' => 'mimes:pdf|max:5120',
+            'signed_acknowledgement_pdf' => 'mimes:pdf|max:5120',
+            'cnic_front_image' => 'mimes:png,jpeg,jpg|max:2048',
+            'cnic_back_image' => 'mimes:png,jpeg,jpg|max:2048',
+            'blank_cheque_image' => 'mimes:png,jpeg,jpg|max:2048',
+        ];
+        $validate = Validator::make($request->all(), $validation);
+
+        if ($validate->fails()) {
+            return redirect()->back()->with(['errors' => $validate->errors()]);
+        }
+        $date = Carbon::now()->format('Y_m_d');
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if ($user_attachment) {
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                if ($user_attachment->filled_and_signed_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->filled_and_signed_pdf);
+                }
+                $filename = 'filled_and_signed_pdf_' . $date . '_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $user_attachment->filled_and_signed_pdf = $filename;
+            }
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                if ($user_attachment->signed_acknowledgement_pdf != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->signed_acknowledgement_pdf);
+                }
+                $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+            if ($request->hasFile('cnic_front_image')) {
+                if ($user_attachment->cnic_front_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_front_image);
+                }
+                $filename = 'cnic_front_image_' . $date . '_' . $request->user_id . '.png';
+                $file = $request->file('cnic_front_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $user_attachment->cnic_front_image = $filename;
+            }
+            if ($request->hasFile('cnic_back_image')) {
+                if ($user_attachment->cnic_back_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->cnic_back_image);
+                }
+                $filename = 'cnic_back_image_' . $date . '_' . $request->user_id . '.png';
+                $file = $request->file('cnic_back_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $user_attachment->cnic_back_image = $filename;
+            }
+            if ($request->hasFile('blank_cheque_image')) {
+                if ($user_attachment->blank_cheque_image != NULL) {
+                    Storage::disk('public')->delete('users_attached_documents/' . $request->user_id . '/' . $user_attachment->blank_cheque_image);
+                }
+                $filename = 'blank_cheque_image_' . $date . '_' . $request->user_id . '.png';
+                $file = $request->file('blank_cheque_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $user_attachment->blank_cheque_image = $filename;
+            }
+            $user_attachment->uploaded_at = Carbon::now();
+            //$user_attachment->uploaded_by = Auth::id();
+            $user_attachment->save();
+        } else {
+
+            $new_user_attachment = new UserDocumentAttachment();
+            if ($request->hasFile('filled_and_signed_pdf')) {
+                $filename = 'filled_and_signed_pdf_' . $date . '_' . $request->user_id . '.pdf';
+                $file = $request->file('filled_and_signed_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $new_user_attachment->filled_and_signed_pdf = $filename;
+            }
+
+            if ($request->hasFile('signed_acknowledgement_pdf')) {
+                $filename = 'signed_acknowledgement_pdf_' . $date . '_' . $request->user_id . '.pdf';
+                $file = $request->file('signed_acknowledgement_pdf');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $new_user_attachment->signed_acknowledgement_pdf = $filename;
+            }
+
+            if ($request->hasFile('cnic_front_image')) {
+                $filename = 'cnic_front_image_' . $date . '_' . $request->user_id . '.png';
+                $file = $request->file('cnic_front_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $new_user_attachment->cnic_front_image = $filename;
+            }
+
+            if ($request->hasFile('cnic_back_image')) {
+                $filename = 'cnic_back_image_' . $date . '_' . $request->user_id . '.png';
+                $file = $request->file('cnic_back_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $new_user_attachment->cnic_back_image = $filename;
+            }
+
+            if ($request->hasFile('blank_cheque_image')) {
+                $filename = 'blank_cheque_image_' . $date . '_' . $request->user_id . '.png';
+                $file = $request->file('blank_cheque_image');
+                Storage::disk('public')->putFileAs('users_attached_documents/' . $request->user_id . '', $file, $filename);
+                $new_user_attachment->blank_cheque_image = $filename;
+            }
+
+            $new_user_attachment->user_id = $request->user_id;
+            $new_user_attachment->uploaded_at = Carbon::now();
+            //$new_user_attachment->uploaded_by = Auth::id();
+            $new_user_attachment->save();
+        }
+
+        $user = User::find($request->user_id);
+        $user->documents_status = 0;
+        $user->documents_status_reason = null;
+
+        $user_attachment = UserDocumentAttachment::where('user_id', $request->user_id)->first();
+        if ($user_attachment) {
+            if (
+                $user_attachment->filled_and_signed_pdf != null &&
+                $user_attachment->signed_acknowledgement_pdf != null &&
+                $user_attachment->cnic_front_image != null &&
+                $user_attachment->cnic_back_image != null &&
+                $user_attachment->blank_cheque_image != null
+            ) {
+                $user->documents_status = 1;
+            }
+        }
+
+        $user->save();
+
+        return redirect()->back()->with(['success' => 'Files uploaded successfully']);
+    }
 }

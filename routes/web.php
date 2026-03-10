@@ -105,6 +105,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('ledger/list', 'Shippers\ShipperDashboardController@ledger_list')->name('ledger.list');
 
     Route::get('/welcome', 'Shippers\ShipperDashboardController@welcome_index')->name('welcome');
+
+    Route::get('/documents', 'Shippers\ShipperDashboardController@documents_index')->name('documents');
+    Route::get('/{id}/{check}/{pdf}/documents', 'Shippers\ShipperDashboardController@viewUserDocuments')->name('documents.view');
+    Route::post('/documents/upload', 'Shippers\ShipperDashboardController@uploadDocuments')->name('documents.upload');
+    Route::post('/documents/confirm', 'Shippers\ShipperDashboardController@userDocumentsConfirm')->name('documents.confirm');
+    Route::post('/documents/edit', 'Shippers\ShipperDashboardController@userDocumentsEdit')->name('documents.edit');
+
     Route::get('/welcome/list', 'Shippers\ShipperDashboardController@welcome_list')->name('welcome.list');
     Route::post('/welcome/data', 'Shippers\ShipperDashboardController@welcome_data')->name('welcome.data');
     Route::post('otp_verify', 'Shippers\ShipperDashboardController@opt_verify')->name('opt_verify');
