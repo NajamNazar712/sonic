@@ -50,7 +50,7 @@ class ProcessSMS implements ShouldQueue
             }
         }
         catch(\Exception $exception) {
-            $to = ['sahban.ghani@logiserves.com'];
+            $to = ['munawar.shamsi@logiserves.com'];
             $subject = '[Error] SMS API';
             $body = $this->sms->body.'<br/>'.'Error Exception.<br/>' . json_encode($exception->getMessage());
 
@@ -404,7 +404,7 @@ class ProcessSMS implements ShouldQueue
                 $sms->status = 2;
                 $sms->save();
 
-                $to = ['sahban.ghani@logiserves.com'];
+                $to = ['munawar.shamsi@logiserves.com'];
                 $subject = '[Error] SMS API';
                 $body = $sms->body.'<br/>'.'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($responseArray);
 
