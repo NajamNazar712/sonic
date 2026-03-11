@@ -52,7 +52,7 @@ class ProcessSMS implements ShouldQueue
         catch(\Exception $exception) {
             $to = ['sahban.ghani@logiserves.com'];
             $subject = '[Error] SMS API';
-            $body = 'Error Exception.<br/>' . json_encode($exception->getMessage());
+            $body = $this->sms->body.'<br/>'.'Error Exception.<br/>' . json_encode($exception->getMessage());
 
             // Explicitly use the huawei_email mailer
             Mail::mailer('huawei_email')
@@ -406,7 +406,7 @@ class ProcessSMS implements ShouldQueue
 
                 $to = ['sahban.ghani@logiserves.com'];
                 $subject = '[Error] SMS API';
-                $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($responseArray);
+                $body = $sms->body.'<br/>'.'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($responseArray);
 
                 // Updated to use the huawei_email mailer
                 Mail::mailer('huawei_email')
