@@ -763,7 +763,7 @@ class JourneyMissingEntrySeeder extends Seeder
             foreach ($shipmentId as $shipment) {
                 $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->select('status_reason_id', 'remarks')->first();
                 $shipment_status_reason = $journey->status_reason_id;
-                $remarks =  ((!$remarks) ? $journey->remarks : '');
+                $remarks =  ((! $journey->remarks) ? $journey->remarks : '');
                 Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                 NotificationsController::send(15, 0, $shipment->id);
                 NotificationsController::send(16, 0, $shipment->id);
