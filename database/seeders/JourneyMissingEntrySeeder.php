@@ -757,7 +757,7 @@ class JourneyMissingEntrySeeder extends Seeder
             14431160863856
         ];
         if ($shipmentId) {
-            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->where('shipper_status_id',13)->get();
+            $shipmentId = Shipment::whereIn('tracking_number', $shipmentId)->get();
             echo count($shipmentId);
         
             foreach ($shipmentId as $shipment) {
