@@ -16312,6 +16312,7 @@ class RiderAPIController extends Controller
 
         $fromDate = Carbon::parse($request->from)->startOfDay();
         $toDate   = Carbon::parse($request->to)->startOfDay();
+        $now      = Carbon::now();
 
         if ($fromDate->gt($toDate)) {
             return response()->json([
@@ -16319,6 +16320,13 @@ class RiderAPIController extends Controller
                 'message' => 'From date cannot be greater than To date.'
             ]);
         }
+        if ($fromDate->lt($now->copy()->subHours(24))) {
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Leave request can only be submitted within the last 24 hours.'
+            ]);
+        }
+
 
         $workingDays = (int) ($employee->department->working_days ?? 0);
 
