@@ -53,7 +53,6 @@ class ExpectedShipmentNotMeetPenaltyCharges extends Command
         ->where('pos.percentage_on_expected_shipments', '>', 0)
         ->get();
 
-        //dd($users);
 
         $users->chunk(500)->each(function ($chunked_users) use ($start_date, $end_date )
         {
@@ -96,7 +95,6 @@ class ExpectedShipmentNotMeetPenaltyCharges extends Command
                     ) as total_charges
                 ')
                 ->first();
-                dd($result);
                 
                 if ($result->total_shipments != 0 && $result->total_shipments < $chunked_user->average_shipments) {
                     $total_charges = $result->total_charges ?? 0;
