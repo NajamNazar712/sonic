@@ -68,6 +68,7 @@ class ProcessOTPSMSITS implements ShouldQueue
                     'UniqueId' => $sms->id,
                 ]
             ]);
+            $responvecode = $response->getBody()->getContents();
 
             if ($response->getStatusCode() == 200) {
                 $this->sms->status = 3;
@@ -80,10 +81,10 @@ class ProcessOTPSMSITS implements ShouldQueue
                 $this->sms->status = 2;
 
                 $this->sms->save();
-
-                $to = ['munawar.shamsi@logiserves.com'];
+                
+                $to = ['anas.mazhar@logiserves.com'];
                 $subject = '[Error] CALL API - ITS';
-                $body = 'Unrecognized Error in CALL API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
+                $body = 'Unrecognized Error in CALL API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($responvecode);
 
                 $mail = Mail::to($to)->send(new Notifications($subject, $body));
             }
