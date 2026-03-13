@@ -137,7 +137,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.updated_by') || $(header).is('.status_updated_at') || $(header).is('.created_at') || $(header).is('.average_shipments')  || $(header).is('.recorded_shipments') || $(header).is('.amount')  || $(header).is('.percentage_applied') ) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.updated_by') || $(header).is('.status_updated_at') || $(header).is('.created_at') || $(header).is('.average_shipments')  || $(header).is('.recorded_shipments') || $(header).is('.amount')  || $(header).is('.percentage_applied')  || $(header).is('.total_charges') || $(header).is('.applied_month')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.status')){
