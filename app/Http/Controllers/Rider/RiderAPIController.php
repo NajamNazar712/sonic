@@ -12000,7 +12000,7 @@ class RiderAPIController extends Controller
 
                                         if ($request->has('audio')) {
                                             $time = Carbon::now()->toDateString();
-                                            if ($environment == 'production') {
+                                        if ($environment == 'production') {
                                                 $extension = $request->file('audio')->getClientOriginalExtension();
                                                 $audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                                 Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
