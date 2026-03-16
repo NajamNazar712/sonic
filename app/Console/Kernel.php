@@ -198,8 +198,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ExpectedShipmentNotMeetPenaltyCharges',
         'App\Console\Commands\RemoveExpiredZeroCodShippers',
         'App\Console\Commands\SyncS3ToMinio',
-
-
+        'App\Console\Commands\AutoRejectLeaves',
     ];
 
     /**
@@ -729,6 +728,8 @@ class Kernel extends ConsoleKernel
         // $schedule->command('sync:s3-minio 2026-03-05')
         //     ->cron('0 3 5 3 *')
         //     ->withoutOverlapping();
+
+        $schedule->command('auto:reject-leaves')->everyFiveMinutes();
     }
     /**
      * Register the commands for the application.
