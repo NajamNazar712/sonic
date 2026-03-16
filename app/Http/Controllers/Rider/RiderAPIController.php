@@ -9155,6 +9155,11 @@ class RiderAPIController extends Controller
 
     public function shipment_delivered_v5(Request $request)
     {
+//        if ($request->rider_id == 12079) {
+//            Log::info('Debug Request for Rider 12079:', [
+//                'data' => json_encode($request->all())
+//            ]);
+//        }
         $message = '';
         $rules = [
             'added_at' => ['required'],
