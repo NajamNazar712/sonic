@@ -543,6 +543,13 @@ class APIController extends Controller
         $flag = null;
         $user_type = User::where('id', $user_id)->first();
 
+        //adding this for the process of document re-upload from shipper
+        if(in_array($user_type->document_status , [0,3]) && Carbon::now()->gt(Carbon::parse('2026-03-31 23:59:59'))){
+            return response()->json([
+                'status' => 1,
+                'message' => "Please login to Sonic Portal and upload required documents to enable booking"
+            ]);
+        }
 
         // sahban bhai said service type 3,5 then disabled this below condition
             if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(1)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id']) && !in_array($request->input('service_type_id',1), [3,5])) {

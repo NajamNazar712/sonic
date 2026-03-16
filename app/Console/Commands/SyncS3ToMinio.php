@@ -55,7 +55,7 @@ class SyncS3ToMinio extends Command
         $s3Client = Storage::disk($disk)->getClient();
         $params = [
             'Bucket' => $bucket,
-            'Prefix' => 'petty_cash_statement_images/',
+            'Prefix' => 'station_deposit_notes/',
         ];
 
         $paginator = $s3Client->getPaginator('ListObjectsV2', $params);
