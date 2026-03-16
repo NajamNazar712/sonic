@@ -1192,7 +1192,8 @@ class Permission
             'human_resource.employee_directory.reference.update' => 652,
             'human_resource.employee_directory.education.update' => 652,
             'human_resource.employee_directory.employment.update' => 652,
-            'human_resource.employee_directory.attachments.update' => 652,
+            // shahban bhai discussed
+//            'human_resource.employee_directory.attachments.update' => 652,
             'human_resource.employee_directory.rider.update' => 652,
             'human_resource.employee_directory.rider.deactivate' => 652,
             'human_resource.employee_directory.rider.activate' => 652,
