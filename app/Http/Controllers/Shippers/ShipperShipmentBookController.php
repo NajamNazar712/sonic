@@ -1170,7 +1170,7 @@ class ShipperShipmentBookController extends Controller
     public function check_negative_payable(Request $request){
         $user_id = session('user_id');
         $account_type = session('account_type');
-        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type) && !NegativePayableAllowShipperZeroCod::isAllowed($user_id)){
+        if(!PendingPayment::check_negative_payable_cod($user_id,$account_type,$request->input('amount')) && !NegativePayableAllowShipperZeroCod::isAllowed($user_id)){
             return 'false';
         }else{
             return 'true';
@@ -3171,7 +3171,7 @@ class ShipperShipmentBookController extends Controller
     {
         $user_id = session('user_id');
         $account_type = session('account_type');
-        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
+        $bulk_total_cod = 0.0;
 
         $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
         ->where('id', Session::get('substitute_user_id'))
@@ -3195,12 +3195,12 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         });
-        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
-            if ($value == 0) {
-                return $pending_payable;
-            }
-            return true;
+
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use ($user_id, $account_type, &$bulk_total_cod) {
+
+            return PendingPayment::check_negative_payable_cod((int)$user_id, (int)$account_type, (float)$bulk_total_cod);
         });
+
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
             $data = $validator->getData();
@@ -3649,6 +3649,14 @@ class ShipperShipmentBookController extends Controller
 
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
+
+                $serviceType = isset($row['service_type_id']) ? (int)$row['service_type_id'] : null;
+                $amount      = isset($row['amount']) ? (float)$row['amount'] : 0.0;
+
+                // Only count COD service types (adjust if your business logic differs)
+                if (in_array($serviceType, [1, 2], true) && $amount > 0) {
+                    $bulk_total_cod += $amount;
+                }
 
                 if (!isset($row['charges_mode_id'])) {
                     $rows[$key]['charges_mode_id'] = 4;
@@ -6275,7 +6283,7 @@ class ShipperShipmentBookController extends Controller
     {
         $user_id = session('user_id');
         $account_type = session('account_type');
-        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
+        $bulk_total_cod = 0.0;
 
         $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
         ->where('id', Session::get('substitute_user_id'))
@@ -6301,11 +6309,9 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
-        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
-            if ($value == 0) {
-                return $pending_payable;
-            }
-            return true;
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use ($user_id, $account_type, &$bulk_total_cod) {
+
+            return PendingPayment::check_negative_payable_cod((int)$user_id, (int)$account_type, (float)$bulk_total_cod);
         });
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
@@ -6718,6 +6724,12 @@ class ShipperShipmentBookController extends Controller
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
 
+                $serviceType = isset($row['service_type_id']) ? (int)$row['service_type_id'] : null;
+                $amount      = isset($row['amount']) ? (float)$row['amount'] : 0.0;
+
+                if (in_array($serviceType, [1, 2], true) && $amount > 0) {
+                    $bulk_total_cod += $amount;
+                }
 
                 if (!isset($row['charges_mode_id'])) {
                     $rows[$key]['charges_mode_id'] = 3;
@@ -8339,13 +8351,11 @@ class ShipperShipmentBookController extends Controller
     {
         $user_id = session('user_id');
         $account_type = session('account_type');
-        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
+        $bulk_total_cod = 0.0;
 
-        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
-            if ($value == 0) {
-                return $pending_payable;
-            }
-            return true;
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use ($user_id, $account_type, &$bulk_total_cod) {
+
+            return PendingPayment::check_negative_payable_cod((int)$user_id, (int)$account_type, (float)$bulk_total_cod);
         });
 
         $names = [
@@ -8601,6 +8611,13 @@ class ShipperShipmentBookController extends Controller
 
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
+
+                $serviceType = isset($row['service_type_id']) ? (int)$row['service_type_id'] : null;
+                $amount      = isset($row['amount']) ? (float)$row['amount'] : 0.0;
+
+                if (in_array($serviceType, [1, 2], true) && $amount > 0) {
+                    $bulk_total_cod += $amount;
+                }
 
                 if (!isset($row['charges_mode_id'])) {
                     $rows[$key]['charges_mode_id'] = 4;
