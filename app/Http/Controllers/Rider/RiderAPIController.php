@@ -4543,7 +4543,7 @@ class RiderAPIController extends Controller
             ->join('cities as h', 'h.id', '=', 'c.hub_id')
             ->leftjoin('employees as e', 'e.trax_id', '=', 'riders.trax_id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
-            ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
+            ->select('riders.trax_id as trax_id', 'c.name as city_name', 'h.name as hub', 'riders.name as rider_name', 'riders.phone as phone', 'riders.cnic as cnic', 'riders.address as address', 'rc.name as category', 'bg.name as blood_group', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person','e.status_id')
             ->where('riders.id', $rider_id);
         if ($rider_profile->exists()) {
             $rider_profile = $rider_profile->get();
@@ -12402,6 +12402,10 @@ class RiderAPIController extends Controller
                                 $information['lat'] = 0;
                                 $information['long'] = 0;
                             }
+
+                            $employee = Employee::find($rider->employee_id ?? null);
+                            $information['status_id'] = $employee ? $employee->status_id : 0;
+
                             $rider->first_login = 1;
                             $rider->save();
                             return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'information' => $information]);

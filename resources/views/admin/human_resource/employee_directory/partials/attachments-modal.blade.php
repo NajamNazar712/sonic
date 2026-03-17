@@ -85,7 +85,7 @@
                   action="{{ route('admin.human_resource.employee_directory.attachments.update', $id) }}"
                   enctype="multipart/form-data">
                 @csrf
-
+                <input type="hidden" name="is_forced_document" value="1">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title" id="shipments_modal_title">Documents - {{ $employee_name }}</h4>
