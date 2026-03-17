@@ -149,6 +149,8 @@
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
+                        <th class="border-primary border-darken-1">Paid Payment Status</th>
+                        <th class="border-primary border-darken-1">Paid Payment ID</th>
                         <th class="border-primary border-darken-1">Processed Date</th>
                         <th class="border-primary border-darken-1">Paid Date</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -452,6 +454,8 @@
                             head.push('Reason');
                             head.push('Payment Status');
                             head.push('Payment ID');
+                            head.push('Paid Payment Status');
+                            head.push('Paid Payment ID');
                             head.push('Processed Date');
                             head.push('Paid Date');
                             head.push('Service Type');
@@ -512,6 +516,8 @@
                                 row.push(values.reason_name);
                                 row.push(values.payment_status);
                                 row.push(values.payment_id);
+                                row.push(values.paid_payment_status);
+                                row.push(values.paid_payment_id);
                                 row.push(values.processed_date);
                                 row.push(values.paid_date);
                                 row.push(values.service_type);
@@ -620,6 +626,8 @@
                     { data: 'reason_name' ,name: 'ssreason.name', class: 'align-middle reason_name'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_id'},
+                    { data: 'paid_payment_status', name: 'sps_d.name', class: 'align-middle paid_payment_status', value: 'paid_payment_status', text: 'Paid Payment Status', download: true },
+                    { data: 'paid_payment_id', name: 'spj_d.payment_id', class: 'align-middle paid_payment_id', value: 'paid_payment_id', text: 'Paid Payment ID', download: true },
                     { data:'processed_date' ,name: 'spjproceed_date.created_at', class: 'align-middle processed_date'},
                     { data:'paid_date' ,name: 'spjpaid_date.created_at', class: 'align-middle paid_date'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
