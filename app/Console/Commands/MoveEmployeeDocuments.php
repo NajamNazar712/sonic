@@ -52,7 +52,7 @@ class MoveEmployeeDocuments extends Command
                     ->whereIn('employee_id', function ($query) {
                         $query->select('id')
                             ->from('employees')
-                            ->where('created_at', '<=', '2025-11-30');
+                            ->whereDate('created_at', '<=', '2025-11-30');
                     })
                     ->select(
                         'employee_id',
@@ -77,7 +77,7 @@ class MoveEmployeeDocuments extends Command
                 ->whereIn('employee_id', function ($query) {
                     $query->select('id')
                         ->from('employees')
-                        ->where('created_at', '<=', '2025-11-30');
+                        ->whereDate('created_at', '<=', '2025-11-30');
                 })
                 ->delete();
 
