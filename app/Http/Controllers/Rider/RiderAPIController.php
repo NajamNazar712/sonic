@@ -13230,6 +13230,14 @@ class RiderAPIController extends Controller
                         $deliveries['delivery_otp'] = 1;
                     }
 
+                    $deliveries['retail_shipment'] = $shipment_data->shipment_type == 2 ? 1 : 0;
+
+                    if($shipment_data->shipment_type == 2) {
+                        $deliveries['otp_sms_charged'] = $shipment_data->retail_shipment->charged_sms;
+                    } else {
+                        $deliveries['otp_sms_charged'] = 0;
+                    }
+
                     $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note->id);
                     $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
                     ->where('trax_pay_transactions.shipment_id',$shipment_id)
