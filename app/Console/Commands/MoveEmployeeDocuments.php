@@ -83,7 +83,7 @@ class MoveEmployeeDocuments extends Command
 
             // Update users
             DB::table('employees')
-                ->where('created_at', '<=', '2025-11-30')
+                ->whereDate('created_at', '<=', '2025-11-30')
                 ->where('status_id','!=',2)
                 ->update(['status_id' => 3]);
         });
