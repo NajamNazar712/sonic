@@ -78,19 +78,16 @@ class AgentSarNotification extends Command
                 ->where('rv_state_id', 2)
                 ->where('unresponsive_count', 3)
                 //selects older records, i.e., records that were updated more than 16 hours ago.            
-                // ->where('updated_at', '>=', $nowSub16Hours)
-                ->where('updated_at', '>=', "2026-03-15  07:00:00")
-                ->where('updated_at', '<=', "2026-03-16  23:59:59")
+                ->where('updated_at', '>=', $nowSub16Hours)
                 ->where('unresponsive_email_count', '<', 1);
             
             // rv_assign_agent_status_id' 8 (Refusal on call) and Check If State Is 2 (Unassign Assigned)
             $sendEmailofRefusalShipments = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 8)
-            ->where('updated_at', '>=', "2026-03-15  07:00:00")
+            ->where('updated_at', '>=', $nowSub24Hours)
             ->where('rv_state_id', 2);
 
             //Combine the results for sending in single email
             $sendEmail = $sendEmails->union($sendEmailofRefusalShipments)->get();
-           
             // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
             if ($sendEmail->isNotEmpty()) {
 
@@ -104,7 +101,7 @@ class AgentSarNotification extends Command
                 }
                 NotificationsController::send(220, $sendEmail);
             }
-            return true;
+
             // When there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
             // the system will automatically update the shipment status to "Return Confirm."
             $unresponsive_shipments = RvShipmentAssignAgent::join('shipments', function ($join){
