@@ -708,8 +708,31 @@
         </div>
     </div>
 
+    <div class="modal fade" id="SwitchReimbursement" data-backdrop="static" role="dialog" aria-labelledby="SwitchReimbursement_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="reimbursement_rate_type_title">Switch To Reimbursement Account</h4>
+                    <input type="hidden" id="reimbursement_rate_type_shipper_id">
 
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
 
+                <div class="modal-body">
+                    <p class="mb-0 text-danger">
+                        Are you sure? This will permanently change this account to a reimbursement account.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" id="switch_reimbursement_submit_btn" class="btn btn-success">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     {{-- Add Fintech Charges Modal --}}
 
@@ -2690,6 +2713,65 @@ function checkboxStatus() {
             }
 
         });
+
+        //switch re
+
+        $('body').on('click', 'button.switch_reimbursement_button', function () {
+            var id = $(this).data('target-id');
+
+            if (id) {
+                $('#reimbursement_rate_type_shipper_id').val(id);
+                $('#SwitchReimbursement').modal('show');
+            }
+        });
+
+        $('#switch_reimbursement_submit_btn').on('click', function () {
+            var shipper = Number($('#reimbursement_rate_type_shipper_id').val());
+            var url = "{{ url('') }}/admin/accounts/" + shipper + "/add/rates";
+
+            if (shipper) {
+                $.ajax({
+                    url: '{!! route('admin.accounts.switch_reimbursement_submit') !!}',
+                    method: 'POST',
+                    data: {
+                        shipper_id: shipper,
+                        _token: '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        if (data.status) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+
+                            window.location.href = url;
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                        $('#reimbursement_rate_type_shipper_id').val('');
+                        $('#SwitchReimbursement').modal('hide');
+                        table.draw(true);
+                    })
+                    .fail(function () {
+                        toastr.error('Something went wrong!', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    });
+            } else {
+                toastr.error('Shipper not selected!', 'Error!', {
+                    positionClass: 'toast-top-center',
+                    containerId: 'toast-top-center'
+                });
+            }
+        });
+
+        //end
 
         $('#old_rate_date').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Date',

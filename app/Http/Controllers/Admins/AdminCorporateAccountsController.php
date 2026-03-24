@@ -37795,5 +37795,134 @@ class AdminCorporateAccountsController extends Controller
         }
     }
 
+    public function switch_reimbursement_submit(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+
+        $pending_payment = PendingPayment::where('user_id', $shipper_id);
+        $done_payment    = DonePayment::where('user_id', $shipper_id)->where('status', 0);
+
+        if ($pending_payment->exists() || $done_payment->exists()) {
+            return response()->json(['status' => 0, 'error' => 'Please Clear the Payment First']);
+        }
+
+        if (!$shipper_id) {
+            return response()->json(['status' => 0, 'error' => 'Shipper not selected!']);
+        }
+
+        $shipper = User::find($shipper_id);
+        if (!$shipper) {
+            return response()->json(['status' => 0, 'error' => 'Shipper not found!']);
+        }
+
+        if (isset($shipper->wallet->id)) {
+            return response()->json(['status' => 0, 'error' => 'Wallet Users are not allowed']);
+        }
+
+        $rate_type_id = (int) $shipper->corporate_rate_type_id;
+
+        DB::beginTransaction();
+
+        try {
+            $now = now();
+
+            // corporate types 1 and 2 => corporate_rate_statuses -> pending_corporate_rate_statuses
+            if (in_array($rate_type_id, [1, 2], true)) {
+                $rateRows = CorporateRateStatus::where('user_id', $shipper_id)->get();
+
+                if ($rateRows->isNotEmpty()) {
+                    $payload = $rateRows->map(function ($row) use ($shipper_id, $now) {
+                        return [
+                            'user_id'               => $shipper_id,
+                            'shipping_mode_id'      => $row->shipping_mode_id,
+                            'status'                => (int) $row->status,
+                            'cash_handling_charges' => (int) $row->cash_handling_charges,
+                            'insurance_charges'     => (int) $row->insurance_charges,
+                            'return_charges'        => (int) $row->return_charges,
+                            'fuel_charges'          => (int) $row->fuel_charges,
+                            'zero_cod_discount'     => (int) $row->zero_cod_discount,
+                            'return_discount'       => (int) $row->return_discount,
+                            'created_at'            => $now,
+                            'updated_at'            => $now,
+                        ];
+                    })->all();
+
+                    PendingCorporateRateStatus::where('user_id', $shipper_id)->delete();
+                    PendingCorporateRateStatus::insert($payload);
+                }
+
+                CorporateRateStatus::where('user_id', $shipper_id)->delete();
+            }
+
+            // corporate type 3 => corporate_default_rate_statuses -> pending_corporate_default_rate_statuses
+            elseif ($rate_type_id === 3) {
+                $rateRows = CorporateDefaultRateStatus::where('user_id', $shipper_id)->get();
+
+                if ($rateRows->isNotEmpty()) {
+                    $payload = $rateRows->map(function ($row) use ($shipper_id, $now) {
+                        return [
+                            'user_id'               => $shipper_id,
+                            'shipping_mode_id'      => $row->shipping_mode_id,
+                            'status'                => (int) $row->status,
+                            'cash_handling_charges' => (int) $row->cash_handling_charges,
+                            'insurance_charges'     => (int) $row->insurance_charges,
+                            'return_charges'        => (int) $row->return_charges,
+                            'packaging_charges'     => (int) ($row->packaging_charges ?? 0),
+                            'fuel_charges'          => (int) $row->fuel_charges,
+                            'zero_cod_discount'     => (int) $row->zero_cod_discount,
+                            'return_discount'       => (int) $row->return_discount,
+                            'created_at'            => $now,
+                            'updated_at'            => $now,
+                        ];
+                    })->all();
+
+                    PendingCorporateDefaultRateStatus::where('user_id', $shipper_id)->delete();
+                    PendingCorporateDefaultRateStatus::insert($payload);
+                }
+
+                CorporateDefaultRateStatus::where('user_id', $shipper_id)->delete();
+            }
+
+            else {
+                return response()->json(['status' => 0, 'error' => 'Invalid corporate rate type!']);
+            }
+
+            // copy invoicing cycle from bank info back to user main table
+            $latestBankInfo = UserBankInfo::where('user_id', $shipper_id)->latest()->first();
+            if ($latestBankInfo && !is_null($latestBankInfo->invoicing_cycle_id)) {
+                $shipper->payment_cycle_id = $latestBankInfo->invoicing_cycle_id;
+            }
+
+            // switch user back to reimbursement
+            $shipper->corporate_rate_type_id = null; // or 0 if your system uses 0
+            $shipper->account_type_id = 1;           // reimbursement account type
+            $shipper->agreement_signed = 0;
+            $shipper->status = 0;
+            $shipper->save();
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 1,
+                'success' => 'Account Successfully Switched to Reimbursement'
+            ]);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            \Log::error('SWITCH_TO_REIMBURSEMENT_FAIL', [
+                'shipper_id' => $shipper_id,
+                'message'    => $e->getMessage(),
+                'file'       => $e->getFile(),
+                'line'       => $e->getLine(),
+            ]);
+
+            return response()->json([
+                'status' => 0,
+                'error'  => 'Failed to switch account.'
+            ], 500);
+        }
+    }
+
 }
 
