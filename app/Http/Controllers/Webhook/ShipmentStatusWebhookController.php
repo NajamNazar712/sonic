@@ -19,6 +19,27 @@ use Illuminate\Support\Facades\Log;
 
 class ShipmentStatusWebhookController extends Controller
 {
+    /**
+     * Old existing users from your previous code
+     * هؤلاء users already use JSON payload
+     */
+    private const LEGACY_JSON_USERS = [30860, 12221, 5333];
+
+    /**
+     * Add your Google Sheet specific user IDs here
+     * Example only - replace/add real IDs
+     */
+    private const GOOGLE_SHEET_USERS = [
+        52873,
+        52975,
+        52974,
+        52946,
+        52944,
+        52943,
+        52947,
+        52945
+    ];
+
     static public function webhook_subscription($shipment_id, $shipper_status_id, $status_reason_id = NULL)
     {
         $date = Carbon::now()->toDateTimeString();
@@ -70,17 +91,49 @@ class ShipmentStatusWebhookController extends Controller
     }
 
     /**
-     * Only these users should receive JSON payload for Google Sheet / Apps Script
+     * Old existing users from previous code
      */
-    private static function isGoogleSheetWebhookUser($user_id): bool
+    private static function isLegacyJsonUser($user_id): bool
     {
-        return in_array((int) $user_id, [30860, 12221, 5333], true);
+        return in_array((int) $user_id, self::LEGACY_JSON_USERS, true);
     }
 
     /**
-     * Normal existing webhook behavior
+     * New Google Sheet specific users
      */
-    private static function sendDefaultWebhook(Client $client, array $payload)
+    private static function isGoogleSheetUser($user_id): bool
+    {
+        return in_array((int) $user_id, self::GOOGLE_SHEET_USERS, true);
+    }
+
+    /**
+     * Detect Google Apps Script webhook URLs also
+     */
+    private static function isGoogleScriptUrl($url): bool
+    {
+        return str_contains($url, 'script.google.com')
+            || str_contains($url, 'script.googleusercontent.com');
+    }
+
+    /**
+     * Decide whether this webhook should be sent as JSON
+     *
+     * JSON will be used for:
+     * 1) old legacy JSON users
+     * 2) Google Sheet users
+     * 3) Google Apps Script URLs
+     */
+    private static function shouldSendJsonWebhook($user_id, $url): bool
+    {
+        return self::isLegacyJsonUser($user_id)
+            || self::isGoogleSheetUser($user_id)
+            || self::isGoogleScriptUrl($url);
+    }
+
+    /**
+     * Default old behavior for normal users
+     */
+    private static function sendFormWebhook(Client $client, array $payload)
     {
         return $client->post('', [
             'form_params' => $payload,
@@ -88,9 +141,9 @@ class ShipmentStatusWebhookController extends Controller
     }
 
     /**
-     * Special Google Sheet / Apps Script webhook behavior
+     * JSON behavior for legacy + Google Sheet users
      */
-    private static function sendGoogleSheetWebhook(Client $client, array $payload)
+    private static function sendJsonWebhook(Client $client, array $payload)
     {
         return $client->post('', [
             'headers' => [
@@ -102,15 +155,15 @@ class ShipmentStatusWebhookController extends Controller
     }
 
     /**
-     * Centralized request sender so main logic remains clean
+     * Centralized sender
      */
-    private static function sendWebhookByUser(Client $client, $user_id, array $payload)
+    private static function sendWebhookByCondition(Client $client, $user_id, $url, array $payload)
     {
-        if (self::isGoogleSheetWebhookUser($user_id)) {
-            return self::sendGoogleSheetWebhook($client, $payload);
+        if (self::shouldSendJsonWebhook($user_id, $url)) {
+            return self::sendJsonWebhook($client, $payload);
         }
 
-        return self::sendDefaultWebhook($client, $payload);
+        return self::sendFormWebhook($client, $payload);
     }
 
     static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date, $reason = NULL, $otp = NULL, $orderId = NULL)
@@ -121,7 +174,7 @@ class ShipmentStatusWebhookController extends Controller
             'base_uri' => $url,
             'http_errors' => false,
             'connect_timeout' => 30,
-            'timeout' => 30
+            'timeout' => 30,
         ]);
 
         $notification_data = [
@@ -146,8 +199,10 @@ class ShipmentStatusWebhookController extends Controller
                     $payload['otp'] = $otp;
                 }
 
-                // only special users go to JSON webhook
-                $response = self::sendWebhookByUser($client, $user_id, $payload);
+                // Optional: if you want extra security for Google Sheet
+                // $payload['secret'] = 'your-secret-key-here';
+
+                $response = self::sendWebhookByCondition($client, $user_id, $url, $payload);
 
                 if ($response instanceof \Psr\Http\Message\ResponseInterface) {
                     $status_code = $response->getStatusCode();
