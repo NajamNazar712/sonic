@@ -1564,6 +1564,9 @@ class Permission
             'reports.wht.index' => 1036,
             'reports.wht.list' => 1036,
 
+            'reports.negative_balance.list' => 1036,
+            'reports.negative_balance.index' => 1036,
+
             'settings.product_tax.index' => 1037,
             'settings.product_tax_logs.index' => 1039,
              'settings.geo_codes.index' => 1040,
