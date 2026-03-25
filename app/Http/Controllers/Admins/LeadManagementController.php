@@ -184,7 +184,7 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at as updated', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status_name', 'leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name', 'leads.via_channel as via_channel', 'u.status as user_status', 'u.id as user_id', 'leads.activation_code as activation_code', 'u.blacklist as blacklist', 'u.status as user_status');
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'rp.trax_id as rider_id', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at as updated', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id', 'leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status_name', 'leads.expected_shipments as expected_shipments', 'u.brand_name as brand_name', 'leads.via_channel as via_channel', 'u.status as user_status', 'u.id as user_id', 'leads.activation_code as activation_code', 'u.blacklist as blacklist', 'u.status as user_status', 'lr.id as lead_reference_id');
         // ->OrderByDesc('leads.requested_date');
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -966,12 +966,12 @@ class LeadManagementController extends Controller
     {
         $lead_ids = $request->lead_ids;
         $sale_person = $request->sale_person;
+        $input = $request->all();
 
-        if ($request->has('reference_person')) {
-            $reference_person = $request->reference_person;
-        } else {
-            $reference_person = null;
-        }
+        $reference_person = ($input['reference_person'] === 'NaN')
+            ? null
+            : $input['reference_person'];
+
         $leads = Lead::whereIn('id', $lead_ids);
         if ($leads->exists()) {
             $leads = $leads->get();
@@ -990,9 +990,9 @@ class LeadManagementController extends Controller
                 //autotagging end
                 $lead->sale_person_id = $sale_person;
                 if ($request->has('reference_person')) {
-                    $lead->reference_person_id = $reference_person;
+                    $lead->reference_person_id = empty($reference_person) ?  $lead->reference_person_id : $reference_person;
                 }
-
+              
                 $lead->updated_by = Auth::id();
                 $lead->sale_person_updated_at = Carbon::now();
                 $lead->status_id = 15;
