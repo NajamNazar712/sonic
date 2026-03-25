@@ -16,6 +16,7 @@
                                 <fieldset class="form-group">
                                     <select name="search_shippers[]" id="search_shippers" class="form-control select2" multiple>
                                     </select>
+                                     <small class="text-danger d-none" id="shipper_error">Please select at least one shipper</small>
                                 </fieldset>
                             </div>
                             
@@ -193,7 +194,7 @@
 
             $('#search_shippers').select2({
                 width:'100%',
-                placeholder:"Select Multiple Shippers",
+                placeholder:"Select at least one shipper *",
                 allowClear:true,
                 multiple: true,
                 minimumInputLength: 2,
@@ -316,15 +317,37 @@
                 },
             });
 
+        // $('#search_form').bind('submit', function (e) {
+        //     e.preventDefault();
+        //     var search_date_from = $('#search_form #search_date_from').val();
+        //     var search_date_to = $('#search_form #search_date_to').val();
+
+        //     if ((search_date_from != '' && search_date_to != '' )) {
+        //         table.draw();
+        //     }
+
+        // });.
+
         $('#search_form').bind('submit', function (e) {
             e.preventDefault();
+
             var search_date_from = $('#search_form #search_date_from').val();
             var search_date_to = $('#search_form #search_date_to').val();
+            var shippers = $('#search_shippers').val();
 
-            if ((search_date_from != '' && search_date_to != '' )) {
-                table.draw();
+           $('#shipper_error').addClass('d-none');
+
+            if (!shippers || shippers.length === 0) {
+                $('#shipper_error').removeClass('d-none');
+                return;
             }
 
+            if (search_date_from == '' || search_date_to == '') {
+                toastr.error('Please select date range');
+                return;
+            }
+
+            table.draw();
         });
 
         });

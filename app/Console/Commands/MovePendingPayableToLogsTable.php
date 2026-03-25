@@ -19,7 +19,7 @@ class MovePendingPayableToLogsTable extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'This will only run once to dump current available data into logs';
 
     /**
      * Execute the console command.

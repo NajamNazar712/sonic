@@ -199,6 +199,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RemoveExpiredZeroCodShippers',
         'App\Console\Commands\SyncS3ToMinio',
         'App\Console\Commands\AutoRejectLeaves',
+        'App\Console\Commands\MoveDailyPayableRecordsToLogsTable',
+
     ];
 
     /**
@@ -730,6 +732,8 @@ class Kernel extends ConsoleKernel
         //     ->withoutOverlapping();
 
         $schedule->command('auto:reject-leaves')->everyFiveMinutes();
+        $schedule->command('dump:daily-payable-records-to-logs-table')->everyThreeHours()->withoutOverlapping()->runInBackground();
+
     }
     /**
      * Register the commands for the application.
