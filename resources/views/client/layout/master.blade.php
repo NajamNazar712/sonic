@@ -33,7 +33,7 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
   </div>
   @include('client.components.modals')
   @include('client.layout.footer')
-  @include('client.documents_modal')
+  <!-- @include('client.documents_modal') -->
 
   <audio id="audio_success" autostart="false">
     <source src="{{asset('file/success_sound.mp3')}}" type="audio/ogg">

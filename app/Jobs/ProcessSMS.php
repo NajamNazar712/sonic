@@ -46,18 +46,20 @@ class ProcessSMS implements ShouldQueue
     {
         try {
             if ($this->sms->status < 2) {
-               $this->zong($this->sms);
+                $this->zong($this->sms);
             }
         }
-        catch(Exception $exception) {
+        catch(\Exception $exception) {
             $to = ['munawar.shamsi@logiserves.com'];
             $subject = '[Error] SMS API';
-            $body = 'Error Exception.<br/>' . json_encode($exception->getMessage());
+            $body = $this->sms->body.'<br/>'.'Error Exception.<br/>' . json_encode($exception->getMessage());
 
-            $mail = Mail::to($to)->send(new Notifications($subject, $body));
+            // Explicitly use the huawei_email mailer
+            Mail::mailer('huawei_email')
+                ->to($to)
+                ->send(new Notifications($subject, $body));
         }
     }
-
     private function telecard($sms) {
         try {
             $client = new Client(['base_uri' => 'https://bsms.telecard.com.pk/SMSPortal/Customer/ProcessSMS.aspx', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
@@ -365,16 +367,20 @@ class ProcessSMS implements ShouldQueue
 
     private function zong($sms) {
         $sms->status = 1;
-
         $sms->save();
 
         try {
-            $client = new Client(['base_uri' => 'https://cbs.zong.com.pk/reachrestapi/home/SendQuickSMS', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+            $client = new Client([
+                'base_uri' => 'https://cbs.zong.com.pk/reachrestapi/home/SendQuickSMS',
+                'http_errors' => FALSE,
+                'connect_timeout' => 120,
+                'timeout' => 120
+            ]);
 
             $response = $client->post('', [
                 'form_params' => [
                     'loginId' => '923163639562',
-                    'loginPassword' => 'Zong@123',
+                    'loginPassword' => 'Orlando@2025',
                     'Destination' => $this->phone_number($sms->to),
                     'Mask' => 'TRAX PK',
                     'Message' => $sms->body,
@@ -383,35 +389,33 @@ class ProcessSMS implements ShouldQueue
                 ]
             ]);
 
-            $response = $response->getBody()->getContents();
+            $contents = $response->getBody()->getContents();
+            $responseArray = explode('|', $contents);
 
-            $response = explode('|', $response);
-
-            if ($response[0] == '0') {
+            if ($responseArray[0] == '0') {
                 $sms->status = 3;
-
                 $sms->save();
             }
-            else if ($response[0] == '105') {
+            else if ($responseArray[0] == '105') {
                 $sms->status = 2;
-
                 $sms->save();
             }
             else {
                 $sms->status = 2;
-
                 $sms->save();
 
                 $to = ['munawar.shamsi@logiserves.com'];
                 $subject = '[Error] SMS API';
-                $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
+                $body = $sms->body.'<br/>'.'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($responseArray);
 
-                $mail = Mail::to($to)->send(new Notifications($subject, $body));
+                // Updated to use the huawei_email mailer
+                Mail::mailer('huawei_email')
+                    ->to($to)
+                    ->send(new Notifications($subject, $body));
             }
         }
         catch (RequestException $e) {
             $sms->status = 1;
-
             $sms->save();
         }
     }

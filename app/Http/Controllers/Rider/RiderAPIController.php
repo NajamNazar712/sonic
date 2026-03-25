@@ -9155,6 +9155,11 @@ class RiderAPIController extends Controller
 
     public function shipment_delivered_v5(Request $request)
     {
+//        if ($request->rider_id == 12079) {
+//            Log::info('Debug Request for Rider 12079:', [
+//                'data' => json_encode($request->all())
+//            ]);
+//        }
         $message = '';
         $rules = [
             'added_at' => ['required'],
@@ -11995,7 +12000,7 @@ class RiderAPIController extends Controller
 
                                         if ($request->has('audio')) {
                                             $time = Carbon::now()->toDateString();
-                                            if ($environment == 'production') {
+                                        if ($environment == 'production') {
                                                 $extension = $request->file('audio')->getClientOriginalExtension();
                                                 $audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                                 Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
@@ -13223,6 +13228,14 @@ class RiderAPIController extends Controller
                         }
                     } else {
                         $deliveries['delivery_otp'] = 1;
+                    }
+
+                    $deliveries['retail_shipment'] = $shipment_data->shipment_type == 2 ? 1 : 0;
+
+                    if($shipment_data->shipment_type == 2) {
+                        $deliveries['otp_sms_charged'] = $shipment_data->retail_shipment->charged_sms;
+                    } else {
+                        $deliveries['otp_sms_charged'] = 0;
                     }
 
                     $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note->id);

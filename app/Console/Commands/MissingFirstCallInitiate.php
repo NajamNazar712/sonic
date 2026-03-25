@@ -105,6 +105,7 @@ class MissingFirstCallInitiate extends Command
                 }
             }
             $failedJobs = DB::table('failed_jobs')
+                ->where('queue','!=','email')
                 ->get();
             if ($failedJobs->isNotEmpty()) {
                 foreach ($failedJobs as $job) {
