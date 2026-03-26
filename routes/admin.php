@@ -2681,6 +2681,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@shipment_attempt_performance_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@shipment_attempt_performance_list')->name('list');
         });
+
+        Route::prefix('negative_balance')->name('negative_balance.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@negative_balance_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@negative_balance_list')->name('list');
+        });
     });
 
     //Reports end
