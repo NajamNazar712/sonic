@@ -134,7 +134,233 @@
                                 </div>
                                 {{--saver plus end --}}
 
+                                {{--economy start --}}
+                                <div id="" class="card-header border-success">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h3 class="display-inline card-title lead success">Economy</h3>
 
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="economy_date" class="card border-success hide" aria-expanded="true">
+                                    <div class="card-content">
+                                        <div class="card-body">
+
+                                            <div class="weight-addition-economy">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Range Up</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Range Down</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Weight Addition</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">KG Range</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Zone A</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Zone B</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Zone C</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Zone D</label>
+                                                    </div>
+                                                    <div class="col-1"></div>
+                                                </div>
+
+                                                @if(isset($economy))
+                                                    @foreach($economy as $index => $sp)
+                                                        <div class="row economy_row" id="economy_row{{$index}}">
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="economy_range_up{{$index}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="economy_range_up[{{$index}}]" value="{{$sp->range_up}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="economy_range_down{{$index}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="economy_range_down[{{$index}}]"  value="{{$sp->range_down}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            {{--<div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_kg_range[{{$index}}]"  value="{{$sp->kg_range}}">
+                                                                </fieldset>
+                                                            </div>--}}
+                                                            <div class="col text-center">
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" id="EconomySwitch{{$index}}" class="switchery weightAdditionEconomy{{$index}}" data-color="success" @if($sp->weight_addition == 1) checked @endif data-size="sm" name="economy_switch[{{$index}}]" >
+                                                                </div>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset style="padding-top: 5px;">
+                                                                    <div class="input-group input-group-sm form-group">
+                                                                        <input type="text" class="touchspin-color spkg" data-bts-button-down-class="btn btn-success"
+                                                                               data-bts-button-up-class="btn btn-success" @if($sp->weight_addition == 0) disabled @endif  name="economy_kg_range[{{$index}}]" value="{{$sp->kg_range}}">
+                                                                    </div>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="economy_zone_a[{{$index}}]"  value="{{$sp->zone_a}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="economy_zone_b[{{$index}}]"  value="{{$sp->zone_b}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="economy_zone_c[{{$index}}]"  value="{{$sp->zone_c}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="economy_zone_d[{{$index}}]"  value="{{$sp->zone_d}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col-1">
+                                                                @if($index>0)
+                                                                    <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 en_weight_close"><i class="ft-x"></i></span>
+                                                                @endif
+                                                            </div>
+
+                                                        </div>
+                                                    @endforeach
+
+                                                @endif
+                                            </div>
+                                            <div class="mb-2">
+                                                <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="en_waddition_btn"><i class="la la-plus"></i></button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                {{--economy end --}}
+
+                                {{--express start --}}
+                                <div id="" class="card-header border-success">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h3 class="display-inline card-title lead success">Express</h3>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="express_date" class="card border-success hide" aria-expanded="true">
+                                    <div class="card-content">
+                                        <div class="card-body">
+
+                                            <div class="weight-addition-express">
+                                                <div class="row">
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Range Up</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Range Down</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Weight Addition</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">KG Range</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Zone A</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Zone B</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Zone C</label>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <label class="card-title">Zone D</label>
+                                                    </div>
+                                                    <div class="col-1"></div>
+                                                </div>
+
+                                                @if(isset($express))
+                                                    @foreach($express as $index => $sp)
+                                                        <div class="row express_row" id="express_row{{$index}}">
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="express_range_up{{$index}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="express_range_up[{{$index}}]" value="{{$sp->range_up}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" id="express_range_down{{$index}}" class="form-control decimal weight_range" data-rule-required="true" data-msg-required="This field is required" name="express_range_down[{{$index}}]"  value="{{$sp->range_down}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            {{--<div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="saver_plus_kg_range[{{$index}}]"  value="{{$sp->kg_range}}">
+                                                                </fieldset>
+                                                            </div>--}}
+                                                            <div class="col text-center">
+                                                                <div class="form-group " style="padding-top: 8px;">
+                                                                    <input type="checkbox" id="ExpressSwitch{{$index}}" class="switchery weightAdditionExpress{{$index}}" data-color="success" @if($sp->weight_addition == 1) checked @endif data-size="sm" name="express_switch[{{$index}}]" >
+                                                                </div>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset style="padding-top: 5px;">
+                                                                    <div class="input-group input-group-sm form-group">
+                                                                        <input type="text" class="touchspin-color spkg" data-bts-button-down-class="btn btn-success"
+                                                                               data-bts-button-up-class="btn btn-success" @if($sp->weight_addition == 0) disabled @endif  name="express_kg_range[{{$index}}]" value="{{$sp->kg_range}}">
+                                                                    </div>
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required"  name="express_zone_a[{{$index}}]"  value="{{$sp->zone_a}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="express_zone_b[{{$index}}]"  value="{{$sp->zone_b}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="express_zone_c[{{$index}}]"  value="{{$sp->zone_c}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col text-center">
+                                                                <fieldset class="form-group">
+                                                                    <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  name="express_zone_d[{{$index}}]"  value="{{$sp->zone_d}}">
+                                                                </fieldset>
+                                                            </div>
+                                                            <div class="col-1">
+                                                                @if($index>0)
+                                                                    <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 ex_weight_close"><i class="ft-x"></i></span>
+                                                                @endif
+                                                            </div>
+
+                                                        </div>
+                                                    @endforeach
+
+                                                @endif
+                                            </div>
+                                            <div class="mb-2">
+                                                <button type="button" class="btn btn-outline-success mr-1" title="Add more slabs" id="ex_waddition_btn"><i class="la la-plus"></i></button>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                {{--express end --}}
 
                                 {{--rush start --}}
                                 <div id="" class="card-header border-success mt-2">
@@ -1863,6 +2089,35 @@
                 $('input[name="saver_plus_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
             }
 
+            //economy start
+            var on_en_door_count = $('.economy_row').length;
+            for (let i = 0; i < on_en_door_count; i++) {
+                $('#EconomySwitch'+i+'').bind('change', function () {
+                    if ($('#EconomySwitch'+i+'').is(":checked")) {
+                        $('input[name="economy_kg_range['+i+']"]').prop('disabled', false);
+                    } else {
+                        $('input[name="economy_kg_range['+i+']"]').prop('disabled', true);
+                    }
+                });
+
+                $('input[name="economy_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
+            }
+            //economy end
+
+            //economy start
+            var on_ex_door_count = $('.express_row').length;
+            for (let i = 0; i < on_ex_door_count; i++) {
+                $('#ExpressSwitch'+i+'').bind('change', function () {
+                    if ($('#ExpressSwitch'+i+'').is(":checked")) {
+                        $('input[name="express_kg_range['+i+']"]').prop('disabled', false);
+                    } else {
+                        $('input[name="express_kg_range['+i+']"]').prop('disabled', true);
+                    }
+                });
+
+                $('input[name="express_kg_range['+i+']"]').trigger("touchspin.updatesettings", {max: 1});
+            }
+            //economy end
 
             var rush_count = $('.rush_row').length;
             for (let i = 0; i < rush_count; i++) {
@@ -2101,6 +2356,121 @@
             });
 
             //saver plus end
+
+            //economy start
+            $('body').on('click', '.en_weight_close', function () {
+                $(this).parent().parent().remove();
+            });
+            var on_en_door_count = $('.economy_row').length;
+            $('body').on('click', '#en_waddition_btn', function () {
+                var row_count = on_en_door_count - 1;
+                var economy_range_down = parseFloat($('#economy_range_down' + row_count).val());
+                var on_door_new_range_down = economy_range_down + 0.01;
+                let htmdiv = '<div class="row" id="economy_row' + on_en_door_count + '"><div class="col text-center"><fieldset class="form-group"><input type="text" id="economy_range_up' + on_en_door_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="economy_range_up[' + on_en_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="economy_range_down' + on_en_door_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="economy_range_down[' + on_en_door_count + ']"></fieldset></div> <div class="col text-center">\n' +
+                    '                  <div class="form-group " style="padding-top: 8px;">\n' +
+                    '                   <input type="checkbox" id="EconomySwitch[' + on_en_door_count + ']" class="switchery weightAdditionEconomy' + on_en_door_count + '" data-color="success" data-size="sm" name="economy_switch[' + on_en_door_count + ']">\n' +
+                    '                </div>\n' +
+                    '       </div><div class="col text-center">\n' +
+                    '                                                        <fieldset style="padding-top: 5px;">\n' +
+                    '                                                            <div class="input-group input-group-sm form-group">\n' +
+                    '                                                                <input type="text" class="touchspin-color spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="economy_kg_range[' + on_en_door_count + ']" disabled value="0.5">\n' +
+                    '                                                            </div>\n' +
+                    '                                                        </fieldset>\n' +
+                    '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="economy_zone_a[' + on_en_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="economy_zone_b[' + on_en_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="economy_zone_c[' + on_en_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="economy_zone_d[' + on_en_door_count + ']"></fieldset></div><div class="col-1">\n' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 en_weight_close"><i class="ft-x"></i></span></div></div>';
+                $('.weight-addition-economy').append(htmdiv);
+                var switches = document.querySelector('.switchery.weightAdditionEconomy' + on_en_door_count);
+                var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+                $(".touchspin-color").TouchSpin({
+                    min: 0.5,
+                    max: 1,
+                    step: 0.5,
+                    decimals: 2,
+                    buttondown_class: "btn btn-success",
+                    buttonup_class: "btn btn-success",
+                    buttondown_txt: '<i class="ft-minus"></i>',
+                    buttonup_txt: '<i class="ft-plus"></i>'
+                });
+
+                masks();
+
+                switches.onchange = function () {
+
+                    if (switches.checked === true) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                    } else if (switches.checked === false) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+                    }
+
+                };
+                $("#economy_row" + on_en_door_count + " .validated").each(function () {
+                    $(this).rules("add", {
+                        required: true,
+                    });
+
+                });
+                on_en_door_count++;
+            });
+            //economy end
+
+            //express start
+            $('body').on('click', '.ex_weight_close', function () {
+                $(this).parent().parent().remove();
+            });
+            var on_ex_door_count = $('.express_row').length;
+            $('body').on('click', '#ex_waddition_btn', function () {
+                var row_count = on_ex_door_count - 1;
+                var express_range_down = parseFloat($('#express_range_down' + row_count).val());
+                var on_door_new_range_down = express_range_down + 0.01;
+                let htmdiv = '<div class="row" id="express_row' + on_ex_door_count + '"><div class="col text-center"><fieldset class="form-group"><input type="text" id="express_range_up' + on_ex_door_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="express_range_up[' + on_ex_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" id="express_range_down' + on_ex_door_count + '" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="express_range_down[' + on_ex_door_count + ']"></fieldset></div> <div class="col text-center">\n' +
+                    '                  <div class="form-group " style="padding-top: 8px;">\n' +
+                    '                   <input type="checkbox" id="ExpressSwitch[' + on_ex_door_count + ']" class="switchery weightAdditionExpress' + on_ex_door_count + '" data-color="success" data-size="sm" name="express_switch[' + on_ex_door_count + ']">\n' +
+                    '                </div>\n' +
+                    '       </div><div class="col text-center">\n' +
+                    '                                                        <fieldset style="padding-top: 5px;">\n' +
+                    '                                                            <div class="input-group input-group-sm form-group">\n' +
+                    '                                                                <input type="text" class="touchspin-color spkg" data-toggle="tooltip" data-trigger="hover" data-placement="top"  data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="express_kg_range[' + on_en_door_count + ']" disabled value="0.5">\n' +
+                    '                                                            </div>\n' +
+                    '                                                        </fieldset>\n' +
+                    '                                                    </div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required"  name="express_zone_a[' + on_ex_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="express_zone_b[' + on_ex_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="express_zone_c[' + on_ex_door_count + ']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="express_zone_d[' + on_ex_door_count + ']"></fieldset></div><div class="col-1">\n' +
+                    '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 en_weight_close"><i class="ft-x"></i></span></div></div>';
+                $('.weight-addition-express').append(htmdiv);
+                var switches = document.querySelector('.switchery.weightAdditionExpress' + on_ex_door_count);
+                var switchery = new Switchery(switches, {disabled: false, color: '#37BC9B', size: 'small'});
+                $(".touchspin-color").TouchSpin({
+                    min: 0.5,
+                    max: 1,
+                    step: 0.5,
+                    decimals: 2,
+                    buttondown_class: "btn btn-success",
+                    buttonup_class: "btn btn-success",
+                    buttondown_txt: '<i class="ft-minus"></i>',
+                    buttonup_txt: '<i class="ft-plus"></i>'
+                });
+
+                masks();
+
+                switches.onchange = function () {
+
+                    if (switches.checked === true) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+                    } else if (switches.checked === false) {
+                        $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+
+                    }
+
+                };
+                $("#economy_row" + on_ex_door_count + " .validated").each(function () {
+                    $(this).rules("add", {
+                        required: true,
+                    });
+
+                });
+                on_ex_door_count++;
+            });
+            //express end
+
 
             //rush start
             $('body').on('click', '.rush_weight_close', function () {
