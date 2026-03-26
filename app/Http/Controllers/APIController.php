@@ -11169,7 +11169,7 @@ class APIController extends Controller
         if (config('app.env') === 'staging') {
             $allowedIps = ['164.90.252.105','103.244.178.3','134.209.126.19','72.255.0.55','110.93.236.91'];
         } elseif (config('app.env') === 'production') {
-            $allowedIps = ['3.23.216.198', '18.118.233.146','103.244.178.3','35.209.242.61','35.209.38.219'];
+            $allowedIps = ['3.23.216.198', '18.118.233.146','103.244.178.3','35.209.242.61','35.209.38.219' ,'35.206.93.131' ,'35.208.180.253'];
         }
 
         if ($allowedIps && !in_array($request->ip(), $allowedIps)) {
