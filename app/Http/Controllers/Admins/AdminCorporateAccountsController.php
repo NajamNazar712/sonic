@@ -13,6 +13,7 @@ use App\HistoryCorporateZeroCodDiscountCharges;
 use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
 use App\Http\Models\DonePayment;
+use App\Http\Models\InvoiceShipment;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Rates\PendingRateStatus;
 use App\Http\Models\Shipper\UserBankInfo;
@@ -38054,7 +38055,7 @@ class AdminCorporateAccountsController extends Controller
                         $total_adjusted_shipments++;
                     }
 
-                    self::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
+                    AdminFinanceController::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
 
                     $total_sms_charges += $pending_invoice_shipment->sms_charges;
                     $total_charges += $pending_invoice_shipment->charges;
