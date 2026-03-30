@@ -40,6 +40,9 @@ class MoveDailyPayableRecordsToLogsTable extends Command
             FROM pending_payments
             JOIN pending_payment_calculations as ppc 
                 ON pending_payments.id = ppc.pending_payment_id
+            JOIN users u 
+                ON u.id = pending_payments.user_id
+            WHERE u.account_type_id != 2
         ");
         //return Command::SUCCESS;
     }
