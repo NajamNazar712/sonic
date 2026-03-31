@@ -675,7 +675,7 @@ trait CommonTrait
           } else {
             try {
               $imageUrl = Storage::disk('s3')->temporaryUrl(
-                'sonic-archive/'.$riderReturn->picture_path,
+                $riderReturn->picture_path,
                 now()->addMinutes(5)
               );
             } catch (\Exception $e) {
@@ -696,7 +696,7 @@ trait CommonTrait
           } else {
             try {
               $audioUrl = Storage::disk('s3')->temporaryUrl(
-                'sonic-archive/'.$riderReturn->audio_path,
+                $riderReturn->audio_path,
                 now()->addMinutes(5)
               );
             } catch (\Exception $e) {

@@ -329,7 +329,7 @@ class NotificationsController extends Controller
                 if ($id == 230) {
                     $mailable = new NotificationsDispatchNow($subject, $body);
                 } else {
-                    $mailable = new Notifications($subject, $body, $fromAddress);;
+                    $mailable = new Notifications($subject, $body, $fromAddress);
                 }
 
                 // Select mailer
