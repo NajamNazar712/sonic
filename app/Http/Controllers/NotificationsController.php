@@ -323,13 +323,13 @@ class NotificationsController extends Controller
             if ($to) {
 
                 // Determine mailer based on $from
-                // $fromAddress = (str_contains($from, 'return')) ? 'return@trax.pk' : 'info@trax.pk';
+                $fromAddress = (str_contains($from, 'return')) ? 'return@slgtrax.com' : 'info@slgtrax.com';
                 $selectedMailer = 'huawei_email';
 
                 if ($id == 230) {
                     $mailable = new NotificationsDispatchNow($subject, $body);
                 } else {
-                    $mailable = new Notifications($subject, $body);
+                    $mailable = new Notifications($subject, $body, $fromAddress);
                 }
 
                 // Select mailer
