@@ -26,7 +26,7 @@ class Notifications extends Mailable implements ShouldQueue
 
     
         if ($from) {
-            $this->from($from, 'TRAX');
+            $this->from($from, 'SLG TRAX');
         }
         
     }

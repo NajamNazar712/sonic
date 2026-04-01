@@ -631,9 +631,9 @@ trait CommonTrait
             $audioUrl = asset(Storage::url($riderDelivery->audio_path));
           } else {
             try {
-              $audioUrl = Storage::disk('s3')->temporaryUrl(
-                'sonic-archive/'.$riderDelivery->audio_path,
-                now()->addMinutes(5)
+              $audioUrl = Storage::disk('s3')->url(
+                $riderDelivery->audio_path,
+                // now()->addMinutes(5)
               );
             } catch (\Exception $e) {
               \Log::error('S3 Audio URL error: ' . $e->getMessage());
@@ -695,9 +695,9 @@ trait CommonTrait
             $audioUrl = asset(Storage::url($riderReturn->audio_path));
           } else {
             try {
-              $audioUrl = Storage::disk('s3')->temporaryUrl(
+              $audioUrl = Storage::disk('s3')->url(
                 $riderReturn->audio_path,
-                now()->addMinutes(5)
+                // now()->addMinutes(5)
               );
             } catch (\Exception $e) {
               \Log::error('S3 Return Audio URL error: ' . $e->getMessage());
