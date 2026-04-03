@@ -3457,7 +3457,7 @@ class RetailAdminUserManagementController extends Controller
 
         RetailStandardRates::where('shipping_mode_id', 13)->delete();
 
-        foreach ($request->economy_range_up as $index => $economy_range_up) {
+        foreach ($request->input('economy_range_up',[]) as $index => $economy_range_up) {
 
             $retail = new RetailStandardRates();
             $retail->range_up = $request->economy_range_up[$index];
@@ -3480,7 +3480,7 @@ class RetailAdminUserManagementController extends Controller
 
         RetailStandardRates::where('shipping_mode_id', 14)->delete();
 
-        foreach ($request->express_range_up as $index => $express_range_up) {
+        foreach ($request->input('express_range_up',[]) as $index => $express_range_up) {
 
             $retail = new RetailStandardRates();
             $retail->range_up = $request->express_range_up[$index];
