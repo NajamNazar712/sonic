@@ -13058,7 +13058,7 @@ class RiderAPIController extends Controller
                     $consignee_address = $shipment_data->consignee_address;
                     $booking_type = $shipment_data->booking_type_id;
                     $consignee_phone = $shipment_data->consignee_phone_number_1;
-                    $shipper_name = $shipment_data->user->name;
+                    $shipper_name = $shipment_data->user->brand_name ?? $shipment_data->user->name;
                     if ($shipment_data->consignee_phone_number_2 != null) {
                         $consignee_phone .= ' / ' . $shipment_data->consignee_phone_number_2;
                     }
