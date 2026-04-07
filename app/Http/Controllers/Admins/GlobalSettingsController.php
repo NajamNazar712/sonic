@@ -10919,7 +10919,10 @@ class GlobalSettingsController extends Controller
         $faf_charges->admin_id = Auth::user()->id;
         $faf_charges->save();
 
-
+        FafCharges::query()->update([
+            'percentage' => $applied_faf_charges,
+            'updated_at' => now(),
+        ]);
 
         return redirect()->back()->with('success', 'FaF Percent Updated !!!');
 

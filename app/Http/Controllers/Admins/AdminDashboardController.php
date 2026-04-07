@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admins;
 
 use Exception;
 use Carbon\Carbon;
-use App\FafCharges;
 use App\Models\CityLog;
 use App\RouteLocations;
 use App\Http\Models\City;
@@ -244,6 +243,8 @@ use App\Models\CorporateUserOnDeliveredInvoiceLog;
 use App\Models\CorporateUserOnDeliveredInvoice;
 use App\Models\CityTypeETD;
 use App\Models\PercentageOnExpectedShipment;
+use App\FafChargesGlobal;
+use App\FafCharges;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait,FilterTrait;
@@ -1508,6 +1509,22 @@ class AdminDashboardController extends Controller
                             $notification_setting_shipper->shipper_id = $user->id;
                             $notification_setting_shipper->save();
                         }
+                    }
+
+                    $percentage = FafChargesGlobal::value('faf_charges');
+                    $fafCharge = FafCharges::where('user_id', $user->id)->first();
+                    if ($fafCharge) {
+                        $fafCharge->percentage = $percentage;
+                        $fafCharge->status = 1;
+                        $fafCharge->save();
+                    } else {
+                        FafCharges::insert([
+                            'user_id' => $user->id,
+                            'percentage' => $percentage,
+                            'status' => 1,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
                     }
                     NotificationsController::send(1, $user->id);
 
@@ -9683,6 +9700,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
             ->leftJoin('wallet_users', 'wallet_users.user_id', 'users.id')
+            
 
             // ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason','users.sms_charges','faf_charges.status as fc_status'])
 
@@ -9754,7 +9772,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'users.sms_charges',
                 'faf_charges.status as fc_status',
                 'wallet_users.user_id as wallet_shippers',
-                'users.sub_segment_id'
+                'users.sub_segment_id',
+                'faf_charges.percentage as percentage'
             ])
             ->where(function($query){
                 $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
@@ -15684,7 +15703,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     public function faf_charges_info(Request $request)
     {
         $faf_charges = FafCharges::where('user_id',$request->user_id)->first();
-        return response()->json(['status' => !empty($faf_charges->status) ? $faf_charges->status : 0]);
+        return response()->json(['status' => !empty($faf_charges->status) ? $faf_charges->status : 0, 'percentage' => !empty($faf_charges->percentage) ? $faf_charges->percentage : 0]);
     }
     public function faf_charges_submit(Request $request)
     {
@@ -15695,6 +15714,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         }
         $faf_charges->user_id =$request->user_id;
         $faf_charges->status =$faf_charges_checkbox;
+        $faf_charges->percentage = $request->faf_percentage;
         $faf_charges->save();
 
         return redirect()->back()->with('success', 'FAF Charges Status Updated');
