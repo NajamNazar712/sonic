@@ -1167,7 +1167,7 @@ class AdminFinanceController extends Controller
         }
 
         //------x-------x------------x------TO-6827---------x----------x-----------
-        $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
+        $adminId = 989;  //if admin is [Trax04800 Marib Ali (TO-7355)]
 
         if(!App::environment('production'))
         {
