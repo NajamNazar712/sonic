@@ -381,7 +381,6 @@ class Kernel extends ConsoleKernel
             $settings = $settings->first();
 
             $time = $settings->setting_value . ':00';
-
             $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
         }
 
