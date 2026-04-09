@@ -8,9 +8,7 @@ pipelines:
           deployment: staging
           script:
             - echo "Deploying to staging branch VM..."
-            - ssh -o StrictHostKeyChecking=no $SPRINT_132_HOST << EOF
-              cd /var/www/html/sonic3 && ./deploy.sh
-              EOF
+            - ssh -o StrictHostKeyChecking=no "$STAGING_USER@$SPRINT_132_HOST" "cd /var/www/html/sonic3 && chmod +x deploy.sh && bash ./deploy.sh"
 
     master:
       - step:
@@ -18,4 +16,4 @@ pipelines:
           deployment: Production
           script:
             - echo "Deploying to production server..."
-            - ssh -p "$PRODUCTION_PORT" -o StrictHostKeyChecking=no $PRODUCTION_HOST "cd /var/www/html/sonic && ./deploy.sh"
+            - ssh -vvv -p "$PRODUCTION_PORT" -o StrictHostKeyChecking=no "$PRODUCTION_USER@$PRODUCTION_HOST" "cd /var/www/html/sonic && chmod +x deploy.sh && bash ./deploy.sh"
