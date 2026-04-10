@@ -280,12 +280,11 @@ class Kernel extends ConsoleKernel
 
         //SarNotification Email Cron
         $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
-        $agent_sar_notify_time = '23:15'; //1:30 am
         if ($agent_sar_settings->exists()) {
             $sar_setting = $agent_sar_settings->first();
             $agent_sar_notify_time = $sar_setting->setting_value . ':00';
         }else{
-            $agent_sar_notify_time = '23:16:00';
+            $agent_sar_notify_time = '23:30'; //1:30 am
         }
         $schedule->command('agent:sarnotification')->dailyAt($agent_sar_notify_time)->runInBackground();
 
