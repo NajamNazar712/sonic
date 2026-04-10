@@ -284,6 +284,8 @@ class Kernel extends ConsoleKernel
         if ($agent_sar_settings->exists()) {
             $sar_setting = $agent_sar_settings->first();
             $agent_sar_notify_time = $sar_setting->setting_value . ':00';
+        }else{
+            $agent_sar_notify_time = '23:16:00';
         }
         $schedule->command('agent:sarnotification')->dailyAt($agent_sar_notify_time)->runInBackground();
 
