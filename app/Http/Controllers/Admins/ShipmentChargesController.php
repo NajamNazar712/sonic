@@ -3091,20 +3091,23 @@ class ShipmentChargesController extends Controller
 
     static public function calculate_faf_charges($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
         $faf_charges_status = 0;
+        $faf_charges_percentage = 0;
+        
         $faf_charges = FafCharges::where('user_id',$user_id);
         if($faf_charges->exists()){
             $faf_charges= $faf_charges->first();
             $faf_charges_status = $faf_charges->status;
+            $faf_charges_percentage = !is_null($faf_charges->percentage) ? $faf_charges->percentage : 0;
         }
 
         if ($faf_charges_status) {
             $today = date('Y-m-d');
             $fuel_charge_global = FafChargesGlobal::where('date_range_start','<=',$today)->where('date_range_end','>=',$today);
             if ($fuel_charge_global->exists()) {
-                $fuel_charge_global = $fuel_charge_global->first();
+                //$fuel_charge_global = $fuel_charge_global->first();
 
                 $result = array();
-                $result['faf_charges'] = ROUND((($fuel_charge_global->faf_charges / 100) * $weight_charges), 2, PHP_ROUND_HALF_DOWN);
+                $result['faf_charges'] = ROUND((($faf_charges_percentage  / 100) * $weight_charges), 2, PHP_ROUND_HALF_DOWN);
                 return $result;
             }
         }
@@ -3116,19 +3119,21 @@ class ShipmentChargesController extends Controller
     // calculate faf_charges for shipment not in db
     static public function calculate_faf_charges_view($account_type_id, $user_id, $shipping_mode_id, $weight_charges) {
         $faf_charges_status = 0;
+        $faf_charges_percentage = 0;
         $faf_charges = FafCharges::where('user_id',$user_id);
         if($faf_charges->exists()){
             $faf_charges= $faf_charges->first();
             $faf_charges_status = $faf_charges->status;
+            $faf_charges_percentage = !is_null($faf_charges->percentage) ? $faf_charges->percentage : 0;
         }
         if ($faf_charges_status) {
             $today = date('Y-m-d');
             $fuel_charge_global = FafChargesGlobal::where('date_range_start','<=',$today)->where('date_range_end','>=',$today);
             if ($fuel_charge_global->exists()) {
-                $fuel_charge_global = $fuel_charge_global->first();
+                //$fuel_charge_global = $fuel_charge_global->first();
 
                 $result = array();
-                $result['faf_charges'] = ROUND((($fuel_charge_global->faf_charges / 100) * $weight_charges), 2, PHP_ROUND_HALF_DOWN);
+                $result['faf_charges'] = ROUND((($faf_charges_percentage / 100) * $weight_charges), 2, PHP_ROUND_HALF_DOWN);
                 return $result;
             }
         }
