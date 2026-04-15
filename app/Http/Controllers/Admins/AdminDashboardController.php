@@ -245,6 +245,7 @@ use App\Models\CityTypeETD;
 use App\Models\PercentageOnExpectedShipment;
 use App\FafChargesGlobal;
 use App\FafCharges;
+use App\Models\FafChargesLog;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait,FilterTrait;
@@ -15709,6 +15710,19 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
     {
         $faf_charges_checkbox = isset($request->faf_charges_checkbox) ? 1 : 0;
         $faf_charges = FafCharges::where('user_id',$request->user_id)->first();
+        if ($faf_charges && (
+            $faf_charges->status != $faf_charges_checkbox ||
+            $faf_charges->percentage != $request->faf_percentage
+        )) {
+            FafChargesLog::create([
+                'user_id'        => $faf_charges->user_id,
+                'old_status'     => $faf_charges->status,
+                'new_status'     => $faf_charges_checkbox,
+                'old_percentage' => $faf_charges->percentage,
+                'new_percentage' => $request->faf_percentage,
+                'changed_by'     => auth()->id(),
+            ]);
+        }
         if(empty($faf_charges)){
             $faf_charges = new FafCharges();
         }
@@ -16775,5 +16789,23 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         );
 
         return redirect()->back()->with('success', 'Percentage Updated');
+    }
+
+    public function faf_charges_logs(Request $request)
+    {
+        $logs = FafChargesLog::select(
+            'faf_charges_logs.old_status',
+            'faf_charges_logs.new_status',
+            'faf_charges_logs.new_percentage',
+            'faf_charges_logs.old_percentage',
+            'faf_charges_logs.created_at as created',
+            'admins.name as admin_name'
+            )
+        ->leftJoin('admins', 'admins.id', '=', 'faf_charges_logs.changed_by')
+        ->where('faf_charges_logs.user_id', $request->user_id)
+        ->orderBy('faf_charges_logs.id', 'desc')
+        ->get();
+
+        return response()->json($logs);
     }
 }

@@ -624,9 +624,9 @@
     </div>
 
 
-    <div class="modal fade text-left" id="faf_charges_modal" data-backdrop="static" role="dialog" aria-labelledby=""
+    <!-- <div class="modal fade text-left" id="faf_charges_modal" data-backdrop="static" role="dialog" aria-labelledby=""
          aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">FaF Charges</h4>
@@ -650,7 +650,100 @@
                         <button type="submit" class="btn btn-success" id="faf_charges_submit">Submit</button>
                         <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                     </div>
+
+                    <hr>
+
+                    <h5 class="text-center font-weight-bold">FAF Charges History</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm" id="faf_logs_table">
+                            <thead class="bg-primary white">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Old Status</th>
+                                    <th>New Status</th>
+                                    <th>Old %</th>
+                                    <th>New %</th>
+                                    <th>Changed By</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="7" class="text-center">No data</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </form>
+            </div>
+        </div>
+    </div> -->
+    <div class="modal fade text-left" id="faf_charges_modal" data-backdrop="static" role="dialog" aria-labelledby=""
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h4 class="modal-title">FaF Charges</h4>
+                </div>
+
+                <form id="faf_charges_form" method="post" action="{{ route('admin.accounts.faf_charges.submit') }}">
+                    @csrf
+
+                    <div class="modal-body">
+
+                        <!-- ===== FORM SECTION ===== -->
+                        <div class="text-center mb-3">
+                            <label class="font-medium-2 font-weight-bold d-block">Apply FAF Charges</label>
+
+                            <input type="hidden" name="user_id" id="faf_charges_user_id">
+
+                            <label class="mr-1">No</label>
+                            <input type="checkbox" name="faf_charges_checkbox" id="faf_charges_checkbox" class="switchery" data-size="sm">
+                            <label class="ml-1">Yes</label>
+
+                            <input type="text"
+                                class="form-control mt-2"
+                                placeholder="FAF Percentage"
+                                name="faf_percentage"
+                                id="faf_percentage"
+                                required>
+                        </div>
+
+                        <!-- ✅ BUTTONS HERE -->
+                        <div class="text-right mb-2">
+                            <button type="submit" class="btn btn-success">Submit</button>
+                            <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                        </div>
+                        <!-- ===== TABLE SECTION ===== -->
+                        <h5 class="text-center font-weight-bold mb-2">FAF Charges History</h5>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm" id="faf_logs_table">
+                                <thead class="bg-primary white">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Old %</th>
+                                        <th>New %</th>
+                                        <th>Old Status</th>
+                                        <th>New Status</th>
+                                        <th>Changed By</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" class="text-center">No data</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </form>
+
             </div>
         </div>
     </div>
@@ -3368,6 +3461,7 @@ function checkboxStatus() {
                                 $('#faf_percentage').val(data.percentage);
                             }
                             $('#faf_charges_user_id').val(id);
+                            loadFafLogs(id);
                             $('#faf_charges_modal').modal('show');
 
 
@@ -4358,6 +4452,41 @@ var days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
                 }
             });
         });
+
+        function loadFafLogs(user_id) {
+            $.ajax({
+                url: '{!! route('admin.accounts.faf_charges.logs') !!}',
+                method: 'POST',
+                data: {
+                    user_id: user_id,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (logs) {
+
+                    let html = '';
+
+                    if (logs.length > 0) {
+                        $.each(logs, function (index, log) {
+                            html += `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${log.old_percentage ?? '-'}</td>
+                                    <td>${log.new_percentage ?? '-'}</td>
+                                    <td>${log.old_status == 1 ? 'Yes' : 'No'}</td>
+                                    <td>${log.new_status == 1 ? 'Yes' : 'No'}</td>
+                                    <td>${log.admin_name ?? '-'}</td>
+                                    <td>${log.created}</td>
+                                </tr>
+                            `;
+                        });
+                    } else {
+                        html = `<tr><td colspan="7" class="text-center">No logs found</td></tr>`;
+                    }
+
+                    $('#faf_logs_table tbody').html(html);
+                }
+            });
+        }
 
 
 
