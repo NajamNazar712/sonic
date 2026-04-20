@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Models\NegativePayableAllowShipperZeroCod;
 use App\Models\NegativePayableAllowShipperZeroCodLogs;
+use App\Http\Models\Admin\GlobalSettings;
 
 
 class GeneralSettingController extends Controller
@@ -441,6 +442,53 @@ class GeneralSettingController extends Controller
 
         $datatables = Datatables::of($zero_cod_shippers);
         return $datatables->make(true);
+    }
+
+
+    public function t_payment_exclude_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 847);
+        $users = User::select('users.id', 'users.name')
+        ->leftjoin('wallet_users as wu', 'wu.user_id', 'users.id')
+        ->where('users.status',3 )
+        ->where('blacklist', 0)
+        ->whereNull('wu.user_id')
+        ->get();
+
+        $settings = GlobalSettings::where('type', 't_payment_exclude_shippers');
+        $value = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $value = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.t_payment')->with(['users' => $users, 't_payment_exclude_shippers' => $value]);
+    }
+
+    public function t_payment_exclude_shippers_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 848);
+        if ($request->has('users')) {
+
+            if (count($request->users) > 0) {
+                $users = implode(',', $request->users);
+
+                $settings = GlobalSettings::where('type', 't_payment_exclude_shippers');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 't_payment_exclude_shippers';
+                    $settings->setting_value = 1;
+                }
+                $settings->text = $users;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
     }
 
     

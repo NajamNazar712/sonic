@@ -245,6 +245,9 @@ use App\Models\CityTypeETD;
 use App\Models\PercentageOnExpectedShipment;
 use App\FafChargesGlobal;
 use App\FafCharges;
+use App\Models\TPaymentCycle;
+use App\Models\PendingTPaymentCycle;
+use App\Models\HistoryTPaymentCycle;
 
 class AdminDashboardController extends Controller
 {   use RateReusableTrait,FilterTrait;
@@ -1484,6 +1487,10 @@ class AdminDashboardController extends Controller
 
             if ($user->status == 2) {   
                 $now = Carbon::now();
+
+                if(!TPaymentCycle::where('user_id', $user->id)->exists()) {
+                    return redirect()->back()->with('error', 'Please set and approve shipper T Payment Cycle first.');
+                }
                 $action = User::where('id', $user->id)->update(['status' => 3, 'account_activated_by' => Auth::id(), 'activated_at' => $now, 'reactivated_at' => $now]);
                 if ($user->lead_id != null) {
                     $lead = Lead::find($user->lead_id);
@@ -10425,6 +10432,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
 
                         $dropdown .= '<button type="button" class="dropdown-item exp_shipment_percentage"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Exp Shipment %</div></button>';
                     }
+
+                    if(session('role_id') == 1 || in_array(12, session('permissions'))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.t_payments', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add T Payment Cycle</div></button>';
+                    }
                         
                     
                 
@@ -11083,7 +11094,10 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 if($result->sub_segment_id == 5) {
                     $dropdown .= '<button type="button" class="dropdown-item exp_shipment_percentage"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Exp Shipment %</div></button>';
                 }
-                 
+                
+                if(session('role_id') == 1 || in_array(6, session('permissions'))) {
+                    $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.t_payments', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add T Payment Cycle</div></button>';
+                }
                 $dropdown .= '<button type="button" class="dropdown-item account_tagging_history" data-id="' . $result->id . '" data-toggle="modal" data-target="#AccountTaggingHistoryModal">
                     <div class="row no-gutters align-items-center">
                         <div class="col-2"><i class="ft-activity"></i></div>
@@ -16775,5 +16789,101 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
         );
 
         return redirect()->back()->with('success', 'Percentage Updated');
+    }
+
+    public function t_payments($id) {
+
+        $user = User::find($id);
+
+        $paymentCycle = TPaymentCycle::with(['addedByUser', 'approvedByUser'])
+            ->where('user_id', $user->id)
+            ->first();
+
+        $pendingPaymentCycle = PendingTPaymentCycle::with(['addedByUser'])
+            ->where('user_id', $user->id)
+            ->first();
+
+        return view('admin.accounts.t_payment_cycle', compact(
+            'user',
+            'paymentCycle',
+            'pendingPaymentCycle'
+        ));
+    
+    }
+
+    public function t_payments_store(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        $request->validate([
+            'value' => ['required', 'in:T-0,T-1,T-2,T-3,T-4,T-5'],
+        ]);
+
+        $pending = PendingTPaymentCycle::where('user_id', $user->id)->first();
+
+        if ($pending) {
+            $pending->update([
+                'value'    => $request->value,
+                'added_by' => Auth::id(),
+                'added_at' => now(),
+            ]);
+        } else {
+            PendingTPaymentCycle::create([
+                'user_id'  => $user->id,
+                'value'    => $request->value,
+                'added_by' => Auth::id(),
+                'added_at' => now(),
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.accounts.t_payments', $user->id)
+            ->with('success', 'T-Payment Cycle submitted successfully and is waiting for approval.');
+    }
+
+
+    public function t_payments_approve($id)
+    {
+        $user = User::find($id);
+
+        $pending = PendingTPaymentCycle::where('user_id', $user->id)->firstOrFail();
+
+        DB::transaction(function () use ($user, $pending) {
+            $existing = TPaymentCycle::where('user_id', $user->id)->first();
+
+            if ($existing) {
+                HistoryTPaymentCycle::create([
+                    'user_id'     => $existing->user_id,
+                    'value'       => $existing->value,
+                    'added_by'    => $existing->added_by,
+                    'added_at'    => $existing->added_at,
+                    'approved_by' => $existing->approved_by,
+                    'approved_at' => $existing->approved_at,
+                ]);
+
+                $existing->update([
+                    'value'       => $pending->value,
+                    'added_by'    => $pending->added_by,
+                    'added_at'    => $pending->added_at,
+                    'approved_by' => Auth::id(),
+                    'approved_at' => now(),
+                ]);
+            } else {
+                TPaymentCycle::create([
+                    'user_id'     => $pending->user_id,
+                    'value'       => $pending->value,
+                    'added_by'    => $pending->added_by,
+                    'added_at'    => $pending->added_at,
+                    'approved_by' => Auth::id(),
+                    'approved_at' => now(),
+                ]);
+            }
+
+            $pending->delete();
+        });
+
+        return redirect()
+            ->route('admin.accounts.t_payments', $user->id)
+            ->with('success', 'T-Payment Cycle approved successfully.');
     }
 }

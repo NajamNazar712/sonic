@@ -22565,5 +22565,82 @@ class AdminFinanceController extends Controller
         }
     }
 
+    public function make_payments_hold(Request $request)
+    {
+        $already_hold_ids = [];
+        $markedHold = false;
+
+        foreach ($request->ids as $pending_payment_id) {
+            $done_payment = PendingPayment::find($pending_payment_id);
+
+            if (!$done_payment) {
+                continue;
+            }
+
+            if ($done_payment->is_hold == 1) {
+                $already_hold_ids[] = $done_payment->id;
+            } else {
+                $done_payment->is_hold = 1;
+                $done_payment->hold_by = Auth::id();
+                $done_payment->hold_at = Carbon::now();
+                $done_payment->save();
+
+                $markedHold = true;
+            }
+        }
+
+        if ($markedHold) {
+            return response()->json([
+                'status' => 0,
+                'success' => 'Payment(s) marked as Hold',
+                'already_hold_ids' => $already_hold_ids
+            ]);
+        }
+
+        return response()->json([
+            'status' => 1,
+            'error' => 'No payment(s) marked as Hold',
+            'already_hold_ids' => $already_hold_ids
+        ]);
+    }
+
+    public function make_payments_un_hold(Request $request)
+    {
+        $already_unhold_ids = [];
+        $markedunHold = false;
+
+        foreach ($request->ids as $pending_payment_id) {
+            $pending_payment = PendingPayment::find($pending_payment_id);
+
+            if (!$pending_payment) {
+                continue;
+            }
+
+            if ($pending_payment->is_hold == 1) {
+                $pending_payment->is_hold = 0;
+                $pending_payment->hold_by = Auth::id();
+                $pending_payment->hold_at = Carbon::now();
+                $pending_payment->save();
+
+                $markedunHold = true;
+            } else {
+                $already_unhold_ids[] = $pending_payment->id;
+            }
+        }
+
+        if ($markedunHold) {
+            return response()->json([
+                'status' => 0,
+                'success' => 'Payment(s) successfully taken off hold',
+                'already_unhold_ids' => $already_unhold_ids
+            ]);
+        }
+
+        return response()->json([
+            'status' => 1,
+            'error' => 'No payments remaining to unhold',
+            'already_unhold_ids' => $already_unhold_ids
+        ]);
+    }
 
 }

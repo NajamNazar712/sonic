@@ -2296,6 +2296,11 @@
                                         <li><a class="menu-item"
                                                    href="{{ route('admin.settings.zero_cod_shippers.logs') }}">Zero COD Shippers Logs</a></li>
                                         @endif
+
+                                        @if (session('role_id') == 1 || in_array(1072, session('permissions')))
+                                        <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.t_payment_exclude_shippers.index') }}">T Payment Exclude Shippers</a></li>
+                                        @endif
                                 </ul>
 
                             </li>
