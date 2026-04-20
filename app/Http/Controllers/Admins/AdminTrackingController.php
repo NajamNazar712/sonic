@@ -839,6 +839,25 @@ class AdminTrackingController extends Controller
                     if(isset($crm) && $crm->status_id != 4){
                         $details['complaint'] = $crm->id;
                     }
+                    //added by
+
+                    $statusBy = '-';
+
+                    if ($journey) {
+                        if (!empty($journey->admin_id)) {
+                            $admin = Admin::select('id','name')->find($journey->admin_id);
+                            $statusBy = $admin?->name ?? '-';
+                        } elseif (!empty($journey->user_id)) {
+                            $user = User::select('id','name')->find($journey->user_id);
+                            $statusBy = $user?->name ?? '-';
+                        } elseif (!empty($journey->rider_id)) {
+                            $rider = Rider::select('id','name')->find($journey->rider_id);
+                            $statusBy = $rider?->name ?? '-';
+                        }
+                    }
+                    $details['status_by'] = $statusBy;
+
+                    //end
 
                     ShipmentScanningJourneyController::add($shipment->id ,8,1,Auth::id(),NULL,NULL,NULL,NULL, session('latitude'), session('longitude'), NULL, $request->action);
                     return response()->json(['status' => 1, 'details' => $details]);

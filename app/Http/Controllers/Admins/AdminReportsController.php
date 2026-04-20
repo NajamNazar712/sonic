@@ -12909,7 +12909,7 @@ class AdminReportsController extends Controller
 
     public function rider_pickup_index()
     {
-
+        return redirect()->route('admin.access_denied');
         ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
         // $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);

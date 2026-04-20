@@ -544,12 +544,12 @@ class APIController extends Controller
         $user_type = User::where('id', $user_id)->first();
 
         //adding this for the process of document re-upload from shipper
-        if(in_array($user_type->document_status , [0,3]) && Carbon::now()->gt(Carbon::parse('2026-03-31 23:59:59'))){
-            return response()->json([
-                'status' => 1,
-                'message' => "Please login to Sonic Portal and upload required documents to enable booking"
-            ]);
-        }
+//        if(in_array($user_type->document_status , [0,3]) && Carbon::now()->gt(Carbon::parse('2026-03-31 23:59:59'))){
+//            return response()->json([
+//                'status' => 1,
+//                'message' => "Please login to Sonic Portal and upload required documents to enable booking"
+//            ]);
+//        }
 
         // sahban bhai said service type 3,5 then disabled this below condition
             if (Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(1)) && !PendingPayment::check_negative_payable_cod($user_id,$user_type['account_type_id'],$request->input('amount')) && !in_array($request->input('service_type_id',1), [3,5])) {
@@ -11169,7 +11169,7 @@ class APIController extends Controller
         if (config('app.env') === 'staging') {
             $allowedIps = ['164.90.252.105','103.244.178.3','134.209.126.19','72.255.0.55','110.93.236.91'];
         } elseif (config('app.env') === 'production') {
-            $allowedIps = ['3.23.216.198', '18.118.233.146','103.244.178.3','35.209.242.61','35.209.38.219'];
+            $allowedIps = ['3.23.216.198', '18.118.233.146','103.244.178.3','35.209.242.61','35.209.38.219' ,'35.206.93.131' ,'35.208.180.253'];
         }
 
         if ($allowedIps && !in_array($request->ip(), $allowedIps)) {

@@ -13,8 +13,13 @@ use App\HistoryCorporateZeroCodDiscountCharges;
 use App\HistoryShipmentReturnDiscountCharges;
 use App\HistoryZeroCodDiscountCharges;
 use App\Http\Models\DonePayment;
+use App\Http\Models\Invoice;
+use App\Http\Models\InvoiceShipment;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PendingInvoiceShipment;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Rates\PendingRateStatus;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\PendingCorporateDefaultShipmentReturnDiscountCharges;
 use App\PendingCorporateDefaultZeroCodDiscountCharges;
@@ -37792,6 +37797,383 @@ class AdminCorporateAccountsController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json(['status' => 0, 'error' => 'Failed to switch account.'], 500);
+        }
+    }
+
+    public function switch_reimbursement_submit(Request $request)
+{
+    $shipper_id = $request->shipper_id;
+
+    $pending_payment = PendingPayment::where('user_id', $shipper_id);
+    $done_payment    = DonePayment::where('user_id', $shipper_id)->where('status', 0);
+
+    if ($pending_payment->exists() || $done_payment->exists()) {
+        return response()->json(['status' => 0, 'error' => 'Please Clear the Payment First']);
+    }
+
+    if (!$shipper_id) {
+        return response()->json(['status' => 0, 'error' => 'Shipper not selected!']);
+    }
+
+    $shipper = User::find($shipper_id);
+    if (!$shipper) {
+        return response()->json(['status' => 0, 'error' => 'Shipper not found!']);
+    }
+
+    if (isset($shipper->wallet->id)) {
+        return response()->json(['status' => 0, 'error' => 'Wallet Users are not allowed']);
+    }
+
+    $rate_type_id = (int) $shipper->corporate_rate_type_id;
+
+    DB::beginTransaction();
+
+    try {
+        $now = now();
+
+        // Force-generate all pending corporate invoices before switch
+        $this->forceGenerateCorporateInvoicesForUser($shipper_id);
+
+        if (in_array($rate_type_id, [1, 2], true)) {
+            $rateRows = CorporateRateStatus::where('user_id', $shipper_id)->get();
+
+            if ($rateRows->isNotEmpty()) {
+                $payload = $rateRows->map(function ($row) use ($shipper_id, $now) {
+                    return [
+                        'user_id'               => $shipper_id,
+                        'shipping_mode_id'      => $row->shipping_mode_id,
+                        'status'                => (int) $row->status,
+                        'cash_handling_charges' => (int) $row->cash_handling_charges,
+                        'insurance_charges'     => (int) $row->insurance_charges,
+                        'return_charges'        => (int) $row->return_charges,
+                        'fuel_charges'          => (int) $row->fuel_charges,
+                        'zero_cod_discount'     => (int) $row->zero_cod_discount,
+                        'return_discount'       => (int) $row->return_discount,
+                        'created_at'            => $now,
+                        'updated_at'            => $now,
+                    ];
+                })->all();
+
+                PendingCorporateRateStatus::where('user_id', $shipper_id)->delete();
+                PendingCorporateRateStatus::insert($payload);
+            }
+
+            CorporateRateStatus::where('user_id', $shipper_id)->delete();
+        } elseif ($rate_type_id === 3) {
+            $rateRows = CorporateDefaultRateStatus::where('user_id', $shipper_id)->get();
+
+            if ($rateRows->isNotEmpty()) {
+                $payload = $rateRows->map(function ($row) use ($shipper_id, $now) {
+                    return [
+                        'user_id'               => $shipper_id,
+                        'shipping_mode_id'      => $row->shipping_mode_id,
+                        'status'                => (int) $row->status,
+                        'cash_handling_charges' => (int) $row->cash_handling_charges,
+                        'insurance_charges'     => (int) $row->insurance_charges,
+                        'return_charges'        => (int) $row->return_charges,
+                        'packaging_charges'     => (int) ($row->packaging_charges ?? 0),
+                        'fuel_charges'          => (int) $row->fuel_charges,
+                        'zero_cod_discount'     => (int) $row->zero_cod_discount,
+                        'return_discount'       => (int) $row->return_discount,
+                        'created_at'            => $now,
+                        'updated_at'            => $now,
+                    ];
+                })->all();
+
+                PendingCorporateDefaultRateStatus::where('user_id', $shipper_id)->delete();
+                PendingCorporateDefaultRateStatus::insert($payload);
+            }
+
+            CorporateDefaultRateStatus::where('user_id', $shipper_id)->delete();
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Invalid corporate rate type!']);
+        }
+
+        $latestBankInfo = UserBankInfo::where('user_id', $shipper_id)->latest()->first();
+        if ($latestBankInfo && !is_null($latestBankInfo->invoicing_cycle_id)) {
+            $shipper->payment_cycle_id = $latestBankInfo->invoicing_cycle_id;
+        }
+
+        $shipper->corporate_rate_type_id = null;
+        $shipper->account_type_id = 1;
+        $shipper->agreement_signed = 0;
+        $shipper->status = 0;
+        $shipper->save();
+
+        DB::commit();
+
+        return response()->json([
+            'status'  => 1,
+            'success' => 'Account Successfully Switched to Reimbursement'
+        ]);
+    } catch (\Throwable $e) {
+        DB::rollBack();
+
+        \Log::error('SWITCH_TO_REIMBURSEMENT_FAIL', [
+            'shipper_id' => $shipper_id,
+            'message'    => $e->getMessage(),
+            'file'       => $e->getFile(),
+            'line'       => $e->getLine(),
+        ]);
+
+        return response()->json([
+            'status' => 0,
+            'error'  => 'Failed to switch account.'
+        ], 500);
+    }
+}
+
+    private function forceGenerateCorporateInvoicesForUser(int $user_id): void
+    {
+        $settings = GlobalSettings::where('type', 'due_date_days')->first();
+        $due_date_days = $settings ? $settings->setting_value : 7;
+
+        $current_date = Carbon::now()->startOfDay();
+        $current_date_string = $current_date->toDateString();
+
+        $user = User::find($user_id);
+        if (!$user || (int) $user->account_type_id !== 2) {
+            return;
+        }
+
+        $user_banking_information = UserBankInfo::where('user_id', $user_id)
+            ->where('default_bank', 1)
+            ->first();
+
+        if (!$user_banking_information) {
+            return;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Force generation regardless of actual scheduled generation day
+        |--------------------------------------------------------------------------
+        */
+        $generate = true;
+        $billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
+
+        if ((int) $user_banking_information->invoicing_cycle_id === 1) {
+            // Weekly
+            $billing_period_from_date = Carbon::now()->subDays(7)->startOfDay()->toDateString();
+        } elseif ((int) $user_banking_information->invoicing_cycle_id === 2) {
+            // 14 / 28 cycle - force using the currently active half-cycle window
+            if ($current_date->day <= 14) {
+                $billing_period_from_date = Carbon::now()->subMonth()->day(28)->startOfDay()->toDateString();
+            } else {
+                $billing_period_from_date = Carbon::now()->day(14)->startOfDay()->toDateString();
+            }
+        } elseif ((int) $user_banking_information->invoicing_cycle_id === 3) {
+            // Monthly
+            $billing_period_from_date = Carbon::now()->subMonth()->startOfMonth()->startOfDay()->toDateString();
+            $current_date_string = Carbon::now()->addDay()->toDateString();
+        } elseif ((int) $user_banking_information->invoicing_cycle_id === 4) {
+            // Daily
+            $billing_period_from_date = Carbon::now()->subDays(1)->startOfDay()->toDateString();
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Main invoice generation from pending_invoice_shipments
+        |--------------------------------------------------------------------------
+        */
+        $pending_invoice_shipments = PendingInvoiceShipment::whereDate('created_at', '<=', $current_date_string)
+            ->whereHas('shipment', function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            });
+
+        if ($pending_invoice_shipments->exists()) {
+            $invoice = new Invoice();
+            $invoice->user_id = $user_id;
+            $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+            $invoice->billing_period_from_date = $billing_period_from_date;
+            $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+            $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
+            $invoice->status_id = 1;
+            $invoice->invoice_type = 1;
+            $invoice->save();
+
+            $invoice_id = $invoice->id;
+            $invoice_number = $user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
+
+            $total_shipments = 0;
+            $total_delivered_shipments = 0;
+            $total_returned_shipments = 0;
+            $total_arrival_shipments = 0;
+            $total_adjusted_shipments = 0;
+            $total_charges = 0;
+            $total_gst = 0;
+            $total_invoice_amount = 0;
+            $shipment_count = 0;
+            $total_sms_charges = 0;
+            $total_wht = 0;
+            $total_cod_sst = 0;
+
+            $returned_shipper = GlobalSettings::where('type', 'invoice_against_return_delivered_shipper')
+                ->select('text')
+                ->first();
+
+            $array = $returned_shipper ? explode(",", $returned_shipper->text) : [];
+
+            foreach ($pending_invoice_shipments->get() as $pending_invoice_shipment) {
+                $check_status = true;
+
+                if (in_array($user_id, $array)) {
+                    $shipment_id = $pending_invoice_shipment->shipment_id;
+                    $shipment_status_ids = ShipmentsJourney::where('shipment_id', $shipment_id)
+                        ->select('shipper_status_id')
+                        ->latest()
+                        ->first();
+
+                    $status = $shipment_status_ids ? $shipment_status_ids->shipper_status_id : null;
+
+                    if (($status != 14) && ($status != 25)) {
+                        $check_status = false;
+                    }
+                }
+
+                if ($check_status) {
+                    $shipment_count += 1;
+
+                    $invoice_shipment = new InvoiceShipment();
+                    $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
+                    $invoice_shipment->invoice_id = $invoice_id;
+                    $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
+                    $invoice_shipment->type = $pending_invoice_shipment->type;
+                    $invoice_shipment->charges = $pending_invoice_shipment->charges;
+                    $invoice_shipment->sms_charges = $pending_invoice_shipment->sms_charges;
+                    $invoice_shipment->gst = $pending_invoice_shipment->gst;
+                    $invoice_shipment->wht = $pending_invoice_shipment->wht;
+                    $invoice_shipment->cod_sst = $pending_invoice_shipment->cod_sst;
+                    $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+                    $invoice_shipment->save();
+
+                    $total_shipments++;
+
+                    if ($pending_invoice_shipment->type == 0) {
+                        $total_delivered_shipments++;
+                    } elseif ($pending_invoice_shipment->type == 1) {
+                        $total_returned_shipments++;
+                    } elseif ($pending_invoice_shipment->type == 3) {
+                        $total_arrival_shipments++;
+                    } else {
+                        $total_adjusted_shipments++;
+                    }
+
+                    AdminFinanceController::adjustment_logs_done(2, $pending_invoice_shipment->id, $invoice_shipment->id);
+
+                    $total_sms_charges += $pending_invoice_shipment->sms_charges;
+                    $total_charges += $pending_invoice_shipment->charges;
+                    $total_gst += $pending_invoice_shipment->gst;
+                    $total_wht += $pending_invoice_shipment->wht;
+                    $total_cod_sst += $pending_invoice_shipment->cod_sst;
+                    $total_invoice_amount += $pending_invoice_shipment->invoice_amount;
+
+                    $pending_invoice_shipment->delete();
+                }
+            }
+
+            if ($shipment_count < 1) {
+                $invoice->delete();
+            } else {
+                $invoice->invoice_number = $invoice_number;
+                $invoice->total_shipments = $total_shipments;
+                $invoice->total_delivered_shipments = $total_delivered_shipments;
+                $invoice->total_returned_shipments = $total_returned_shipments;
+                $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+                $invoice->total_arrival_shipments = $total_arrival_shipments;
+                $invoice->total_charges = $total_charges;
+                $invoice->total_gst = $total_gst;
+                $invoice->total_wht = $total_wht;
+                $invoice->cod_sst = $total_cod_sst;
+                $invoice->total_sms_charges = $total_sms_charges;
+                $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+                $invoice->save();
+
+                NotificationsController::send(27, $invoice_id);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Packaging invoice generation too, same as original generate_invoice()
+        |--------------------------------------------------------------------------
+        */
+        $packaging_invoice_toggle_on = CorporateUserPackagingInvoice::where('user_id', $user_id)
+            ->where('status', 1)
+            ->first();
+
+        if ($packaging_invoice_toggle_on && $generate) {
+            $packaging_material_requests = PackagingMaterialRequest::where('user_id', $user_id)
+                ->whereBetween('updated_at', [$billing_period_from_date, $current_date_string])
+                ->where('status_id', 4)
+                ->whereNotNull('shipment_id');
+
+            if ($packaging_material_requests->exists()) {
+                $invoice = new Invoice();
+                $invoice->user_id = $user_id;
+                $invoice->invoicing_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                $invoice->billing_period_from_date = $billing_period_from_date;
+                $invoice->billing_period_to_date = Carbon::now()->subDay()->startOfDay()->toDateString();
+                $invoice->due_date = Carbon::now()->addDays($due_date_days)->startOfDay()->toDateString();
+                $invoice->status_id = 1;
+                $invoice->invoice_type = 2;
+                $invoice->save();
+
+                $invoice_id = $invoice->id;
+                $invoice_number = $user_id . str_pad($invoice_id, 6, '0', STR_PAD_LEFT);
+
+                $total_shipments = 0;
+                $total_delivered_shipments = 0;
+                $total_arrival_shipments = 0;
+                $total_returned_shipments = 0;
+                $total_adjusted_shipments = 0;
+                $total_charges = 0;
+                $total_gst = 0;
+                $total_wht = 0;
+                $total_invoice_amount = 0;
+
+                foreach ($packaging_material_requests->get() as $packaging_material_request) {
+                    $gst = $packaging_material_request->city->zone->gst;
+
+                    $invoice_shipment = new InvoiceShipment();
+                    $invoice_shipment->created_at = $packaging_material_request->updated_at;
+                    $invoice_shipment->invoice_id = $invoice_id;
+                    $invoice_shipment->shipment_id = $packaging_material_request->shipment_id;
+                    $invoice_shipment->type = 0;
+                    $invoice_shipment->charges = $packaging_material_request->amount;
+                    $invoice_shipment->gst = round($packaging_material_request->amount * $gst);
+                    $invoice_amount = $packaging_material_request->amount + round($packaging_material_request->amount * $gst);
+                    $invoice_shipment->invoice_amount = $invoice_amount;
+                    $invoice_shipment->save();
+
+                    $total_shipments++;
+
+                    if ($invoice_shipment->type == 0) {
+                        $total_delivered_shipments++;
+                    } elseif ($invoice_shipment->type == 1) {
+                        $total_returned_shipments++;
+                    } elseif ($invoice_shipment->type == 3) {
+                        $total_arrival_shipments++;
+                    } else {
+                        $total_adjusted_shipments++;
+                    }
+
+                    $total_charges += $packaging_material_request->amount;
+                    $total_gst += round($packaging_material_request->amount * $gst);
+                    $total_invoice_amount += $invoice_amount;
+                }
+
+                $invoice->invoice_number = $invoice_number;
+                $invoice->total_shipments = $total_shipments;
+                $invoice->total_delivered_shipments = $total_delivered_shipments;
+                $invoice->total_returned_shipments = $total_returned_shipments;
+                $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+                $invoice->total_arrival_shipments = $total_arrival_shipments;
+                $invoice->total_charges = round($total_charges);
+                $invoice->total_gst = round($total_gst);
+                $invoice->total_invoice_amount = ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN);
+                $invoice->save();
+            }
         }
     }
 

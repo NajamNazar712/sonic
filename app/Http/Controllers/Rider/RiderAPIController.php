@@ -3848,7 +3848,7 @@ class RiderAPIController extends Controller
                                   
                                 } else {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                    $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                     Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
                                     $rider_delivery->audio_path = $audio_path;
                                     $rider_delivery->save();
@@ -11771,7 +11771,7 @@ class RiderAPIController extends Controller
                                             $time = Carbon::now()->toDateString();
                                             if ($environment == 'production') {
                                                 $extension = $request->file('audio')->getClientOriginalExtension();
-                                                $audio_path = 'sonic-archive/srider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                                $audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                                 Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                                 $rider_delivery->audio_path = $audio_path;
                                                 $rider_delivery->save();
@@ -12000,7 +12000,7 @@ class RiderAPIController extends Controller
 
                                         if ($request->has('audio')) {
                                             $time = Carbon::now()->toDateString();
-                                            if ($environment == 'production') {
+                                        if ($environment == 'production') {
                                                 $extension = $request->file('audio')->getClientOriginalExtension();
                                                 $audio_path = 'sonic-archive/rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
                                                 Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
@@ -13062,7 +13062,7 @@ class RiderAPIController extends Controller
                     $consignee_address = $shipment_data->consignee_address;
                     $booking_type = $shipment_data->booking_type_id;
                     $consignee_phone = $shipment_data->consignee_phone_number_1;
-                    $shipper_name = $shipment_data->user->name;
+                    $shipper_name = $shipment_data->user->brand_name ?? $shipment_data->user->name;
                     if ($shipment_data->consignee_phone_number_2 != null) {
                         $consignee_phone .= ' / ' . $shipment_data->consignee_phone_number_2;
                     }
@@ -13232,6 +13232,14 @@ class RiderAPIController extends Controller
                         }
                     } else {
                         $deliveries['delivery_otp'] = 1;
+                    }
+
+                    $deliveries['retail_shipment'] = $shipment_data->shipment_type == 2 ? 1 : 0;
+
+                    if($shipment_data->shipment_type == 2) {
+                        $deliveries['otp_sms_charged'] = $shipment_data->retail_shipment->charged_sms;
+                    } else {
+                        $deliveries['otp_sms_charged'] = 0;
                     }
 
                     $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note->id);

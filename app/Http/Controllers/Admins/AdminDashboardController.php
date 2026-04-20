@@ -10241,14 +10241,41 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                         }
                         if ($result->corporate_rate_type_id == 3) {
                             if (CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
-                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.rates.view', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.default.rates.view', ['id' => $result->id]) . '\')" type="button" class="dropdown-item">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-2"><i class="ft-plus-circle"></i></div>
+                            <div class="col-9 offset-1">View Rates</div>
+                        </div>
+                      </button>';
+                            }
+
+                            if (CorporateDefaultRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(1071, session('permissions')))) {
+                                $dropdown .= '<button type="button" class="dropdown-item switch_reimbursement_button" data-target-id="' . $result->id . '">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-2"><i class="ft-plus-circle"></i></div>
+                            <div class="col-9 offset-1">Switch To Reimbursement</div>
+                        </div>
+                      </button>';
                             }
                         } else {
                             if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(115, session('permissions')))) {
-                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates</div></button>';
+                                $dropdown .= '<button onclick="window.open(\'' . route('admin.corporate.view.rates', ['id' => $result->id]) . '\')" type="button" class="dropdown-item">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-2"><i class="ft-plus-circle"></i></div>
+                            <div class="col-9 offset-1">View Rates</div>
+                        </div>
+                      </button>';
+                            }
+
+                            if (CorporateRateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(1071, session('permissions')))) {
+                                $dropdown .= '<button type="button" class="dropdown-item switch_reimbursement_button" data-target-id="' . $result->id . '">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-2"><i class="ft-plus-circle"></i></div>
+                            <div class="col-9 offset-1">Switch To Reimbursement</div>
+                        </div>
+                      </button>';
                             }
                         }
-
                         if ((session('role_id') == 1 || in_array(115, session('permissions')))) {
                             $dropdown .= '<button type="button" class="dropdown-item rates_history" data-target-id=' . $result->id . ' rel="rates_history" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Rates History</div></button>';
                         }
