@@ -1170,8 +1170,22 @@ class ShipperShipmentBookController extends Controller
     public function check_negative_payable(Request $request){
         $user_id = session('user_id');
         $account_type = session('account_type');
+        $total_cod = $request->input('amount',0);
+        if ($account_type == 2) {
+            return 'true';
+        }
+        if (NegativePayableAllowShipperZeroCod::isAllowed($user_id)) {
+            return 'true';
+        }
 
-        if(!PendingPayment::check_negative_payable_cod($user_id,$account_type,$request->input('amount')) && !NegativePayableAllowShipperZeroCod::isAllowed($user_id)){
+        $payable = PendingPayment::current_payable_value($user_id);
+        if ($payable === null) {
+            return 'true';
+        }
+
+        $required = abs((float) $payable);
+
+        if((float) $total_cod >= (float) $required){
             return 'true';
         }else{
             return 'false';
