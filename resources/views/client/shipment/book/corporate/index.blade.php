@@ -577,7 +577,7 @@
                                                 <span class="input-group-text">Rs</span>
                                             </div>
 
-                                            <input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required" data-rule-remote="{{ route('cod.shipment.book.check_negative_payable') }}" data-msg-remote="Can not process Zero COD Shipment, due to pending negative payable amount.">
+                                            <input type="text" name="amount" id="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required" data-rule-remote="{{ route('cod.shipment.book.check_negative_payable') }}" data-msg-remote="The Cod Amount should be grater or Equal to Your Payable">
                                         </div>
                                         <div class="form-group input-group" id="try_and_buy_charges_div">
                                             <input type="text" name="try_and_buy_charges" id="try_and_buy_charges" class="form-control amount" placeholder="Try & Buy Charges*" data-rule-required="true" data-msg-required="Charges field is required" value="">

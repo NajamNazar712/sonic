@@ -34,8 +34,6 @@ class PendingPayment extends Model
                 })->where('user_id', $user_id);
 
                 if ($check->exists()) {
-
-                    // additional override permission
                     if (NegativePayableAllowShipperZeroCod::isAllowed($user_id)) {
                         return true;
                     }
@@ -52,7 +50,6 @@ class PendingPayment extends Model
         }
     }
 
-
     static function negative_payable_check($user_id,$account_type){
         if ($account_type == 2) return false;
 
@@ -67,5 +64,50 @@ class PendingPayment extends Model
             })
             ->exists();
         
+    }
+
+
+    public static function current_payable_value(int $user_id): ?float
+    {
+        $pending = self::query()
+            ->where('user_id', $user_id)
+            ->whereHas('pending_payment_calculation')
+            ->with(['pending_payment_calculation' => function ($q) {
+                $q->select('*');
+            }])
+            ->latest('id')
+            ->first();
+
+        if (!$pending || !$pending->pending_payment_calculation) {
+            return null;
+        }
+
+        return (float) $pending->pending_payment_calculation->payable;
+    }
+
+    /**
+     * NEW RULE (Bulk/Excel):
+     * - If payable is below configured negative_payable_limit, allow ONLY when:
+     *      total_cod >= abs(current_payable)
+     * - Keep NegativePayableAllowShipperZeroCod override.
+     */
+    public static function check_negative_payable_cod(int $user_id, int $account_type, float $total_cod = 0): bool
+    {
+        if ($account_type == 2) {
+            return true;
+        }
+
+        // additional override permission
+        if (NegativePayableAllowShipperZeroCod::isAllowed($user_id)) {
+            return true;
+        }
+
+        $payable = self::current_payable_value($user_id);
+        if ($payable === null) {
+            return true;
+        }
+        $required = abs((float) $payable);
+
+        return (float) $total_cod >= (float) $required;
     }
 }

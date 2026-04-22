@@ -24,9 +24,11 @@
                                     <th class="border-primary border-darken-1">Tracking Number</th>
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Expected Shipments</th>
-                                    <th class="border-primary border-darken-1">Meet Shipments</th>
+                                    <th class="border-primary border-darken-1">Arrived Shipments</th>
                                     <th class="border-primary border-darken-1">Percentage Applied</th>
                                     <th class="border-primary border-darken-1">Amount</th>
+                                    <th class="border-primary border-darken-1">Total Amount</th>
+                                    <th class="border-primary border-darken-1">Adjustment Month</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Approved/Rejected By</th>
                                     <th class="border-primary border-darken-1">Approved/Rejected Date</th>
@@ -99,6 +101,8 @@
                     {data: 'recorded_shipments', name: 'esp.recorded_shipments', class: 'align-middle recorded_shipments'},
                     {data: 'percentage_applied', name: 'esp.percentage_applied', class: 'align-middle percentage_applied'},
                     {data: 'amount', name: 'esp.amount', class: 'align-middle amount'},
+                    {data: 'total_charges', name: 'esp.total_charges', class: 'align-middle total_charges'},
+                    {data: 'applied_month', name: 'esp.applied_month', class: 'align-middle applied_month'},
                     {data: 'status', name: 'esp.status', class: 'align-middle status'},
                     {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
                     {data: 'status_updated_at', name: 'esp.status_updated_at', class: 'align-middle status_updated_at'},
@@ -133,7 +137,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.updated_by') || $(header).is('.status_updated_at') || $(header).is('.created_at') || $(header).is('.average_shipments')  || $(header).is('.recorded_shipments') || $(header).is('.amount')  || $(header).is('.percentage_applied') ) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.updated_by') || $(header).is('.status_updated_at') || $(header).is('.created_at') || $(header).is('.average_shipments')  || $(header).is('.recorded_shipments') || $(header).is('.amount')  || $(header).is('.percentage_applied')  || $(header).is('.total_charges') || $(header).is('.applied_month')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.status')){

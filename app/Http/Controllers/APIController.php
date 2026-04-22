@@ -552,7 +552,7 @@ class APIController extends Controller
 //        }
 
         // sahban bhai said service type 3,5 then disabled this below condition
-            if ($request->input('amount') == 0 && Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(1)) && !PendingPayment::check_negative_payable($user_id, $user_type['account_type_id']) && !in_array($request->input('service_type_id',1), [3,5])) {
+            if (Carbon::parse($user_type->activated_at)->lt(Carbon::now()->subDays(1)) && !PendingPayment::check_negative_payable_cod($user_id,$user_type['account_type_id'],$request->input('amount')) && !in_array($request->input('service_type_id',1), [3,5])) {
 
                 $allowed = NegativePayableAllowShipperZeroCod::isAllowed($user_id);
                 if (!$allowed) {
