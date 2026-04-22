@@ -93,21 +93,33 @@ class PendingPayment extends Model
      */
     public static function check_negative_payable_cod(int $user_id, int $account_type, float $total_cod = 0): bool
     {
+        // If the account type is 2, allow booking immediately
         if ($account_type == 2) {
             return true;
         }
 
-        // additional override permission
+        // Additional override permission (zero COD allowed in some cases)
         if (NegativePayableAllowShipperZeroCod::isAllowed($user_id)) {
             return true;
         }
 
+        // Get the current payable value
         $payable = self::current_payable_value($user_id);
+
+        // If there's no payable value (null), allow booking
         if ($payable === null) {
             return true;
         }
+
+        // If the payable is positive or zero, allow booking immediately
+        if ((float) $payable >= 0) {
+            return true;
+        }
+
+        // If the payable is negative, calculate the required COD to cover it
         $required = abs((float) $payable);
 
+        // Check if the COD amount is enough to cover the negative payable
         return (float) $total_cod >= (float) $required;
     }
 }
