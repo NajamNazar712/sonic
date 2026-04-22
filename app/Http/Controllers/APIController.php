@@ -8837,7 +8837,7 @@ class APIController extends Controller
                             $details['pickup']['brand_name'] = $pickup->pickup_brand_name;
 
                             $details['consignee']['name'] = $shipment->consignee_name;
-                            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                            $details['consignee']['phone_number_1'] = substr($shipment->consignee_phone_number_1, 0, 4) . str_repeat('X', strlen($shipment->consignee_phone_number_1) - 4);
                             $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
                             $details['consignee']['destination'] = $shipment->consignee_city->name;
                             $details['consignee']['address'] = $shipment->consignee_address;

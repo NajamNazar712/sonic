@@ -10900,10 +10900,12 @@ class GlobalSettingsController extends Controller
 
         $date_range_start = Carbon::createFromFormat('d F, Y', $request->date_range_start)->format('Y-m-d');
         $date_range_end = Carbon::createFromFormat('d F, Y', $request->date_range_end)->format('Y-m-d');
+        $old_global_percentage = null;
 
         $faf_charges = FafChargesGlobal::orderby('id','desc');
         if($faf_charges->exists()) {
             $faf_charges = $faf_charges->first();
+            $old_global_percentage = $faf_charges->faf_charges;
             $faf_charges_history =  new FafChargesGlobalHistory();
             $faf_charges_history->faf_charges = $faf_charges->faf_charges;
             $faf_charges_history->date_range_start = $faf_charges->date_range_start;
@@ -10919,7 +10921,12 @@ class GlobalSettingsController extends Controller
         $faf_charges->admin_id = Auth::user()->id;
         $faf_charges->save();
 
-
+        if (!is_null($old_global_percentage)) {
+            FafCharges::where('percentage', $old_global_percentage)->update([
+                'percentage' => $applied_faf_charges,
+                'updated_at' => now(),
+            ]);
+        }
 
         return redirect()->back()->with('success', 'FaF Percent Updated !!!');
 

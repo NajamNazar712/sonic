@@ -1167,7 +1167,7 @@ class AdminFinanceController extends Controller
         }
 
         //------x-------x------------x------TO-6827---------x----------x-----------
-        $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
+        $adminId = 989;  //if admin is [Trax04800 Marib Ali (TO-7355)]
 
         if(!App::environment('production'))
         {
@@ -16144,7 +16144,7 @@ class AdminFinanceController extends Controller
                 $revert_status_request_log->save();
 
                 //----------x---------x-----------TO-6827--------x------------x--------x
-                $adminId = 3364;//if admin is [Trax12195 Syed Muhammad Raza Naqvi (TO-6827)]
+                $adminId = 989;  //if admin is [Trax04800 Marib Ali (TO-7355)]
                 if(!App::environment('production'))
                 {
                     $adminId = 3335;//if admin is 3335 for testing in staging environment

@@ -61,6 +61,7 @@
                                         <th class="border-primary border-darken-1">Account Type</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">Expected Shipments</th>
+                                        <th class="border-primary border-darken-1">FAF Percentage</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         {{-- <th class="border-primary border-darken-1">Address</th> --}}
                                         <th class="border-primary border-darken-1">Zone</th>
@@ -640,6 +641,8 @@
                                 <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
                                 <input type="checkbox" name="faf_charges_checkbox" id="faf_charges_checkbox" class="switchery faf_charges_checkbox" data-size="sm" data-switchery="true">
                                 <label for="" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+
+                                <input type="text" class="form-control" placeholder="FAF Percentage" name="faf_percentage" id="faf_percentage" data-rule-required="true" data-msg-required="Required">
                             </div>
                         </div>
                     </div>
@@ -1250,6 +1253,7 @@ function checkboxStatus() {
                         head.push('Account Type');
                         head.push('Company Name');
                         head.push('Expected Shipments');
+                        head.push('FAF Percentage');
                         head.push('Contact Person');
                         //head.push('Address');
                         head.push('Zone');
@@ -1315,6 +1319,7 @@ function checkboxStatus() {
                                 return tempElement.value;
                             })());
                             row.push(values.average_shipments);
+                            row.push(values.faf_percentage);
                             row.push(values.poc);
                             //row.push(values.address);
                             row.push(values.zone);
@@ -1940,6 +1945,8 @@ function checkboxStatus() {
                 {data: 'account_type', name: 'at.name', class: 'align-middle account_type'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
                 {data: 'average_shipments', name: 'users.average_shipments', class: 'align-middle average_shipments'},
+                {data: 'percentage', name: 'faf_charges.percentage', class: 'align-middle percentage'},
+
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
                 //{data: 'address', name: 'users.address', class: 'align-middle address'},
                 {data: 'zone', name: 'z.name', class: 'align-middle zone'},
@@ -3358,6 +3365,7 @@ function checkboxStatus() {
                             $('#faf_charges_checkbox').prop('checked',false);
                             if (data.status == 1) {
                                 $('#faf_charges_checkbox').click();
+                                $('#faf_percentage').val(data.percentage);
                             }
                             $('#faf_charges_user_id').val(id);
                             $('#faf_charges_modal').modal('show');
@@ -3445,6 +3453,27 @@ function checkboxStatus() {
             }
         });
         $('#exp_shipment_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            normalizer: function(value) {
+                return $.trim(value);
+            },
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+            submitHandler: function(form) {
+                swal({
+                    title: 'Please Wait!',
+                    text: 'Its being updated!',
+                    icon: 'info',
+                    buttons: false,
+                    closeOnClickOutside: false,
+                    closeOnEsc: false
+                });
+                form.submit();
+            }
+        });
+        $('#faf_charges_form').validate({
             errorClass: 'danger',
             successClass: 'success',
             normalizer: function(value) {
