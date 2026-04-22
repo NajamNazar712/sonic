@@ -1167,27 +1167,43 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public function check_negative_payable(Request $request){
+    public function check_negative_payable(Request $request)
+    {
         $user_id = session('user_id');
         $account_type = session('account_type');
-        $total_cod = $request->input('amount',0);
+        $total_cod = $request->input('amount', 0);
+
+        // Allow booking if the account type is 2
         if ($account_type == 2) {
             return 'true';
         }
+
+        // Allow booking if it's allowed for the shipper to have zero COD
         if (NegativePayableAllowShipperZeroCod::isAllowed($user_id)) {
             return 'true';
         }
 
+        // Fetch the current payable value for the user
         $payable = PendingPayment::current_payable_value($user_id);
+
+        // If payable is null (no payable amount), allow booking
         if ($payable === null) {
             return 'true';
         }
 
+        // If the payable is positive or zero, allow booking immediately
+        if ((float) $payable >= 0) {
+            return 'true';
+        }
+
+        // If payable is negative, check if COD amount covers the negative payable
         $required = abs((float) $payable);
 
-        if((float) $total_cod >= (float) $required){
+        // If the COD amount is greater than or equal to the required amount, allow booking
+        if ((float) $total_cod >= $required) {
             return 'true';
-        }else{
+        } else {
+            // Otherwise, deny booking
             return 'false';
         }
     }
