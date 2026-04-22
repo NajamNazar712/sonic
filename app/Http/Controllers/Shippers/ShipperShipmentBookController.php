@@ -1167,44 +1167,54 @@ class ShipperShipmentBookController extends Controller
         }
     }
 
-    public function check_negative_payable(Request $request)
-    {
+//    public function check_negative_payable(Request $request)
+//    {
+//        $user_id = session('user_id');
+//        $account_type = session('account_type');
+//        $total_cod = $request->input('amount', 0);
+//
+//        // Allow booking if the account type is 2
+//        if ($account_type == 2) {
+//            return 'true';
+//        }
+//
+//        // Allow booking if it's allowed for the shipper to have zero COD
+//        if (NegativePayableAllowShipperZeroCod::isAllowed($user_id)) {
+//            return 'true';
+//        }
+//
+//        // Fetch the current payable value for the user
+//        $payable = PendingPayment::current_payable_value($user_id);
+//
+//        // If payable is null (no payable amount), allow booking
+//        if ($payable === null) {
+//            return 'true';
+//        }
+//
+//        // If the payable is positive or zero, allow booking immediately
+//        if ((float) $payable >= 0) {
+//            return 'true';
+//        }
+//
+//        // If payable is negative, check if COD amount covers the negative payable
+//        $required = abs((float) $payable);
+//
+//        // If the COD amount is greater than or equal to the required amount, allow booking
+//        if ((float) $total_cod >= $required) {
+//            return 'true';
+//        } else {
+//            // Otherwise, deny booking
+//            return 'false';
+//        }
+//    }
+
+    public function check_negative_payable(Request $request){
         $user_id = session('user_id');
         $account_type = session('account_type');
-        $total_cod = $request->input('amount', 0);
-
-        // Allow booking if the account type is 2
-        if ($account_type == 2) {
-            return 'true';
-        }
-
-        // Allow booking if it's allowed for the shipper to have zero COD
-        if (NegativePayableAllowShipperZeroCod::isAllowed($user_id)) {
-            return 'true';
-        }
-
-        // Fetch the current payable value for the user
-        $payable = PendingPayment::current_payable_value($user_id);
-
-        // If payable is null (no payable amount), allow booking
-        if ($payable === null) {
-            return 'true';
-        }
-
-        // If the payable is positive or zero, allow booking immediately
-        if ((float) $payable >= 0) {
-            return 'true';
-        }
-
-        // If payable is negative, check if COD amount covers the negative payable
-        $required = abs((float) $payable);
-
-        // If the COD amount is greater than or equal to the required amount, allow booking
-        if ((float) $total_cod >= $required) {
-            return 'true';
-        } else {
-            // Otherwise, deny booking
+        if($request->input('amount') == 0 && !PendingPayment::check_negative_payable($user_id,$account_type) && !NegativePayableAllowShipperZeroCod::isAllowed($user_id)){
             return 'false';
+        }else{
+            return 'true';
         }
     }
 
@@ -3203,6 +3213,7 @@ class ShipperShipmentBookController extends Controller
         $user_id = session('user_id');
         $account_type = session('account_type');
         $bulk_total_cod = 0.0;
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
 
         $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
         ->where('id', Session::get('substitute_user_id'))
@@ -3227,9 +3238,16 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
-        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use ($user_id, $account_type, &$bulk_total_cod) {
+//        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use ($user_id, $account_type, &$bulk_total_cod) {
+//
+//            return PendingPayment::check_negative_payable_cod((int)$user_id, (int)$account_type, (float)$bulk_total_cod);
+//        });
 
-            return PendingPayment::check_negative_payable_cod((int)$user_id, (int)$account_type, (float)$bulk_total_cod);
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
+            }
+            return true;
         });
 
 
@@ -6315,6 +6333,8 @@ class ShipperShipmentBookController extends Controller
         $user_id = session('user_id');
         $account_type = session('account_type');
         $bulk_total_cod = 0.0;
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
+
 
         $substitute_user_pickup_address = SubstituteUser::where('user_id', $user_id)
         ->where('id', Session::get('substitute_user_id'))
@@ -6340,9 +6360,16 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
-        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use ($user_id, $account_type, &$bulk_total_cod) {
+//        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use ($user_id, $account_type, &$bulk_total_cod) {
+//
+//            return PendingPayment::check_negative_payable_cod((int)$user_id, (int)$account_type, (float)$bulk_total_cod);
+//        });
 
-            return PendingPayment::check_negative_payable_cod((int)$user_id, (int)$account_type, (float)$bulk_total_cod);
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
+            }
+            return true;
         });
 
         Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
@@ -8383,11 +8410,19 @@ class ShipperShipmentBookController extends Controller
         $user_id = session('user_id');
         $account_type = session('account_type');
         $bulk_total_cod = 0.0;
+        $pending_payable = PendingPayment::check_negative_payable($user_id,$account_type);
 
-        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use ($user_id, $account_type, &$bulk_total_cod) {
-
-            return PendingPayment::check_negative_payable_cod((int)$user_id, (int)$account_type, (float)$bulk_total_cod);
+        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use($pending_payable) {
+            if ($value == 0) {
+                return $pending_payable;
+            }
+            return true;
         });
+
+//        Validator::extend('negative_balance', function ($attribute, $value, $parameters) use ($user_id, $account_type, &$bulk_total_cod) {
+//
+//            return PendingPayment::check_negative_payable_cod((int)$user_id, (int)$account_type, (float)$bulk_total_cod);
+//        });
 
         $names = [
             'service_type_id' => 'Service Type ID',
