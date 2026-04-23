@@ -1767,6 +1767,111 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
+    public function shipment_validate(Request $request)
+    {
+        // Feature: pre-booking-consignee-validation
+        // Read-only endpoint — no shipment creation, no side effects.
+
+        $consignee_phone_number_1 = $request->input('consignee_phone_number_1', '');
+
+        // Replicate the same conditional phone_number validator used in shipment_book
+        if (preg_match('/^(92|03)\d+/', $consignee_phone_number_1)) {
+            Validator::extend('phone_number', function ($attribute, $value, $parameters) {
+                if ($value) {
+                    $value = $this->phone_number($value);
+                    return (bool) preg_match('/^((\+92)|(92)|(0092))-{0,1}\d{10}$|^03\d{9}$/', $value);
+                }
+                return false;
+            });
+        } else {
+            Validator::extend('phone_number', function ($attribute, $value, $parameters) {
+                if ($value) {
+                    $value = $this->phone_number($value);
+                    return (bool) preg_match('/^\d+$/', $value);
+                }
+                return false;
+            });
+        }
+
+        $rules = [
+            'consignee_city_id'        => ['required', 'integer', 'exists:cities,id'],
+            'consignee_name'           => ['required', 'string', 'between:1,100'],
+            'consignee_address'        => ['required', 'between:1,255'],
+            'consignee_phone_number_1' => ['required', 'phone_number'],
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 1,
+                'message' => 'Error(s) in Input',
+                'errors'  => $validator->errors(),
+            ]);
+        }
+
+        $consignee_city_id    = $request->input('consignee_city_id');
+        $consignee_address    = $request->input('consignee_address');
+
+        // --- NSA check ---
+        $nsa_keywords = NonServiceArea::pluck('name')->toArray();
+        $msg_string   = null;
+        $str_arr      = preg_split("/[ ,]+/", $consignee_address);
+        foreach ($nsa_keywords as $nsa) {
+            foreach ($str_arr as $arr_value) {
+                if (strtolower($nsa) == strtolower($arr_value)) {
+                    $msg_string = $msg_string !== null ? $msg_string . ', ' . $arr_value : $arr_value;
+                }
+            }
+        }
+
+        // --- BDMK check ---
+        $check_bdmk = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
+            ->where('bdm.status', 1)
+            ->select(['booking_destination_mapping_keywords.keyword'])
+            ->pluck('keyword')
+            ->toArray();
+        $bdmk_error     = null;
+        $consignee_city = City::find($consignee_city_id);
+        $bdmk_result    = $this->check_bdmk($consignee_city->id, $consignee_address, $check_bdmk, $consignee_city->name);
+        if (isset($bdmk_result['invalid_cities'])) {
+            $bdmk_error = $bdmk_result['invalid_cities'];
+        }
+
+        // --- Blacklist check ---
+        $blacklist_message       = null;
+        $consignee_information   = ConsigneeInformation::where('phone', $consignee_phone_number_1);
+        if ($consignee_information->exists()) {
+            $consignee_information = $consignee_information->first();
+            $blacklist = BlacklistedConsignee::where('consignee_information_id', $consignee_information->id);
+            if ($blacklist->exists()) {
+                $blacklist             = $blacklist->first();
+                $blacklist_setting     = BlacklistSetting::find($blacklist->blacklist_setting_id);
+                if ($blacklist_setting) {
+                    $blacklist_message = $blacklist_setting->message;
+                }
+            }
+        }
+
+        // --- Assemble response ---
+        $response = ['status' => 0, 'message' => 'Consignee validated successfully'];
+
+        if ($msg_string !== null) {
+            $response['non_service_area'] = 'A Possible Address Anomaly: ' . $msg_string . ' Detected! In case of, Out Of Service Area: Additional charges may apply and Non Service Area: Shipment may be returned. For assistance, Call: 021-38772222.';
+        }
+        if ($blacklist_message !== null) {
+            $response['blacklisted_consignee'] = $blacklist_message;
+        }
+        if (!empty($bdmk_error)) {
+            $response['bdmk_message'] = $bdmk_error;
+        }
+
+        if (isset($response['non_service_area']) || isset($response['blacklisted_consignee']) || isset($response['bdmk_message'])) {
+            $response['message'] = 'Consignee validated with warnings';
+        }
+
+        return response()->json($response);
+    }
+
     public function shipment_book_international(Request $request)
     {
         $user_id = $request->user_id;
