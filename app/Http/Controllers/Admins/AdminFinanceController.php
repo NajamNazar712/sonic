@@ -6732,7 +6732,8 @@ class AdminFinanceController extends Controller
                     ->where('wu.substitute_user_id', '0');
             })
             ->leftjoin('territories as t', 't.id', '=', 'u.territory_id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user', 'wu.finova_account_type as wallet_finance','t.name as territory','ppc.cod_sst as total_cod_sst','r.name as region')
+            ->leftjoin('admins as ah', 'ah.id', '=', 'pending_payments.hold_by')
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges','u.payment_cycle_days as payment_cycle_days', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'pc.id as payment_cycle_id','u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status', 'u.id as user_id', 'ppc.sms_charges as total_sms_charges', 'wu.id as wallet_user', 'wu.finova_account_type as wallet_finance','t.name as territory','ppc.cod_sst as total_cod_sst','r.name as region' , 'pending_payments.is_hold as hold_status', 'pending_payments.hold_at as hold_date', 'ah.name as hold_by')
             ->where(function($query){
                 $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
                 if (!empty($idsToExclude)) {
@@ -7006,6 +7007,14 @@ class AdminFinanceController extends Controller
             // })
             ->editColumn('total_payable', function ($pending_payment) {
                 return number_format(ROUND($pending_payment->total_payable, 0, PHP_ROUND_HALF_DOWN));
+            })
+            ->editColumn('hold_status', function ($pending_payment) {
+                if($pending_payment->hold_status == 1) {
+                    return 'Hold';
+                } else if($pending_payment->hold_status == 0) {
+                    return 'Un-Hold';
+                }
+              
             })
             ->addColumn('phone_numbers', function ($pending_payment) {
                 $phone_numbers = $pending_payment->phone;

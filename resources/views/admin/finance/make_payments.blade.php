@@ -212,6 +212,9 @@
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
 
                                         <th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
+                                        <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Status Date</th>
+                                        <th class="border-primary border-darken-1">Status Updated By</th>
                                         <th class="border-primary border-darken-1"></th>
                                     </tr>
                                 </thead>
@@ -786,6 +789,7 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.finance.make_payments.list') }}',
                         data: params,
+                        method: 'POST',
                         success: function(result) {
                             console.log(result)
                             head = [];
@@ -821,6 +825,9 @@
                             head.push('Payment Cycle');
                             head.push('Payment Cycle Days');
                             head.push('Return Shipments Avg. Aging');
+                            head.push('Status');
+                            head.push('Status Date');
+                            head.push('Status Updated By');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 
@@ -856,7 +863,9 @@
                                 row.push(values.payment_cycle);
                                 row.push(values.payment_cycle_days);
                                 row.push(values.return_shipments_average_aging);
-
+                                row.push(values.hold_status);
+                                row.push(values.hold_date);
+                                row.push(values.hold_by);
                                 body.push(row);
                             });
                         },
@@ -1142,7 +1151,9 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.finance.make_payments.list') }}',
+                    method: 'POST',
                     data: function(d) {
+                        d._token = '{{ csrf_token() }}'; 
                         d.payment_filter = $('#payment_cycle_filter_form select.payment_cycle_filter')
                             .val();
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
@@ -1344,6 +1355,21 @@
                         name: 'return_shipments_average_aging',
                         class: 'align-middle text-center return_shipments_average_aging',
                         orderable: false
+                    },
+                    {
+                        data: 'hold_status',
+                        name: 'pending_payments.is_hold',
+                        class: 'align-middle text-center hold_status'
+                    },
+                    {
+                        data: 'hold_date',
+                        name: 'pending_payments.hold_at',
+                        class: 'align-middle text-center hold_date'
+                    },
+                    {
+                        data: 'hold_by',
+                        name: 'ah.name',
+                        class: 'align-middle text-center hold_by'
                     },
                     {
                         data: 'action',
