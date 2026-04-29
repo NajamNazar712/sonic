@@ -50,20 +50,21 @@
 											@foreach($modules as $module)
 												@if($module->id != 18)
 													@php
-														$moduleHasPermission = count(array_intersect($module->permissions->pluck('id')->toArray(), $permissions)) > 0;
+														$modulePermCount = count(array_intersect($module->permissions->pluck('id')->toArray(), $permissions));
+														$moduleHasPermission = $modulePermCount > 0;
 													@endphp
 													@if ($loop->first)
 														<a class="nav-link rounded-0 active {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">
 															{{ $module->name }}
 															@if($moduleHasPermission)
-																<span class="badge badge-success float-right">✓</span>
+																<span class="badge badge-primary float-right">{{ $modulePermCount }}</span>
 															@endif
 														</a>
 													@else
 														<a class="nav-link rounded-0 {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">
 															{{ $module->name }}
 															@if($moduleHasPermission)
-																<span class="badge badge-success float-right">✓</span>
+																<span class="badge badge-primary float-right">{{ $modulePermCount }}</span>
 															@endif
 														</a>
 													@endif
@@ -156,23 +157,23 @@
 	<style>
 		/* Highlight sidebar modules that have at least one permission enabled */
 		.nav-pills .nav-link.module-has-permissions {
-			background-color: #e8f5e9 !important;
-			border-left: 4px solid #28a745 !important;
-			color: #155724 !important;
+			background-color: #e8f0fe !important;
+			border-left: 4px solid #007bff !important;
+			color: #004085 !important;
 			font-weight: 600;
 		}
 		.nav-pills .nav-link.module-has-permissions.active {
-			background-color: #28a745 !important;
-			border-left: 4px solid #1e7e34 !important;
+			background-color: #007bff !important;
+			border-left: 4px solid #0056b3 !important;
 			color: #fff !important;
 		}
-		.nav-pills .nav-link.module-has-permissions .badge-success {
-			background-color: #28a745;
+		.nav-pills .nav-link.module-has-permissions .badge-primary {
+			background-color: #007bff;
 			font-size: 0.75rem;
 		}
-		.nav-pills .nav-link.module-has-permissions.active .badge-success {
+		.nav-pills .nav-link.module-has-permissions.active .badge-primary {
 			background-color: #fff;
-			color: #28a745;
+			color: #007bff;
 		}
 	</style>
 @endsection
