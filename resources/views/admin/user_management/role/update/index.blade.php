@@ -58,14 +58,14 @@
 														<a class="nav-link rounded-0 active {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">
 															{{ $module->name }}
 															@if($moduleHasPermission)
-																<span class="badge badge-primary float-right">{{ $modulePermCount }}/{{ $moduleTotalCount }}</span>
+																<span class="badge badge-primary">{{ $modulePermCount }}/{{ $moduleTotalCount }}</span>
 															@endif
 														</a>
 													@else
 														<a class="nav-link rounded-0 {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">
 															{{ $module->name }}
 															@if($moduleHasPermission)
-																<span class="badge badge-primary float-right">{{ $modulePermCount }}/{{ $moduleTotalCount }}</span>
+																<span class="badge badge-primary">{{ $modulePermCount }}/{{ $moduleTotalCount }}</span>
 															@endif
 														</a>
 													@endif
@@ -157,6 +157,11 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 	<style>
 		/* Highlight sidebar modules that have at least one permission enabled */
+		.nav-pills .nav-link {
+			display: flex !important;
+			justify-content: space-between;
+			align-items: center;
+		}
 		.nav-pills .nav-link.module-has-permissions {
 			background-color: #eaf2f8 !important;
 			border-left: 4px solid #64a0d2 !important;
@@ -171,6 +176,8 @@
 		.nav-pills .nav-link.module-has-permissions .badge-primary {
 			background-color: #64a0d2;
 			font-size: 0.75rem;
+			margin-left: 4px;
+			flex-shrink: 0;
 		}
 		.nav-pills .nav-link.module-has-permissions.active .badge-primary {
 			background-color: #fff;
