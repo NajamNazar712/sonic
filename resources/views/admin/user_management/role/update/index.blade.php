@@ -57,16 +57,12 @@
 													@if ($loop->first)
 														<a class="nav-link rounded-0 active {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">
 															{{ $module->name }}
-															@if($moduleHasPermission)
-																<span class="badge badge-primary">{{ $modulePermCount }}/{{ $moduleTotalCount }}</span>
-															@endif
+															<span class="badge badge-primary">{{ $modulePermCount }} / {{ $moduleTotalCount }}</span>
 														</a>
 													@else
 														<a class="nav-link rounded-0 {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">
 															{{ $module->name }}
-															@if($moduleHasPermission)
-																<span class="badge badge-primary">{{ $modulePermCount }}/{{ $moduleTotalCount }}</span>
-															@endif
+															<span class="badge badge-primary">{{ $modulePermCount }} / {{ $moduleTotalCount }}</span>
 														</a>
 													@endif
 												@endif
@@ -173,15 +169,20 @@
 			border-left: 4px solid #4a86bb !important;
 			color: #fff !important;
 		}
-		.nav-pills .nav-link.module-has-permissions .badge-primary {
+		.nav-pills .nav-link .badge-primary {
 			background-color: #64a0d2;
 			font-size: 0.75rem;
 			margin-left: 4px;
 			flex-shrink: 0;
 		}
-		.nav-pills .nav-link.module-has-permissions.active .badge-primary {
+		.nav-pills .nav-link.active .badge-primary {
 			background-color: #fff;
 			color: #64a0d2;
+		}
+		/* Muted badge for 0/total modules */
+		.nav-pills .nav-link:not(.module-has-permissions) .badge-primary {
+			background-color: #b0bec5 !important;
+			color: #fff !important;
 		}
 	</style>
 @endsection
