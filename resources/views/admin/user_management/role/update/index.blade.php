@@ -157,23 +157,23 @@
 	<style>
 		/* Highlight sidebar modules that have at least one permission enabled */
 		.nav-pills .nav-link.module-has-permissions {
-			background-color: #e8f0fe !important;
-			border-left: 4px solid #007bff !important;
-			color: #004085 !important;
+			background-color: #eaf2f8 !important;
+			border-left: 4px solid #64a0d2 !important;
+			color: #2c5f8a !important;
 			font-weight: 600;
 		}
 		.nav-pills .nav-link.module-has-permissions.active {
-			background-color: #007bff !important;
-			border-left: 4px solid #0056b3 !important;
+			background-color: #64a0d2 !important;
+			border-left: 4px solid #4a86bb !important;
 			color: #fff !important;
 		}
 		.nav-pills .nav-link.module-has-permissions .badge-primary {
-			background-color: #007bff;
+			background-color: #64a0d2;
 			font-size: 0.75rem;
 		}
 		.nav-pills .nav-link.module-has-permissions.active .badge-primary {
 			background-color: #fff;
-			color: #007bff;
+			color: #64a0d2;
 		}
 	</style>
 @endsection
