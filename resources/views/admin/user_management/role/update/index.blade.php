@@ -49,10 +49,23 @@
 										<div class="nav flex-column nav-pills border-info rounded-0" role="tablist" aria-orientation="vertical">
 											@foreach($modules as $module)
 												@if($module->id != 18)
+													@php
+														$moduleHasPermission = count(array_intersect($module->permissions->pluck('id')->toArray(), $permissions)) > 0;
+													@endphp
 													@if ($loop->first)
-														<a class="nav-link rounded-0 active" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">{{ $module->name }}</a>
+														<a class="nav-link rounded-0 active {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">
+															{{ $module->name }}
+															@if($moduleHasPermission)
+																<span class="badge badge-success float-right">✓</span>
+															@endif
+														</a>
 													@else
-														<a class="nav-link rounded-0" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">{{ $module->name }}</a>
+														<a class="nav-link rounded-0 {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">
+															{{ $module->name }}
+															@if($moduleHasPermission)
+																<span class="badge badge-success float-right">✓</span>
+															@endif
+														</a>
 													@endif
 												@endif
 											@endforeach
@@ -140,6 +153,28 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+	<style>
+		/* Highlight sidebar modules that have at least one permission enabled */
+		.nav-pills .nav-link.module-has-permissions {
+			background-color: #e8f5e9 !important;
+			border-left: 4px solid #28a745 !important;
+			color: #155724 !important;
+			font-weight: 600;
+		}
+		.nav-pills .nav-link.module-has-permissions.active {
+			background-color: #28a745 !important;
+			border-left: 4px solid #1e7e34 !important;
+			color: #fff !important;
+		}
+		.nav-pills .nav-link.module-has-permissions .badge-success {
+			background-color: #28a745;
+			font-size: 0.75rem;
+		}
+		.nav-pills .nav-link.module-has-permissions.active .badge-success {
+			background-color: #fff;
+			color: #28a745;
+		}
+	</style>
 @endsection
 
 @section('js')
