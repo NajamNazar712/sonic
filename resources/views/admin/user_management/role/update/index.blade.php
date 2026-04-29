@@ -50,6 +50,7 @@
 											@foreach($modules as $module)
 												@if($module->id != 18)
 													@php
+														$moduleTotalCount = $module->permissions->count();
 														$modulePermCount = count(array_intersect($module->permissions->pluck('id')->toArray(), $permissions));
 														$moduleHasPermission = $modulePermCount > 0;
 													@endphp
@@ -57,14 +58,14 @@
 														<a class="nav-link rounded-0 active {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">
 															{{ $module->name }}
 															@if($moduleHasPermission)
-																<span class="badge badge-primary float-right">{{ $modulePermCount }}</span>
+																<span class="badge badge-primary float-right">{{ $modulePermCount }}/{{ $moduleTotalCount }}</span>
 															@endif
 														</a>
 													@else
 														<a class="nav-link rounded-0 {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">
 															{{ $module->name }}
 															@if($moduleHasPermission)
-																<span class="badge badge-primary float-right">{{ $modulePermCount }}</span>
+																<span class="badge badge-primary float-right">{{ $modulePermCount }}/{{ $moduleTotalCount }}</span>
 															@endif
 														</a>
 													@endif
