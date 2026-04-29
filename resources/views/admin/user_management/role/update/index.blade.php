@@ -49,10 +49,21 @@
 										<div class="nav flex-column nav-pills border-info rounded-0" role="tablist" aria-orientation="vertical">
 											@foreach($modules as $module)
 												@if($module->id != 18)
+													@php
+														$moduleTotalCount = $module->permissions->count();
+														$modulePermCount = count(array_intersect($module->permissions->pluck('id')->toArray(), $permissions));
+														$moduleHasPermission = $modulePermCount > 0;
+													@endphp
 													@if ($loop->first)
-														<a class="nav-link rounded-0 active" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">{{ $module->name }}</a>
+														<a class="nav-link rounded-0 active {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="true">
+															{{ $module->name }}
+															<span class="badge badge-primary">{{ $modulePermCount }} / {{ $moduleTotalCount }}</span>
+														</a>
 													@else
-														<a class="nav-link rounded-0" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">{{ $module->name }}</a>
+														<a class="nav-link rounded-0 {{ $moduleHasPermission ? 'module-has-permissions' : '' }}" id="module_{{ $module->id }}_tab" data-toggle="pill" href="#module_{{ $module->id }}_tabpanel" role="tab" aria-controls="module_{{ $module->id }}_tabpanel" aria-selected="false">
+															{{ $module->name }}
+															<span class="badge badge-primary">{{ $modulePermCount }} / {{ $moduleTotalCount }}</span>
+														</a>
 													@endif
 												@endif
 											@endforeach
@@ -140,6 +151,40 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+	<style>
+		/* Highlight sidebar modules that have at least one permission enabled */
+		.nav-pills .nav-link {
+			display: flex !important;
+			justify-content: space-between;
+			align-items: center;
+		}
+		.nav-pills .nav-link.module-has-permissions {
+			background-color: #eaf2f8 !important;
+			border-left: 4px solid #64a0d2 !important;
+			color: #2c5f8a !important;
+			font-weight: 600;
+		}
+		.nav-pills .nav-link.module-has-permissions.active {
+			background-color: #64a0d2 !important;
+			border-left: 4px solid #4a86bb !important;
+			color: #fff !important;
+		}
+		.nav-pills .nav-link .badge-primary {
+			background-color: #64a0d2;
+			font-size: 0.75rem;
+			margin-left: 4px;
+			flex-shrink: 0;
+		}
+		.nav-pills .nav-link.active .badge-primary {
+			background-color: #fff;
+			color: #64a0d2;
+		}
+		/* Muted badge for 0/total modules */
+		.nav-pills .nav-link:not(.module-has-permissions) .badge-primary {
+			background-color: #b0bec5 !important;
+			color: #fff !important;
+		}
+	</style>
 @endsection
 
 @section('js')
