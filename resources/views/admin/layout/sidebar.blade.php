@@ -2301,6 +2301,11 @@
                                         <li><a class="menu-item"
                                                    href="{{ route('admin.settings.t_payment_exclude_shippers.index') }}">T Payment Exclude Shippers</a></li>
                                         @endif
+
+                                         @if (session('role_id') == 1 || in_array(1073, session('permissions')))
+                                        <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.t_payment_cash_shippers.index') }}">T Payment Cash Shippers</a></li>
+                                        @endif
                                 </ul>
 
                             </li>

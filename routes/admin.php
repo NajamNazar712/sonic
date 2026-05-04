@@ -3050,6 +3050,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\Settings\GeneralSettingController@t_payment_exclude_shippers_index')->name('index');
             Route::post('', 'Admins\Settings\GeneralSettingController@t_payment_exclude_shippers_store')->name('store');
         });
+        Route::prefix('t_payment_cash_shippers')->name('t_payment_cash_shippers.')->group(function () {
+            Route::get('', 'Admins\Settings\GeneralSettingController@t_payment_cash_shippers_index')->name('index');
+            Route::post('', 'Admins\Settings\GeneralSettingController@t_payment_cash_shippers_store')->name('store');
+        });
 
         Route::prefix('invoice_against_return_delivered_shipper')->name('invoice_against_return_delivered_shipper.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_index')->name('index');

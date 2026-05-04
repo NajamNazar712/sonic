@@ -491,5 +491,51 @@ class GeneralSettingController extends Controller
         }
     }
 
+     public function t_payment_cash_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 849);
+        $users = User::select('users.id', 'users.name')
+        ->leftjoin('wallet_users as wu', 'wu.user_id', 'users.id')
+        ->where('users.status',3 )
+        ->where('blacklist', 0)
+        ->whereNull('wu.user_id')
+        ->get();
+
+        $settings = GlobalSettings::where('type', 't_payment_cash_shippers');
+        $value = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $value = array_map('intval', explode(',', $settings->text));
+        }
+        return view('admin.settings.t_payment_cash')->with(['users' => $users, 't_payment_cash_shippers' => $value]);
+    }
+
+    public function t_payment_cash_shippers_store(Request $request)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 850);
+        if ($request->has('users')) {
+
+            if (count($request->users) > 0) {
+                $users = implode(',', $request->users);
+
+                $settings = GlobalSettings::where('type', 't_payment_cash_shippers');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 't_payment_cash_shippers';
+                    $settings->setting_value = 1;
+                }
+                $settings->text = $users;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
     
 }

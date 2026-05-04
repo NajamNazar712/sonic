@@ -10,6 +10,7 @@ use App\Http\Models\PendingPayment;
 use App\Http\Models\WalletUser;
 use App\Models\TPaymentCycle;
 use Carbon\Carbon;
+use App\Http\Models\Shipper\User;
 
 class NonWalletMakeToDonePayment extends Command
 {
@@ -45,16 +46,28 @@ class NonWalletMakeToDonePayment extends Command
         $excludedUserIds = GlobalSettings::where('type', 't_payment_exclude_shippers')->first()->text ?? '';
         $excludedUserIds = array_filter(explode(',', $excludedUserIds));
 
+        $cashShipperIds = GlobalSettings::where('type', 't_payment_cash_shippers')->first()->text ?? '';
+        $cashShipperIds = array_filter(explode(',', $cashShipperIds));
+
         $walletUserIds = WalletUser::pluck('user_id')->toArray();
 
         $pending_payments = PendingPayment::where('is_hold', 0)
             ->whereNotIn('user_id', $excludedUserIds)
             ->whereNotIn('user_id', $walletUserIds)
             ->get();
-        
+
 
         foreach ($pending_payments as $pending_payment) {
             $user_id = $pending_payment->user_id;
+
+            $user = User::select('id', 'payment_cycle_id', 'payment_cycle_days', 'created_at')
+                ->find($user_id);
+
+            // Check whether today matches user's payment cycle
+            if (!$this->shouldRunPaymentToday($user, $today)) {
+                $this->info("Skipped user_id: {$user_id} | payment cycle does not match today");
+                continue;
+            }
 
             $tCycle = TPaymentCycle::where('user_id', $user_id)->first();
 
@@ -74,9 +87,10 @@ class NonWalletMakeToDonePayment extends Command
 
             $pending_payment_shipment_ids = $filteredShipments->pluck('id')->toArray();
             if (count($pending_payment_shipment_ids) > 0) {
+                $companyBankId = in_array($user_id, $cashShipperIds) ? 47 : 29;
                 $request = new Request([
                     'pending_payment_shipment_ids' => implode(',', $pending_payment_shipment_ids),
-                    'company_bank_id' => 29,
+                    'company_bank_id' => $companyBankId,
                 ]);
     
                 $controller = new AdminFinanceController;
@@ -121,5 +135,95 @@ class NonWalletMakeToDonePayment extends Command
 
         // Set to end of that day so all shipments created on that day are included
         return $date->endOfDay();
+    }
+
+    private function matchesMonthDays(Carbon $today, array $monthDays): bool
+    {
+        if (count($monthDays) === 0) {
+            return false;
+        }
+
+        foreach ($monthDays as $day) {
+            if ($today->day === (int) $day) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    private function shouldRunPaymentToday(User $user, Carbon $today): bool
+    {
+        $cycleId = (int) $user->payment_cycle_id;
+        $rawDays = trim((string) $user->payment_cycle_days);
+
+        switch ($cycleId) {
+            case 1: // Daily
+                return true;
+
+            case 2: // Weekly
+            case 4: // Twice a week
+            case 5: // Thrice a week
+                $weekDays = $this->parseWeekDays($rawDays);
+                return in_array($today->dayOfWeekIso, $weekDays, true);
+
+            case 3: // Monthly => like 7
+            case 6: // Fortnight => like 7,22
+                $monthDays = $this->parseMonthDays($rawDays);
+                return $this->matchesMonthDays($today, $monthDays);
+
+            default:
+                return false;
+        }
+    }
+
+    private function parseWeekDays(string $rawDays): array
+    {
+        if ($rawDays === '') {
+            return [];
+        }
+
+        $map = [
+            '1' => 1, 'mon' => 1, 'monday' => 1,
+            '2' => 2, 'tue' => 2, 'tues' => 2, 'tuesday' => 2,
+            '3' => 3, 'wed' => 3, 'wednesday' => 3,
+            '4' => 4, 'thu' => 4, 'thur' => 4, 'thurs' => 4, 'thursday' => 4,
+            '5' => 5, 'fri' => 5, 'friday' => 5,
+            '6' => 6, 'sat' => 6, 'saturday' => 6,
+            '7' => 7, 'sun' => 7, 'sunday' => 7,
+        ];
+
+        $tokens = explode(',', strtolower($rawDays));
+
+        $days = [];
+        foreach ($tokens as $token) {
+            $token = trim($token);
+            if (isset($map[$token])) {
+                $days[] = $map[$token];
+            }
+        }
+
+        return array_values(array_unique($days));
+    }
+
+    private function parseMonthDays(string $rawDays): array
+    {
+        if ($rawDays === '') {
+            return [];
+        }
+
+        $tokens = explode(',', $rawDays);
+
+        $days = [];
+        foreach ($tokens as $token) {
+            $day = (int) trim($token);
+
+            if ($day >= 1 && $day <= 31) {
+                $days[] = $day;
+            }
+        }
+
+        return array_values(array_unique($days));
     }
 }
