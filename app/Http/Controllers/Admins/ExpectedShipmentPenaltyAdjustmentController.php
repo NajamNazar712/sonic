@@ -14,6 +14,7 @@ use App\Http\Models\PendingPaymentCalculation;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsPaymentJourneyController;
+use Carbon\Carbon;
 
 
 class ExpectedShipmentPenaltyAdjustmentController extends Controller
@@ -56,6 +57,15 @@ class ExpectedShipmentPenaltyAdjustmentController extends Controller
             } else if($row->status == 3) {
                 return 'Rejected';
             }
+        })
+        ->editColumn('applied_month', function ($row) {
+
+            if($row->applied_month) {
+
+                return Carbon::parse($row->applied_month)->format('F Y');
+            } else {
+                return '-';
+            }   
         })
         ->addColumn('action', function ($row) {
 

@@ -198,7 +198,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\ExpectedShipmentNotMeetPenaltyCharges',
         'App\Console\Commands\RemoveExpiredZeroCodShippers',
         'App\Console\Commands\SyncS3ToMinio',
-
+        'App\Console\Commands\AutoRejectLeaves',
+        'App\Console\Commands\MoveDailyPayableRecordsToLogsTable',
 
     ];
 
@@ -280,10 +281,11 @@ class Kernel extends ConsoleKernel
 
         //SarNotification Email Cron
         $agent_sar_settings = GlobalSettings::where('type', 'agent_sar_notification');
-        $agent_sar_notify_time = '23:15'; //1:30 am
         if ($agent_sar_settings->exists()) {
             $sar_setting = $agent_sar_settings->first();
             $agent_sar_notify_time = $sar_setting->setting_value . ':00';
+        }else{
+            $agent_sar_notify_time = '23:30'; //1:30 am
         }
         $schedule->command('agent:sarnotification')->dailyAt($agent_sar_notify_time)->runInBackground();
 
@@ -729,6 +731,10 @@ class Kernel extends ConsoleKernel
         // $schedule->command('sync:s3-minio 2026-03-05')
         //     ->cron('0 3 5 3 *')
         //     ->withoutOverlapping();
+
+        $schedule->command('auto:reject-leaves')->everyFiveMinutes();
+        $schedule->command('dump:daily-payable-records-to-logs-table')->everyThreeHours()->withoutOverlapping()->runInBackground();
+
     }
     /**
      * Register the commands for the application.
