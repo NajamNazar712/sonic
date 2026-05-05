@@ -6381,6 +6381,7 @@ class ReturnController extends Controller
                         $img_url = asset('uploads/return_notes/' . $return->image);
                     } else {
                         $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $return->image);
+                        dd();
                         if ($exists) {
                             $img_url = Storage::disk('s3')->temporaryUrl('sonic-archive/return_note_images/' . $return->image, now()->addMinutes(5));
                         }
