@@ -6383,7 +6383,7 @@ class ReturnController extends Controller
                         dd([
                             'bucket' => config('filesystems.disks.s3.bucket'),
                             'endpoint' => config('filesystems.disks.s3.endpoint'),
-                            'exists' => Storage::disk('s3')->exists('sonic-archive/return_note_images/2026_5854622980.png'),
+                            // 'exists' => Storage::disk('s3')->exists('sonic-archive/return_note_images/2026_5854622980.png'),
                         ]);
                         $exists = Storage::disk('s3')->exists('sonic-archive/return_note_images/' . $return->image);
                         dd($exists);
