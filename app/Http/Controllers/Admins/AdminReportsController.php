@@ -112,6 +112,7 @@ use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\InvoiceShipment;
 use App\Models\CrmInvalidReasonRequest;
 use App\Models\CrmRequestResolvedReason;
+use App\Models\NegativePayableDailyLog;
 
 class AdminReportsController extends Controller
 {
@@ -12908,7 +12909,7 @@ class AdminReportsController extends Controller
 
     public function rider_pickup_index()
     {
-        return redirect()->route('admin.access_denied');
+//        return redirect()->route('admin.access_denied');
         ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
         // $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
@@ -18842,5 +18843,58 @@ class AdminReportsController extends Controller
         return $datatable
             ->rawColumns(['tracking_number_link'])
             ->make(true);
+    }
+    
+    public function negative_balance_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 845);
+
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])
+                ->select('id', 'name');
+        $shippers =  $shippers->where(function($query){
+            $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
+            if (!empty($idsToExclude)) {
+                $query->whereNotIn('users.id', $idsToExclude);
+            }
+        })->get();
+        return view('admin.reports.negative_balance')->with(['shippers' => $shippers]);
+    }
+
+
+    public function negative_balance_list(Request $request) {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 846);
+        }
+ 
+        $search_date_from = $request->search_date_from;
+        $search_date_to =  $request->search_date_to;
+
+        $total = DB::table('negative_payable_daily_logs')->join('users as u' , 'u.id', 'negative_payable_daily_logs.user_id')->whereBetween('negative_payable_daily_logs.created_at', [$search_date_from, $search_date_to])->select([
+            'negative_payable_daily_logs.amount',
+            'negative_payable_daily_logs.payable',
+            'u.name as shipper_name',
+            'negative_payable_daily_logs.created_at as created',
+            'negative_payable_daily_logs.user_id'
+        ]);
+    
+
+        if ($request->filled('search_shippers')) {
+            $total->whereIn('user_id', $request->search_shippers);
+        }
+      
+        $datatables = Datatables::of($total)
+            
+            ->editColumn('payable', function ($row) {
+                return number_format($row->payable, 2); // 2 decimal places
+            })
+            ->editColumn('amount', function ($row) {
+                return number_format($row->amount, 2);
+            });
+            
+        return $datatables
+        //->rawColumns(['customer_name','brand_name'])
+        ->make(true);
+
     }
 }

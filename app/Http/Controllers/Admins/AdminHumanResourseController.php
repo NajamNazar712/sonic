@@ -2771,7 +2771,9 @@ class AdminHumanResourseController extends Controller
         $attachments->save();
 
 //        $employee->request_status_id = 2;
-        $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+        if($request->input('is_forced_document')!=1) {
+            $employee->status_id = ($employee->status_id == 2) ? 2 : self::GetStatusOfEmployee($employee->id);
+        }
         $employee->update();
 
         return back()->with(['success' => 'Employee Attachments Updated Successfully']);

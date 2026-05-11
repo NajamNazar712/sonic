@@ -82,7 +82,7 @@ class ProcessOTPSMSITS implements ShouldQueue
 
                 $this->sms->save();
                 
-                $to = ['anas.mazhar@logiserves.com'];
+                $to = ['munawar.shamsi@logiserves.com'];
                 $subject = '[Error] CALL API - ITS';
                 $body = 'Unrecognized Error in CALL API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($responvecode);
 

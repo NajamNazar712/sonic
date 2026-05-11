@@ -24,6 +24,7 @@ Route::get('test-fcm-token', function () {
 //     ];
 // });
 Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
+Route::get('make', 'TrackingController@payment_details')->name('payment_details');
 
 Route::get('/', function () {
     return redirect()->route('cod.login');
@@ -34,6 +35,10 @@ Route::get('test-email-check/{payment_id?}', function ($payment_id = null) {
     ]);
 
     return "Command executed for payment_id: $payment_id";
+});
+Route::get('paymentinsert', function () {
+    Artisan::call('make:payments');
+    return "Command executed for creating payments for missing shipments";
 });
 Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
