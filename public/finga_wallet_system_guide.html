@@ -1,0 +1,1883 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finga Wallet System Guide — Trax/Sonic Integration</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sidebar-bg:#1a1d23;
+  --sidebar-width:280px;
+  --primary:#6366f1;
+  --primary-light:#818cf8;
+  --success:#10b981;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+  --info:#3b82f6;
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --text:#1e293b;
+  --text-muted:#64748b;
+  --border:#e2e8f0;
+  --code-bg:#0f172a;
+  --radius:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -1px rgba(0,0,0,.06);
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;display:flex;min-height:100vh}
+
+/* SIDEBAR */
+#sidebar{
+  width:var(--sidebar-width);
+  background:var(--sidebar-bg);
+  position:fixed;top:0;left:0;height:100vh;
+  overflow-y:auto;z-index:100;
+  display:flex;flex-direction:column;
+  transition:transform .3s ease;
+}
+#sidebar::-webkit-scrollbar{width:4px}
+#sidebar::-webkit-scrollbar-track{background:transparent}
+#sidebar::-webkit-scrollbar-thumb{background:#374151;border-radius:2px}
+.sidebar-header{
+  padding:24px 20px 16px;
+  border-bottom:1px solid #2d3748;
+}
+.sidebar-logo{
+  display:flex;align-items:center;gap:10px;
+  text-decoration:none;margin-bottom:16px;
+}
+.sidebar-logo-icon{
+  width:36px;height:36px;
+  background:linear-gradient(135deg,var(--primary),#8b5cf6);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.sidebar-logo-text{
+  color:#f1f5f9;font-weight:700;font-size:15px;line-height:1.2;
+}
+.sidebar-logo-sub{color:#94a3b8;font-size:11px;font-weight:400}
+#search-box{
+  width:100%;padding:8px 12px;
+  background:#2d3748;border:1px solid #374151;
+  border-radius:6px;color:#f1f5f9;font-size:13px;
+  outline:none;transition:border-color .2s;
+}
+#search-box::placeholder{color:#64748b}
+#search-box:focus{border-color:var(--primary)}
+.sidebar-nav{padding:12px 0;flex:1}
+.nav-section-label{
+  padding:8px 20px 4px;
+  font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:#4b5563;
+}
+.nav-item{
+  display:block;padding:8px 20px;
+  color:#94a3b8;text-decoration:none;font-size:13px;
+  border-left:3px solid transparent;
+  transition:all .15s ease;cursor:pointer;
+}
+.nav-item:hover{color:#f1f5f9;background:rgba(255,255,255,.05);border-left-color:var(--primary-light)}
+.nav-item.active{color:#f1f5f9;background:rgba(99,102,241,.15);border-left-color:var(--primary)}
+.nav-item.sub{padding-left:32px;font-size:12px}
+.nav-badge{
+  float:right;font-size:10px;padding:1px 6px;
+  border-radius:10px;background:#374151;color:#94a3b8;
+}
+.sidebar-footer{
+  padding:16px 20px;border-top:1px solid #2d3748;
+  font-size:11px;color:#4b5563;
+}
+
+/* MAIN CONTENT */
+#main{
+  margin-left:var(--sidebar-width);
+  flex:1;min-width:0;
+  padding:0;
+}
+.content-header{
+  background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e3a5f 100%);
+  padding:60px 48px 48px;color:#fff;
+}
+.content-header h1{font-size:36px;font-weight:800;margin-bottom:8px;letter-spacing:-.5px}
+.content-header p{font-size:16px;color:#c7d2fe;max-width:600px;line-height:1.7}
+.header-badges{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap}
+.header-badge{
+  padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;
+  background:rgba(255,255,255,.15);color:#e0e7ff;border:1px solid rgba(255,255,255,.2);
+}
+.content-body{padding:40px 48px;max-width:1100px}
+
+/* SECTIONS */
+.doc-section{
+  margin-bottom:48px;
+  scroll-margin-top:24px;
+}
+.section-header{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:24px;padding-bottom:12px;
+  border-bottom:2px solid var(--border);
+  cursor:pointer;user-select:none;
+}
+.section-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.section-icon.indigo{background:rgba(99,102,241,.1);color:var(--primary)}
+.section-icon.green{background:rgba(16,185,129,.1);color:var(--success)}
+.section-icon.amber{background:rgba(245,158,11,.1);color:var(--warning)}
+.section-icon.blue{background:rgba(59,130,246,.1);color:var(--info)}
+.section-icon.red{background:rgba(239,68,68,.1);color:var(--danger)}
+.section-icon.purple{background:rgba(139,92,246,.1);color:#8b5cf6}
+.section-icon.teal{background:rgba(20,184,166,.1);color:#14b8a6}
+.section-icon.orange{background:rgba(249,115,22,.1);color:#f97316}
+.section-title{font-size:22px;font-weight:700;color:var(--text)}
+.section-subtitle{font-size:13px;color:var(--text-muted);margin-top:2px}
+.collapse-icon{margin-left:auto;color:var(--text-muted);font-size:18px;transition:transform .2s}
+.section-body.collapsed{display:none}
+.section-body.collapsed + .collapse-icon{transform:rotate(-90deg)}
+
+/* CARDS */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  margin-bottom:16px;overflow:hidden;
+}
+.card-header{
+  padding:14px 20px;background:#f8fafc;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.card-header h3{font-size:14px;font-weight:600;color:var(--text)}
+.card-body{padding:20px}
+
+/* TABLES */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:#f1f5f9}
+th{padding:10px 14px;text-align:left;font-weight:600;color:var(--text-muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+td{padding:10px 14px;border-top:1px solid var(--border);color:var(--text);vertical-align:top}
+tr:hover td{background:#f8fafc}
+.td-code{font-family:'Fira Code','Cascadia Code',monospace;font-size:12px;color:#7c3aed;background:#f5f3ff;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.td-type{font-family:monospace;font-size:12px;color:#0369a1;background:#e0f2fe;padding:2px 6px;border-radius:4px}
+
+/* CODE BLOCKS */
+.code-block-wrap{position:relative;margin:12px 0;border-radius:var(--radius);overflow:hidden}
+.code-block-header{
+  background:#1e293b;padding:8px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.code-lang{font-size:11px;color:#64748b;font-family:monospace;text-transform:uppercase;letter-spacing:.05em}
+.copy-btn{
+  background:transparent;border:1px solid #374151;
+  color:#94a3b8;padding:3px 10px;border-radius:4px;
+  font-size:11px;cursor:pointer;transition:all .15s;
+}
+.copy-btn:hover{background:#374151;color:#f1f5f9}
+.copy-btn.copied{border-color:var(--success);color:var(--success)}
+pre.code-block{
+  background:var(--code-bg);padding:20px;
+  overflow-x:auto;font-family:'Fira Code','Cascadia Code','Courier New',monospace;
+  font-size:13px;line-height:1.7;margin:0;
+}
+pre.code-block::-webkit-scrollbar{height:4px}
+pre.code-block::-webkit-scrollbar-track{background:#1e293b}
+pre.code-block::-webkit-scrollbar-thumb{background:#374151;border-radius:2px}
+.tok-key{color:#7dd3fc}
+.tok-str{color:#86efac}
+.tok-num{color:#fca5a5}
+.tok-bool{color:#c4b5fd}
+.tok-null{color:#94a3b8}
+.tok-punct{color:#64748b}
+.tok-url{color:#fbbf24}
+.tok-comment{color:#4b5563;font-style:italic}
+
+/* HTTP METHOD BADGES */
+.method-badge{
+  display:inline-block;padding:3px 10px;border-radius:4px;
+  font-size:11px;font-weight:700;letter-spacing:.05em;
+  font-family:monospace;margin-right:8px;
+}
+.method-post{background:#dcfce7;color:#166534}
+.method-get{background:#dbeafe;color:#1e40af}
+.endpoint-url{
+  font-family:'Fira Code','Cascadia Code',monospace;
+  font-size:13px;color:#7c3aed;background:#f5f3ff;
+  padding:8px 14px;border-radius:6px;border:1px solid #e9d5ff;
+  display:inline-block;margin:8px 0;word-break:break-all;
+}
+
+/* ENDPOINT CARDS */
+.endpoint-card{
+  border:1px solid var(--border);border-radius:var(--radius);
+  margin-bottom:20px;overflow:hidden;
+}
+.endpoint-card-header{
+  padding:14px 20px;background:#fafafa;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.endpoint-card-header h4{font-size:14px;font-weight:600;color:var(--text)}
+.endpoint-card-body{padding:20px}
+.endpoint-desc{font-size:13px;color:var(--text-muted);margin-bottom:12px}
+
+/* FLOW DIAGRAM */
+.flow-diagram{
+  display:flex;flex-wrap:wrap;gap:0;
+  align-items:stretch;margin:20px 0;
+}
+.flow-phase{
+  flex:1;min-width:160px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+  position:relative;
+}
+.flow-phase + .flow-phase{
+  border-left:none;border-radius:0;
+}
+.flow-phase:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.flow-phase:last-child{border-radius:0 var(--radius) var(--radius) 0}
+.flow-phase-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--primary);color:#fff;
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:8px;
+}
+.flow-phase-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px}
+.flow-phase-desc{font-size:11px;color:var(--text-muted);line-height:1.5}
+.flow-arrow{
+  display:flex;align-items:center;
+  color:var(--primary);font-size:20px;padding:0 4px;
+  flex-shrink:0;
+}
+
+/* VERTICAL FLOW */
+.vflow{display:flex;flex-direction:column;gap:0;margin:16px 0}
+.vflow-step{
+  display:flex;gap:16px;align-items:flex-start;
+  padding:14px 16px;background:var(--card);
+  border:1px solid var(--border);border-radius:0;
+  position:relative;
+}
+.vflow-step:first-child{border-radius:var(--radius) var(--radius) 0 0}
+.vflow-step:last-child{border-radius:0 0 var(--radius) var(--radius)}
+.vflow-step + .vflow-step{border-top:none}
+.vflow-num{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--primary);color:#fff;
+  font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.vflow-content h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.vflow-content p{font-size:12px;color:var(--text-muted);line-height:1.5}
+.vflow-content code{
+  font-family:monospace;font-size:11px;
+  background:#f1f5f9;color:#7c3aed;
+  padding:1px 5px;border-radius:3px;
+}
+
+/* BADGES */
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:12px;
+  font-size:11px;font-weight:600;
+}
+.badge-success{background:#dcfce7;color:#166534}
+.badge-warning{background:#fef3c7;color:#92400e}
+.badge-danger{background:#fee2e2;color:#991b1b}
+.badge-info{background:#dbeafe;color:#1e40af}
+.badge-purple{background:#f5f3ff;color:#6d28d9}
+.badge-gray{background:#f1f5f9;color:#475569}
+
+/* ALERT BOXES */
+.alert{
+  padding:14px 16px;border-radius:var(--radius);
+  margin:12px 0;font-size:13px;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.alert-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.alert-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+.alert-warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.alert-success{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.alert-danger{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* STAT CARDS */
+.stat-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;
+  border-top:3px solid var(--primary);
+}
+.stat-card.green{border-top-color:var(--success)}
+.stat-card.amber{border-top-color:var(--warning)}
+.stat-card.red{border-top-color:var(--danger)}
+.stat-card.blue{border-top-color:var(--info)}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-bottom:6px}
+.stat-value{font-size:24px;font-weight:800;color:var(--text)}
+.stat-desc{font-size:12px;color:var(--text-muted);margin-top:4px}
+
+/* INLINE CODE */
+code.inline{
+  font-family:'Fira Code','Cascadia Code',monospace;
+  font-size:12px;background:#f1f5f9;color:#7c3aed;
+  padding:2px 6px;border-radius:4px;
+}
+
+/* SEARCH HIGHLIGHT */
+.search-highlight{background:#fef08a;border-radius:2px}
+
+/* MOBILE HAMBURGER */
+#menu-toggle{
+  display:none;position:fixed;top:16px;left:16px;z-index:200;
+  background:var(--primary);color:#fff;border:none;
+  width:40px;height:40px;border-radius:8px;
+  font-size:18px;cursor:pointer;align-items:center;justify-content:center;
+}
+#overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.5);z-index:99;
+}
+
+/* PRINT */
+@media print{
+  #sidebar,#menu-toggle,#overlay,.copy-btn{display:none!important}
+  #main{margin-left:0!important}
+  .content-header{background:#1e1b4b!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc-section{page-break-inside:avoid}
+  .section-body.collapsed{display:block!important}
+  a{color:inherit;text-decoration:none}
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  #sidebar{transform:translateX(-100%)}
+  #sidebar.open{transform:translateX(0)}
+  #main{margin-left:0}
+  #menu-toggle{display:flex}
+  #overlay.show{display:block}
+  .content-header{padding:60px 24px 32px}
+  .content-body{padding:24px}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+  .flow-diagram{flex-direction:column}
+  .flow-phase{border-radius:var(--radius)!important;border:1px solid var(--border)!important}
+  .flow-arrow{transform:rotate(90deg)}
+}
+@media(max-width:600px){
+  .content-header h1{font-size:26px}
+  .section-title{font-size:18px}
+}
+</style>
+<style>
+/* ===== PASSWORD GATE ===== */
+#pw-gate{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  display:flex;align-items:center;justify-content:center;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+#pw-gate.hidden{display:none}
+.pw-box{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  padding:48px 40px;
+  width:100%;max-width:400px;
+  text-align:center;
+  backdrop-filter:blur(12px);
+  box-shadow:0 25px 50px rgba(0,0,0,.5);
+}
+.pw-icon{font-size:48px;margin-bottom:16px;display:block}
+.pw-title{
+  color:#f1f5f9;font-size:22px;font-weight:700;
+  margin-bottom:6px;letter-spacing:-.3px;
+}
+.pw-subtitle{color:#94a3b8;font-size:13px;margin-bottom:32px;line-height:1.5}
+.pw-input-wrap{position:relative;margin-bottom:16px}
+#pw-input{
+  width:100%;padding:14px 48px 14px 16px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;color:#f1f5f9;font-size:15px;
+  outline:none;transition:border-color .2s,background .2s;
+  letter-spacing:.05em;
+}
+#pw-input::placeholder{color:#475569;letter-spacing:0}
+#pw-input:focus{border-color:#6366f1;background:rgba(99,102,241,.1)}
+#pw-input.error{border-color:#ef4444;animation:shake .3s ease}
+#pw-toggle{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:#64748b;cursor:pointer;
+  font-size:16px;padding:4px;transition:color .15s;
+}
+#pw-toggle:hover{color:#94a3b8}
+#pw-btn{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  border:none;border-radius:10px;
+  color:#fff;font-size:15px;font-weight:600;
+  cursor:pointer;transition:opacity .2s,transform .1s;
+  letter-spacing:.02em;
+}
+#pw-btn:hover{opacity:.9}
+#pw-btn:active{transform:scale(.98)}
+#pw-error{
+  color:#f87171;font-size:12px;margin-top:10px;
+  min-height:18px;transition:opacity .2s;
+}
+.pw-footer{
+  margin-top:28px;padding-top:20px;
+  border-top:1px solid rgba(255,255,255,.08);
+  color:#334155;font-size:11px;
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== PASSWORD GATE ===== -->
+<div id="pw-gate">
+  <div class="pw-box">
+    <span class="pw-icon">&#128274;</span>
+    <div class="pw-title">Protected Document</div>
+    <div class="pw-subtitle">Finga Wallet Integration Guide<br>Enter the access password to continue</div>
+    <div class="pw-input-wrap">
+      <input type="password" id="pw-input" placeholder="Enter password" autocomplete="off" autofocus>
+      <button id="pw-toggle" type="button" onclick="togglePwVisibility()" title="Show/hide password">&#128065;</button>
+    </div>
+    <button id="pw-btn" onclick="checkPassword()">Unlock &nbsp;&#128275;</button>
+    <div id="pw-error"></div>
+    <div class="pw-footer">Trax / Sonic &bull; Internal Use Only</div>
+  </div>
+</div>
+
+<!-- ===== APP CONTENT (hidden until unlocked) ===== -->
+<div id="app-content" style="display:none">
+
+<button id="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle menu">&#9776;</button>
+<div id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <a class="sidebar-logo" href="#">
+      <div class="sidebar-logo-icon">&#128179;</div>
+      <div>
+        <div class="sidebar-logo-text">Finga Wallet</div>
+        <div class="sidebar-logo-sub">Trax / Sonic Integration</div>
+      </div>
+    </a>
+    <input type="text" id="search-box" placeholder="&#128269; Search docs..." oninput="searchDocs(this.value)" autocomplete="off">
+  </div>
+  <div class="sidebar-nav" id="nav-links">
+    <div class="nav-section-label">Getting Started</div>
+    <a class="nav-item active" href="#overview" onclick="setActive(this)">&#127760; Overview</a>
+    <a class="nav-item" href="#authentication" onclick="setActive(this)">&#128272; Authentication</a>
+
+    <div class="nav-section-label">Data Layer</div>
+    <a class="nav-item" href="#database" onclick="setActive(this)">&#128196; Database Schema</a>
+    <a class="nav-item sub" href="#db-wallet-users" onclick="setActive(this)">wallet_users</a>
+    <a class="nav-item sub" href="#db-shipper-settings" onclick="setActive(this)">wallet_shipper_settings</a>
+    <a class="nav-item sub" href="#db-api-logs" onclick="setActive(this)">finga_api_logs</a>
+    <a class="nav-item sub" href="#db-settlement" onclick="setActive(this)">settlement_records</a>
+    <a class="nav-item sub" href="#db-status-sharing" onclick="setActive(this)">status_sharing</a>
+    <a class="nav-item sub" href="#db-charges" onclick="setActive(this)">additional_charges</a>
+    <a class="nav-item sub" href="#db-natures" onclick="setActive(this)">api_natures</a>
+
+    <div class="nav-section-label">API Reference</div>
+    <a class="nav-item" href="#api-endpoints" onclick="setActive(this)">&#128279; API Endpoints</a>
+    <a class="nav-item sub" href="#api-auth" onclick="setActive(this)">Authentication</a>
+    <a class="nav-item sub" href="#api-onboard" onclick="setActive(this)">Wallet Onboarding</a>
+    <a class="nav-item sub" href="#api-login-url" onclick="setActive(this)">Login URL</a>
+    <a class="nav-item sub" href="#api-cod-log" onclick="setActive(this)">COD Log</a>
+    <a class="nav-item sub" href="#api-cod-change" onclick="setActive(this)">COD Change</a>
+    <a class="nav-item sub" href="#api-status" onclick="setActive(this)">Status Update</a>
+    <a class="nav-item sub" href="#api-charge-log" onclick="setActive(this)">Charge Log</a>
+    <a class="nav-item sub" href="#api-settlement" onclick="setActive(this)">Settlement</a>
+    <a class="nav-item sub" href="#api-adjustment" onclick="setActive(this)">Adjustment</a>
+    <a class="nav-item sub" href="#api-bulk" onclick="setActive(this)">Bulk Operations</a>
+
+    <div class="nav-section-label">Reference</div>
+    <a class="nav-item" href="#status-codes" onclick="setActive(this)">&#128204; Status Codes</a>
+    <a class="nav-item" href="#workflow" onclick="setActive(this)">&#9881; Workflow</a>
+    <a class="nav-item" href="#queues-crons" onclick="setActive(this)">&#9200; Queues &amp; Crons</a>
+    <a class="nav-item" href="#key-files" onclick="setActive(this)">&#128193; Key Files</a>
+  </div>
+  <div class="sidebar-footer">
+    v1.0 &bull; Trax/Sonic Platform &bull; Laravel
+  </div>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main id="main">
+  <div class="content-header">
+    <h1>&#128179; Finga Wallet Integration</h1>
+    <p>Complete technical reference for the Finga/Finova digital wallet integration in the Trax/Sonic courier &amp; logistics platform. Covers API endpoints, database schema, workflows, and operational crons.</p>
+    <div class="header-badges">
+      <span class="header-badge">&#9889; Laravel</span>
+      <span class="header-badge">&#128279; REST API</span>
+      <span class="header-badge">&#128179; COD Payments</span>
+      <span class="header-badge">&#128338; Queue-Driven</span>
+      <span class="header-badge">&#128203; Bearer Auth</span>
+    </div>
+  </div>
+
+  <div class="content-body">
+
+    <!-- ===== OVERVIEW ===== -->
+    <section class="doc-section" id="overview">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon indigo">&#127760;</div>
+        <div>
+          <div class="section-title">System Overview</div>
+          <div class="section-subtitle">What is Finga and how does Trax integrate with it</div>
+        </div>
+        <span class="collapse-icon">&#8964;</span>
+      </div>
+      <div class="section-body">
+        <div class="alert alert-info">
+          <span class="alert-icon">&#8505;</span>
+          <div><strong>Finga</strong> (also known as <strong>Finova</strong> or <strong>Finja</strong>) is a third-party digital wallet provider. Trax integrates with Finga to allow shippers to receive COD (Cash on Delivery) payments directly into their Finga wallet instead of traditional bank transfers.</div>
+        </div>
+
+        <div class="grid-3" style="margin:24px 0">
+          <div class="stat-card">
+            <div class="stat-label">Base URL Config</div>
+            <div class="stat-value" style="font-size:14px;font-family:monospace">config('app.FINGA_URL')</div>
+            <div class="stat-desc">Configurable per environment</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-label">Auth Method</div>
+            <div class="stat-value" style="font-size:16px">Bearer Token</div>
+            <div class="stat-desc">Cached 3 min, auto-refreshed</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-label">Cache Key</div>
+            <div class="stat-value" style="font-size:16px;font-family:monospace">wallet_api_token</div>
+            <div class="stat-desc">Laravel cache, 3-minute TTL</div>
+          </div>
+        </div>
+
+        <h3 style="font-size:15px;font-weight:700;margin:24px 0 12px">Integration Architecture</h3>
+        <div class="flow-diagram">
+          <div class="flow-phase">
+            <div class="flow-phase-num">1</div>
+            <div class="flow-phase-title">&#128100; Shipper</div>
+            <div class="flow-phase-desc">Signs up for Finga wallet via Trax dashboard</div>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-phase">
+            <div class="flow-phase-num">2</div>
+            <div class="flow-phase-title">&#9881; Trax Backend</div>
+            <div class="flow-phase-desc">Laravel app processes requests, manages queues</div>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-phase">
+            <div class="flow-phase-num">3</div>
+            <div class="flow-phase-title">&#128279; Finga API</div>
+            <div class="flow-phase-desc">Third-party wallet provider REST API</div>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-phase">
+            <div class="flow-phase-num">4</div>
+            <div class="flow-phase-title">&#128179; Wallet</div>
+            <div class="flow-phase-desc">COD funds deposited to shipper wallet</div>
+          </div>
+        </div>
+
+        <h3 style="font-size:15px;font-weight:700;margin:24px 0 12px">Key Concepts</h3>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h3>&#128203; COD Flow</h3></div>
+            <div class="card-body" style="font-size:13px;color:var(--text-muted);line-height:1.7">
+              When a shipment is created with COD, Trax logs the expected amount to Finga. As the shipment progresses through delivery statuses, Finga is notified. Upon delivery, the COD amount is settled into the shipper's wallet minus applicable charges.
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>&#128260; Queue-Driven</h3></div>
+            <div class="card-body" style="font-size:13px;color:var(--text-muted);line-height:1.7">
+              All Finga API calls are dispatched as Laravel queue jobs to ensure reliability. Failed jobs are retried automatically. Bulk operations use dedicated bulk queues for efficiency.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== AUTHENTICATION ===== -->
+    <section class="doc-section" id="authentication">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon green">&#128272;</div>
+        <div>
+          <div class="section-title">Authentication</div>
+          <div class="section-subtitle">Bearer token management and auto-refresh</div>
+        </div>
+        <span class="collapse-icon">&#8964;</span>
+      </div>
+      <div class="section-body">
+        <div class="alert alert-warning">
+          <span class="alert-icon">&#9888;</span>
+          <div>The token is cached in Laravel cache under key <code class="inline">wallet_api_token</code> for <strong>3 minutes</strong>. All API calls check the cache first and only re-authenticate when the token is expired or missing.</div>
+        </div>
+
+        <div class="endpoint-card" id="api-auth">
+          <div class="endpoint-card-header">
+            <span class="method-badge method-post">POST</span>
+            <h4>Login / Token Refresh</h4>
+          </div>
+          <div class="endpoint-card-body">
+            <div class="endpoint-url">{FINGA_URL}login/</div>
+            <p class="endpoint-desc">Authenticates with Finga using the Sonic service account credentials and returns a Bearer token.</p>
+            <div class="grid-2">
+              <div>
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Request Body</p>
+                <div class="code-block-wrap">
+                  <div class="code-block-header">
+                    <span class="code-lang">JSON</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                  </div>
+                  <pre class="code-block" data-raw='{"username":"sonic","password":"***"}'><span class="tok-punct">{</span>
+  <span class="tok-key">"username"</span><span class="tok-punct">:</span> <span class="tok-str">"sonic"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"password"</span><span class="tok-punct">:</span> <span class="tok-str">"***"</span>
+<span class="tok-punct">}</span></pre>
+                </div>
+              </div>
+              <div>
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Response</p>
+                <div class="code-block-wrap">
+                  <div class="code-block-header">
+                    <span class="code-lang">JSON</span>
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                  </div>
+                  <pre class="code-block" data-raw='{"token":"Bearer_token_here"}'><span class="tok-punct">{</span>
+  <span class="tok-key">"token"</span><span class="tok-punct">:</span> <span class="tok-str">"Bearer_token_here"</span>
+<span class="tok-punct">}</span></pre>
+                </div>
+              </div>
+            </div>
+            <div class="alert alert-success" style="margin-top:12px">
+              <span class="alert-icon">&#10003;</span>
+              <div>Token is stored via <code class="inline">Cache::put('wallet_api_token', $token, 180)</code> and retrieved with <code class="inline">Cache::get('wallet_api_token')</code> before each API call.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DATABASE SCHEMA ===== -->
+    <section class="doc-section" id="database">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon blue">&#128196;</div>
+        <div>
+          <div class="section-title">Database Schema</div>
+          <div class="section-subtitle">All wallet-related tables and their columns</div>
+        </div>
+        <span class="collapse-icon">&#8964;</span>
+      </div>
+      <div class="section-body">
+
+        <!-- wallet_users -->
+        <div class="card" id="db-wallet-users">
+          <div class="card-header">
+            <h3>&#128100; <code class="inline">wallet_users</code></h3>
+            <span class="badge badge-info" style="margin-left:auto">Primary Table</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Stores all active Finga wallet users linked to Trax shippers.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="td-code">id</span></td><td><span class="td-type">bigint</span></td><td>Primary key</td></tr>
+                  <tr><td><span class="td-code">name</span></td><td><span class="td-type">string unique</span></td><td>Wallet user name</td></tr>
+                  <tr><td><span class="td-code">email</span></td><td><span class="td-type">string unique</span></td><td>Email address</td></tr>
+                  <tr><td><span class="td-code">phone</span></td><td><span class="td-type">string</span></td><td>Phone number</td></tr>
+                  <tr><td><span class="td-code">cnic</span></td><td><span class="td-type">string</span></td><td>CNIC number</td></tr>
+                  <tr><td><span class="td-code">wallet_id</span></td><td><span class="td-type">integer</span></td><td>Finga wallet ID returned on signup</td></tr>
+                  <tr><td><span class="td-code">user_id</span></td><td><span class="td-type">integer</span></td><td>Trax shipper user ID (FK to users)</td></tr>
+                  <tr><td><span class="td-code">substitute_user_id</span></td><td><span class="td-type">integer</span></td><td><span class="badge badge-gray">0</span> = primary user &nbsp; <span class="badge badge-purple">&gt;0</span> = substitute user</td></tr>
+                  <tr><td><span class="td-code">status</span></td><td><span class="td-type">boolean</span></td><td><span class="badge badge-success">1</span> = active</td></tr>
+                  <tr><td><span class="td-code">finova_account_type</span></td><td><span class="td-type">tinyint</span></td><td><span class="badge badge-gray">0</span> = Basic &nbsp; <span class="badge badge-info">1–4</span> = Arrival &nbsp; <span class="badge badge-success">5</span> = Delivered</td></tr>
+                  <tr><td><span class="td-code">created_at</span></td><td><span class="td-type">timestamp</span></td><td>Record creation time</td></tr>
+                  <tr><td><span class="td-code">updated_at</span></td><td><span class="td-type">timestamp</span></td><td>Last update time</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- wallet_users_disables -->
+        <div class="card">
+          <div class="card-header">
+            <h3>&#128683; <code class="inline">wallet_users_disables</code></h3>
+            <span class="badge badge-warning" style="margin-left:auto">Archive Table</span>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-warning">
+              <span class="alert-icon">&#9888;</span>
+              <div>Same structure as <code class="inline">wallet_users</code>. Records are moved here when a wallet user is disabled/removed. Used as an audit trail.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- wallet_shipper_settings -->
+        <div class="card" id="db-shipper-settings">
+          <div class="card-header">
+            <h3>&#9881; <code class="inline">wallet_shipper_settings</code></h3>
+            <span class="badge badge-purple" style="margin-left:auto">Admin Controlled</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Controls which shippers are allowed to use the Finga wallet feature. Admin must add a shipper here before they can sign up.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="td-code">id</span></td><td><span class="td-type">bigint</span></td><td>Primary key</td></tr>
+                  <tr><td><span class="td-code">user_id</span></td><td><span class="td-type">integer</span></td><td>Shipper user ID</td></tr>
+                  <tr><td><span class="td-code">status</span></td><td><span class="td-type">integer</span></td><td><span class="badge badge-success">1</span> = enabled &nbsp; <span class="badge badge-danger">0</span> = disabled</td></tr>
+                  <tr><td><span class="td-code">add_by</span></td><td><span class="td-type">integer</span></td><td>Admin user ID who added this record</td></tr>
+                  <tr><td><span class="td-code">created_at</span></td><td><span class="td-type">timestamp</span></td><td></td></tr>
+                  <tr><td><span class="td-code">updated_at</span></td><td><span class="td-type">timestamp</span></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- finga_api_logs -->
+        <div class="card" id="db-api-logs">
+          <div class="card-header">
+            <h3>&#128203; <code class="inline">finga_api_logs</code></h3>
+            <span class="badge badge-info" style="margin-left:auto">Audit Log</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Logs every API request and response to/from Finga. Each request log is paired with a response log via <code class="inline">request_id</code>.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="td-code">id</span></td><td><span class="td-type">bigint</span></td><td>Primary key</td></tr>
+                  <tr><td><span class="td-code">nature_id</span></td><td><span class="td-type">integer</span></td><td>API call type (see <a href="#db-natures" style="color:var(--primary)">wallet_api_natures</a>)</td></tr>
+                  <tr><td><span class="td-code">nature</span></td><td><span class="td-type">string</span></td><td>Nature name (e.g. "onboard-request")</td></tr>
+                  <tr><td><span class="td-code">status</span></td><td><span class="td-type">string</span></td><td><span class="badge badge-success">success</span> <span class="badge badge-danger">error</span> <span class="badge badge-warning">exception</span> <span class="badge badge-gray">1</span></td></tr>
+                  <tr><td><span class="td-code">details</span></td><td><span class="td-type">json</span></td><td>Full request or response payload</td></tr>
+                  <tr><td><span class="td-code">shipment_id</span></td><td><span class="td-type">integer</span></td><td>Related shipment ID</td></tr>
+                  <tr><td><span class="td-code">request_id</span></td><td><span class="td-type">integer</span></td><td>Links response log back to its request log</td></tr>
+                  <tr><td><span class="td-code">batch_id</span></td><td><span class="td-type">string (UUID)</span></td><td>Groups logs for bulk operations</td></tr>
+                  <tr><td><span class="td-code">created_at</span></td><td><span class="td-type">timestamp</span></td><td></td></tr>
+                  <tr><td><span class="td-code">updated_at</span></td><td><span class="td-type">timestamp</span></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- finja_log_settlement_records -->
+        <div class="card" id="db-settlement">
+          <div class="card-header">
+            <h3>&#128184; <code class="inline">finja_log_settlement_records</code></h3>
+            <span class="badge badge-success" style="margin-left:auto">Settlement Tracking</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Tracks the settlement state for each shipment — which steps have been sent to Finga and which are pending.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="td-code">id</span></td><td><span class="td-type">bigint</span></td><td>Primary key</td></tr>
+                  <tr><td><span class="td-code">shipment_id</span></td><td><span class="td-type">integer</span></td><td>Shipment ID</td></tr>
+                  <tr><td><span class="td-code">wallet_log_updated</span></td><td><span class="td-type">boolean</span></td><td>COD log sent to Finga</td></tr>
+                  <tr><td><span class="td-code">wallet_settlement_updated</span></td><td><span class="td-type">boolean</span></td><td>Settlement sent to Finga</td></tr>
+                  <tr><td><span class="td-code">wallet_adjustment_updated</span></td><td><span class="td-type">boolean</span></td><td>Adjustment sent to Finga</td></tr>
+                  <tr><td><span class="td-code">wallet_log_charges_updated</span></td><td><span class="td-type">boolean</span></td><td>Arrival charges log sent to Finga</td></tr>
+                  <tr><td><span class="td-code">logged_cod_charges</span></td><td><span class="td-type">decimal</span></td><td>COD amount at time of initial logging</td></tr>
+                  <tr><td><span class="td-code">wallet_charges_finova_settled</span></td><td><span class="td-type">integer</span></td><td>Settlement type when wallet charges were settled</td></tr>
+                  <tr><td><span class="td-code">wallet_charges_finova_settled_updated_at</span></td><td><span class="td-type">timestamp</span></td><td>When wallet charges were settled</td></tr>
+                  <tr><td><span class="td-code">created_at / updated_at</span></td><td><span class="td-type">timestamp</span></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- status_sharing_with_wallets -->
+        <div class="card" id="db-status-sharing">
+          <div class="card-header">
+            <h3>&#128204; <code class="inline">status_sharing_with_wallets</code></h3>
+            <span class="badge badge-info" style="margin-left:auto">Status Queue</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Queue table for pending shipment status updates to be sent to Finga. Records with <code class="inline">is_send=0</code> are picked up by the bulk cron.</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="td-code">id</span></td><td><span class="td-type">bigint</span></td><td>Primary key</td></tr>
+                  <tr><td><span class="td-code">shipment_id</span></td><td><span class="td-type">integer</span></td><td>Shipment ID</td></tr>
+                  <tr><td><span class="td-code">status_id</span></td><td><span class="td-type">integer</span></td><td>Shipment status ID</td></tr>
+                  <tr><td><span class="td-code">is_send</span></td><td><span class="td-type">boolean</span></td><td><span class="badge badge-warning">0</span> = pending &nbsp; <span class="badge badge-success">1</span> = sent</td></tr>
+                  <tr><td><span class="td-code">tracking_number</span></td><td><span class="td-type">string</span></td><td>Shipment tracking number</td></tr>
+                  <tr><td><span class="td-code">created_at / updated_at</span></td><td><span class="td-type">timestamp</span></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- shipment_additional_charges -->
+        <div class="card" id="db-charges">
+          <div class="card-header">
+            <h3>&#128181; <code class="inline">shipment_additional_charges</code></h3>
+            <span class="badge badge-amber" style="margin-left:auto;background:#fef3c7;color:#92400e">Charges</span>
+          </div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="td-code">id</span></td><td><span class="td-type">int</span></td><td>Primary key</td></tr>
+                  <tr><td><span class="td-code">shipment_id</span></td><td><span class="td-type">integer</span></td><td>Shipment ID</td></tr>
+                  <tr><td><span class="td-code">faf_charges</span></td><td><span class="td-type">decimal</span></td><td>Fuel adjustment factor charges</td></tr>
+                  <tr><td><span class="td-code">payment_type</span></td><td><span class="td-type">integer</span></td><td>Payment type identifier</td></tr>
+                  <tr><td><span class="td-code">arrival_charges_applied</span></td><td><span class="td-type">boolean</span></td><td>Whether arrival charges have been applied</td></tr>
+                  <tr><td><span class="td-code">zero_cod_discount_applied</span></td><td><span class="td-type">boolean</span></td><td>Zero COD discount applied flag</td></tr>
+                  <tr><td><span class="td-code">return_cod_discount_applied</span></td><td><span class="td-type">boolean</span></td><td>Return COD discount applied flag</td></tr>
+                  <tr><td><span class="td-code">wallet_charges</span></td><td><span class="td-type">decimal</span></td><td>Wallet service charges amount</td></tr>
+                  <tr><td><span class="td-code">wallet_charges_updated_at</span></td><td><span class="td-type">timestamp</span></td><td>When wallet charges were last set</td></tr>
+                  <tr><td><span class="td-code">created_at / updated_at</span></td><td><span class="td-type">timestamp</span></td><td></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- wallet_api_natures -->
+        <div class="card" id="db-natures">
+          <div class="card-header">
+            <h3>&#128203; <code class="inline">wallet_api_natures</code></h3>
+            <span class="badge badge-gray" style="margin-left:auto">Reference Table</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Lookup table defining the type of each API log entry. Request/response pairs share the same base number (odd=request, even=response).</p>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>ID</th><th>Name</th><th>Direction</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="td-code">1</span></td><td>onboard-request</td><td><span class="badge badge-info">Request</span></td></tr>
+                  <tr><td><span class="td-code">2</span></td><td>onboard-response</td><td><span class="badge badge-success">Response</span></td></tr>
+                  <tr><td><span class="td-code">5</span></td><td>log-charge-request</td><td><span class="badge badge-info">Request</span></td></tr>
+                  <tr><td><span class="td-code">6</span></td><td>log-charge-response</td><td><span class="badge badge-success">Response</span></td></tr>
+                  <tr><td><span class="td-code">7</span></td><td>settlement-request</td><td><span class="badge badge-info">Request</span></td></tr>
+                  <tr><td><span class="td-code">8</span></td><td>settlement-response</td><td><span class="badge badge-success">Response</span></td></tr>
+                  <tr><td><span class="td-code">9</span></td><td>adjustment-request</td><td><span class="badge badge-info">Request</span></td></tr>
+                  <tr><td><span class="td-code">10</span></td><td>adjustment-response</td><td><span class="badge badge-success">Response</span></td></tr>
+                  <tr><td><span class="td-code">11</span></td><td>status-update-request</td><td><span class="badge badge-info">Request</span></td></tr>
+                  <tr><td><span class="td-code">12</span></td><td>status-update-response</td><td><span class="badge badge-success">Response</span></td></tr>
+                  <tr><td><span class="td-code">13</span></td><td>cod-change-request</td><td><span class="badge badge-info">Request</span></td></tr>
+                  <tr><td><span class="td-code">14</span></td><td>cod-change-response</td><td><span class="badge badge-success">Response</span></td></tr>
+                  <tr><td><span class="td-code">15</span></td><td>bulk-status-request</td><td><span class="badge badge-info">Request</span></td></tr>
+                  <tr><td><span class="td-code">16</span></td><td>bulk-status-response</td><td><span class="badge badge-success">Response</span></td></tr>
+                  <tr><td><span class="td-code">19</span></td><td>bulk-charge-request</td><td><span class="badge badge-info">Request</span></td></tr>
+                  <tr><td><span class="td-code">20</span></td><td>bulk-charge-response</td><td><span class="badge badge-success">Response</span></td></tr>
+                  <tr><td><span class="td-code">21</span></td><td>bulk-settlement-request</td><td><span class="badge badge-info">Request</span></td></tr>
+                  <tr><td><span class="td-code">22</span></td><td>bulk-settlement-response</td><td><span class="badge badge-success">Response</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <!-- ===== API ENDPOINTS ===== -->
+    <section class="doc-section" id="api-endpoints">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon purple">&#128279;</div>
+        <div><div class="section-title">API Endpoints</div><div class="section-subtitle">All Finga REST API endpoints with request/response examples</div></div>
+        <span class="collapse-icon">&#8964;</span>
+      </div>
+      <div class="section-body">
+        <!-- Onboarding -->
+        <div class="endpoint-card" id="api-onboard">
+          <div class="endpoint-card-header">
+            <span class="method-badge method-post">POST</span>
+            <h4>Wallet Onboarding (Signup)</h4>
+            <span class="badge badge-purple" style="margin-left:auto">nature_id: 1/2</span>
+          </div>
+          <div class="endpoint-card-body">
+            <div class="endpoint-url">{FINGA_URL}wallet/onboard-users/</div>
+            <p class="endpoint-desc">Registers a new shipper on the Finga platform. Called by <code class="inline">FingaIntegrationController::signUp()</code>. On success, the returned <code class="inline">wallet_id</code> is stored in <code class="inline">wallet_users</code>.</p>
+            <div class="grid-2">
+              <div>
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Request Body</p>
+                <div class="code-block-wrap">
+                  <div class="code-block-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"client_id"</span><span class="tok-punct">:</span> <span class="tok-num">12345</span><span class="tok-punct">,</span>
+  <span class="tok-key">"client_name"</span><span class="tok-punct">:</span> <span class="tok-str">"Shipper Name"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"users"</span><span class="tok-punct">:</span> <span class="tok-punct">[</span>
+    <span class="tok-punct">{</span>
+      <span class="tok-key">"cnic"</span><span class="tok-punct">:</span> <span class="tok-str">"35202-1234567-1"</span><span class="tok-punct">,</span>
+      <span class="tok-key">"email"</span><span class="tok-punct">:</span> <span class="tok-str">"user@example.com"</span><span class="tok-punct">,</span>
+      <span class="tok-key">"mobile_no"</span><span class="tok-punct">:</span> <span class="tok-str">"03001234567"</span><span class="tok-punct">,</span>
+      <span class="tok-key">"name"</span><span class="tok-punct">:</span> <span class="tok-str">"User Name"</span><span class="tok-punct">,</span>
+      <span class="tok-key">"cnic_front_image_url"</span><span class="tok-punct">:</span> <span class="tok-str">"https://..."</span><span class="tok-punct">,</span>
+      <span class="tok-key">"cnic_back_image_url"</span><span class="tok-punct">:</span> <span class="tok-str">"https://..."</span>
+    <span class="tok-punct">}</span>
+  <span class="tok-punct">]</span>
+<span class="tok-punct">}</span></pre>
+                </div>
+              </div>
+              <div>
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Success Response</p>
+                <div class="code-block-wrap">
+                  <div class="code-block-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"status"</span><span class="tok-punct">:</span> <span class="tok-str">"success"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"wallet_id"</span><span class="tok-punct">:</span> <span class="tok-num">9876</span><span class="tok-punct">,</span>
+  <span class="tok-key">"users"</span><span class="tok-punct">:</span> <span class="tok-punct">[{</span>
+    <span class="tok-key">"mobile_no"</span><span class="tok-punct">:</span> <span class="tok-str">"..."</span><span class="tok-punct">,</span>
+    <span class="tok-key">"email"</span><span class="tok-punct">:</span> <span class="tok-str">"..."</span><span class="tok-punct">,</span>
+    <span class="tok-key">"cnic"</span><span class="tok-punct">:</span> <span class="tok-str">"..."</span><span class="tok-punct">,</span>
+    <span class="tok-key">"id"</span><span class="tok-punct">:</span> <span class="tok-num">1</span>
+  <span class="tok-punct">}]</span>
+<span class="tok-punct">}</span></pre>
+                </div>
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.05em">Error Response</p>
+                <div class="code-block-wrap">
+                  <div class="code-block-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"status"</span><span class="tok-punct">:</span> <span class="tok-str">"error"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"users"</span><span class="tok-punct">:</span> <span class="tok-punct">[{</span>
+    <span class="tok-key">"mobile_no"</span><span class="tok-punct">:</span> <span class="tok-str">"..."</span><span class="tok-punct">,</span>
+    <span class="tok-key">"status"</span><span class="tok-punct">:</span> <span class="tok-str">"error"</span><span class="tok-punct">,</span>
+    <span class="tok-key">"message"</span><span class="tok-punct">:</span> <span class="tok-punct">{...}</span>
+  <span class="tok-punct">}]</span>
+<span class="tok-punct">}</span></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Login URL -->
+        <div class="endpoint-card" id="api-login-url">
+          <div class="endpoint-card-header">
+            <span class="method-badge method-post">POST</span>
+            <h4>Wallet Login URL</h4>
+          </div>
+          <div class="endpoint-card-body">
+            <div class="endpoint-url">{FINGA_URL}wallet/check/</div>
+            <p class="endpoint-desc">Generates a one-time login URL for the shipper to access their Finga wallet dashboard.</p>
+            <div class="grid-2">
+              <div>
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Request Body</p>
+                <div class="code-block-wrap">
+                  <div class="code-block-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"cnic"</span><span class="tok-punct">:</span> <span class="tok-str">"3520212345671"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"email"</span><span class="tok-punct">:</span> <span class="tok-str">"user@example.com"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"mobile_no"</span><span class="tok-punct">:</span> <span class="tok-str">"923001234567"</span>
+<span class="tok-punct">}</span></pre>
+                </div>
+              </div>
+              <div>
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Response</p>
+                <div class="code-block-wrap">
+                  <div class="code-block-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"url"</span><span class="tok-punct">:</span> <span class="tok-url">"https://finga.app/dashboard?token=..."</span>
+<span class="tok-punct">}</span></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COD Log -->
+        <div class="endpoint-card" id="api-cod-log">
+          <div class="endpoint-card-header">
+            <span class="method-badge method-post">POST</span>
+            <h4>COD Log (Arrival / Initial Log)</h4>
+            <span class="badge badge-purple" style="margin-left:auto">nature_id: 5/6</span>
+          </div>
+          <div class="endpoint-card-body">
+            <div class="endpoint-url">{FINGA_URL}transactions/log/</div>
+            <p class="endpoint-desc">Logs the initial COD amount for a shipment. Called via <code class="inline">FinSurgentLogTrait::arrival_shipment_logs()</code>. Sets <code class="inline">wallet_log_updated=true</code> in settlement records.</p>
+            <div class="code-block-wrap">
+              <div class="code-block-header"><span class="code-lang">JSON Request</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"wallet_id"</span><span class="tok-punct">:</span> <span class="tok-num">9876</span><span class="tok-punct">,</span>
+  <span class="tok-key">"client_id"</span><span class="tok-punct">:</span> <span class="tok-num">12345</span><span class="tok-punct">,</span>
+  <span class="tok-key">"reference_id"</span><span class="tok-punct">:</span> <span class="tok-str">"uuid-v4-string"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"shipment_id"</span><span class="tok-punct">:</span> <span class="tok-str">"TRX20230001"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"amount"</span><span class="tok-punct">:</span> <span class="tok-num">5000.00</span><span class="tok-punct">,</span>
+  <span class="tok-key">"order_created_date"</span><span class="tok-punct">:</span> <span class="tok-str">"2024-01-15 10:30:00"</span>
+<span class="tok-punct">}</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- COD Change -->
+        <div class="endpoint-card" id="api-cod-change">
+          <div class="endpoint-card-header">
+            <span class="method-badge method-post">POST</span>
+            <h4>COD Amount Change</h4>
+            <span class="badge badge-purple" style="margin-left:auto">nature_id: 13/14</span>
+          </div>
+          <div class="endpoint-card-body">
+            <div class="endpoint-url">{FINGA_URL}transactions/log/change</div>
+            <p class="endpoint-desc">Notifies Finga when the COD amount for a shipment has been updated. Dispatched via <code class="inline">CODAmountChangeSendToWallet</code> job.</p>
+            <div class="code-block-wrap">
+              <div class="code-block-header"><span class="code-lang">JSON Request</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"client_id"</span><span class="tok-punct">:</span> <span class="tok-num">12345</span><span class="tok-punct">,</span>
+  <span class="tok-key">"wallet_id"</span><span class="tok-punct">:</span> <span class="tok-num">9876</span><span class="tok-punct">,</span>
+  <span class="tok-key">"shipment_id"</span><span class="tok-punct">:</span> <span class="tok-str">"TRX20230001"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"amount"</span><span class="tok-punct">:</span> <span class="tok-num">5500.00</span>
+<span class="tok-punct">}</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Update -->
+        <div class="endpoint-card" id="api-status">
+          <div class="endpoint-card-header">
+            <span class="method-badge method-post">POST</span>
+            <h4>Shipment Status Update (Single)</h4>
+            <span class="badge badge-purple" style="margin-left:auto">nature_id: 11/12</span>
+          </div>
+          <div class="endpoint-card-body">
+            <div class="endpoint-url">{FINGA_URL}shipments/update/</div>
+            <p class="endpoint-desc">Sends a single shipment status update to Finga. Called by <code class="inline">ShipmentStatusSharingWithWallet</code> job.</p>
+            <div class="grid-2">
+              <div>
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Single Update</p>
+                <div class="code-block-wrap">
+                  <div class="code-block-header"><span class="code-lang">JSON</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"shipment_id"</span><span class="tok-punct">:</span> <span class="tok-str">"TRX20230001"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"status_code"</span><span class="tok-punct">:</span> <span class="tok-str">"S-DE"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"status_name"</span><span class="tok-punct">:</span> <span class="tok-str">"Shipment - Delivered"</span>
+<span class="tok-punct">}</span></pre>
+                </div>
+              </div>
+              <div id="api-bulk">
+                <p style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">Bulk Update — POST {FINGA_URL}shipments/update/bulk</p>
+                <div class="code-block-wrap">
+                  <div class="code-block-header"><span class="code-lang">JSON Array</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                  <pre class="code-block"><span class="tok-punct">[</span>
+  <span class="tok-punct">{</span>
+    <span class="tok-key">"shipment_id"</span><span class="tok-punct">:</span> <span class="tok-str">"TRX001"</span><span class="tok-punct">,</span>
+    <span class="tok-key">"status_code"</span><span class="tok-punct">:</span> <span class="tok-str">"S-DE"</span><span class="tok-punct">,</span>
+    <span class="tok-key">"status_name"</span><span class="tok-punct">:</span> <span class="tok-str">"Shipment - Delivered"</span>
+  <span class="tok-punct">},</span>
+  <span class="tok-punct">{</span>
+    <span class="tok-key">"shipment_id"</span><span class="tok-punct">:</span> <span class="tok-str">"TRX002"</span><span class="tok-punct">,</span>
+    <span class="tok-key">"status_code"</span><span class="tok-punct">:</span> <span class="tok-str">"RT-CO"</span><span class="tok-punct">,</span>
+    <span class="tok-key">"status_name"</span><span class="tok-punct">:</span> <span class="tok-str">"Return - Confirm"</span>
+  <span class="tok-punct">}</span>
+<span class="tok-punct">]</span></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charge Log -->
+        <div class="endpoint-card" id="api-charge-log">
+          <div class="endpoint-card-header">
+            <span class="method-badge method-post">POST</span>
+            <h4>Arrival Charge Log</h4>
+            <span class="badge badge-purple" style="margin-left:auto">nature_id: 19/20</span>
+          </div>
+          <div class="endpoint-card-body">
+            <div class="endpoint-url">{FINGA_URL}transactions/log/charge</div>
+            <p class="endpoint-desc">Sends arrival/delivery charges breakdown to Finga. Triggered when <code class="inline">wallet_action_bid = 0</code> during settlement processing.</p>
+            <div class="code-block-wrap">
+              <div class="code-block-header"><span class="code-lang">JSON Request</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"client_id"</span><span class="tok-punct">:</span> <span class="tok-num">12345</span><span class="tok-punct">,</span>
+  <span class="tok-key">"wallet_id"</span><span class="tok-punct">:</span> <span class="tok-num">9876</span><span class="tok-punct">,</span>
+  <span class="tok-key">"shipment_id"</span><span class="tok-punct">:</span> <span class="tok-str">"TRX20230001"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"charges"</span><span class="tok-punct">:</span> <span class="tok-punct">{</span>
+    <span class="tok-key">"faf_charges"</span><span class="tok-punct">:</span> <span class="tok-num">50.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"weight_charges"</span><span class="tok-punct">:</span> <span class="tok-num">200.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"fuel_surcharge"</span><span class="tok-punct">:</span> <span class="tok-num">30.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"arrival_charges_gst"</span><span class="tok-punct">:</span> <span class="tok-num">28.00</span>
+  <span class="tok-punct">}</span>
+<span class="tok-punct">}</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settlement -->
+        <div class="endpoint-card" id="api-settlement">
+          <div class="endpoint-card-header">
+            <span class="method-badge method-post">POST</span>
+            <h4>Settlement</h4>
+            <span class="badge badge-purple" style="margin-left:auto">nature_id: 7/8 or 21/22</span>
+          </div>
+          <div class="endpoint-card-body">
+            <div class="endpoint-url">{FINGA_URL}transactions/log/settlement</div>
+            <p class="endpoint-desc">Sends the full settlement for a delivered shipment including all charge breakdowns. Triggered when <code class="inline">wallet_action_bid = 1</code>. Bulk version: <code class="inline">transactions/log/settlement/bulk</code></p>
+            <div class="code-block-wrap">
+              <div class="code-block-header"><span class="code-lang">JSON Request</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"client_id"</span><span class="tok-punct">:</span> <span class="tok-num">12345</span><span class="tok-punct">,</span>
+  <span class="tok-key">"wallet_id"</span><span class="tok-punct">:</span> <span class="tok-num">9876</span><span class="tok-punct">,</span>
+  <span class="tok-key">"reference_id"</span><span class="tok-punct">:</span> <span class="tok-num">456</span><span class="tok-punct">,</span>
+  <span class="tok-key">"shipment_id"</span><span class="tok-punct">:</span> <span class="tok-str">"TRX20230001"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"amount"</span><span class="tok-punct">:</span> <span class="tok-num">5000.00</span><span class="tok-punct">,</span>
+  <span class="tok-key">"charges"</span><span class="tok-punct">:</span> <span class="tok-punct">{</span>
+    <span class="tok-key">"faf_charges"</span><span class="tok-punct">:</span> <span class="tok-num">50.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"weight_charges"</span><span class="tok-punct">:</span> <span class="tok-num">200.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"fuel_surcharge"</span><span class="tok-punct">:</span> <span class="tok-num">30.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"cash_handling_charges"</span><span class="tok-punct">:</span> <span class="tok-num">100.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"insurance_charges"</span><span class="tok-punct">:</span> <span class="tok-num">0.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"replacement_charges"</span><span class="tok-punct">:</span> <span class="tok-num">0.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"try_and_buy_charges"</span><span class="tok-punct">:</span> <span class="tok-num">0.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"intercept_charges"</span><span class="tok-punct">:</span> <span class="tok-num">0.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"non_service_area_charges"</span><span class="tok-punct">:</span> <span class="tok-num">0.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"esc_charges"</span><span class="tok-punct">:</span> <span class="tok-num">0.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"gst_charges"</span><span class="tok-punct">:</span> <span class="tok-num">38.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"sms_charges"</span><span class="tok-punct">:</span> <span class="tok-num">5.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"reverse_pickup_charges"</span><span class="tok-punct">:</span> <span class="tok-num">0.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"with_holding_tax"</span><span class="tok-punct">:</span> <span class="tok-num">0.00</span><span class="tok-punct">,</span>
+    <span class="tok-key">"cod_sst"</span><span class="tok-punct">:</span> <span class="tok-num">0.00</span>
+  <span class="tok-punct">}</span>
+<span class="tok-punct">}</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Adjustment -->
+        <div class="endpoint-card" id="api-adjustment">
+          <div class="endpoint-card-header">
+            <span class="method-badge method-post">POST</span>
+            <h4>Adjustment</h4>
+            <span class="badge badge-purple" style="margin-left:auto">nature_id: 9/10</span>
+          </div>
+          <div class="endpoint-card-body">
+            <div class="endpoint-url">{FINGA_URL}transactions/log/adjustment</div>
+            <p class="endpoint-desc">Sends a payment adjustment to Finga. Triggered when <code class="inline">wallet_action_bid = 2</code>. Used when the final payout amount differs from the original settlement.</p>
+            <div class="code-block-wrap">
+              <div class="code-block-header"><span class="code-lang">JSON Request</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+              <pre class="code-block"><span class="tok-punct">{</span>
+  <span class="tok-key">"client_id"</span><span class="tok-punct">:</span> <span class="tok-num">12345</span><span class="tok-punct">,</span>
+  <span class="tok-key">"wallet_id"</span><span class="tok-punct">:</span> <span class="tok-num">9876</span><span class="tok-punct">,</span>
+  <span class="tok-key">"reference_id"</span><span class="tok-punct">:</span> <span class="tok-num">456</span><span class="tok-punct">,</span>
+  <span class="tok-key">"shipment_id"</span><span class="tok-punct">:</span> <span class="tok-str">"TRX20230001"</span><span class="tok-punct">,</span>
+  <span class="tok-key">"amount"</span><span class="tok-punct">:</span> <span class="tok-num">4607.00</span>
+<span class="tok-punct">}</span></pre>
+            </div>
+            <div class="alert alert-info" style="margin-top:12px">
+              <span class="alert-icon">&#8505;</span>
+              <div><strong>Bulk versions:</strong> <code class="inline">transactions/log/settlement/bulk</code> and <code class="inline">transactions/log/charge/bulk</code> accept arrays of the same payload structure. Processed by <code class="inline">WalletBulkSettlementFromDonePayments</code> job.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <!-- ===== STATUS CODES ===== -->
+    <section class="doc-section" id="status-codes">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon amber">&#128204;</div>
+        <div><div class="section-title">Status Code Mapping</div><div class="section-subtitle">Trax shipment status IDs mapped to Finga status codes</div></div>
+        <span class="collapse-icon">&#8964;</span>
+      </div>
+      <div class="section-body">
+        <div class="alert alert-info">
+          <span class="alert-icon">&#8505;</span>
+          <div>When a shipment status changes in Trax, the corresponding Finga status code is sent via <code class="inline">shipments/update/</code>. Only statuses in this mapping table are forwarded to Finga.</div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trax Status ID</th><th>Finga Code</th><th>Finga Name</th><th>Category</th></tr></thead>
+            <tbody>
+              <tr><td><span class="td-code">5</span></td><td><span class="badge badge-info">S-OD</span></td><td>Shipment - Out for Delivery</td><td><span class="badge badge-success">Delivery</span></td></tr>
+              <tr><td><span class="td-code">8</span></td><td><span class="badge badge-warning">S-AF</span></td><td>Shipment - Delivery Unsuccessful</td><td><span class="badge badge-success">Delivery</span></td></tr>
+              <tr><td><span class="td-code">13</span></td><td><span class="badge badge-info">S-RA</span></td><td>Shipment - Re-Attempt</td><td><span class="badge badge-success">Delivery</span></td></tr>
+              <tr><td><span class="td-code">14</span></td><td><span class="badge badge-success">S-DE</span></td><td>Shipment - Delivered</td><td><span class="badge badge-success">Delivery</span></td></tr>
+              <tr><td><span class="td-code">18</span></td><td><span class="badge badge-danger">S-LO</span></td><td>Shipment - Lost</td><td><span class="badge badge-success">Delivery</span></td></tr>
+              <tr><td><span class="td-code">20</span></td><td><span class="badge badge-warning">RT-CO</span></td><td>Return - Confirm</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">21</span></td><td><span class="badge badge-warning">RT-IT</span></td><td>Return - In Transit</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">22</span></td><td><span class="badge badge-warning">RT-AOC</span></td><td>Return - Arrived at Origin</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">23</span></td><td><span class="badge badge-warning">RT-DP</span></td><td>Return - Dispatched</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">24</span></td><td><span class="badge badge-warning">RT-AF</span></td><td>Return - Delivery Unsuccessful</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">25</span></td><td><span class="badge badge-success">RT-DS</span></td><td>Return - Delivered to Shipper</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">30</span></td><td><span class="badge badge-info">RP-EC</span></td><td>Replacement - Collected</td><td><span class="badge badge-purple">Replacement</span></td></tr>
+              <tr><td><span class="td-code">36</span></td><td><span class="badge badge-success">TB-DE</span></td><td>Try &amp; Buy - Delivered</td><td><span class="badge badge-gray">Try &amp; Buy</span></td></tr>
+              <tr><td><span class="td-code">37</span></td><td><span class="badge badge-info">TB-PD</span></td><td>Try &amp; Buy - Partial Delivered</td><td><span class="badge badge-gray">Try &amp; Buy</span></td></tr>
+              <tr><td><span class="td-code">44</span></td><td><span class="badge badge-warning">R-RE</span></td><td>Return - Rider Exchange</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">47</span></td><td><span class="badge badge-warning">R-NA</span></td><td>Return - Not Attempted</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">48</span></td><td><span class="badge badge-warning">R-OH</span></td><td>Return - On Hold</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">57</span></td><td><span class="badge badge-gray">RN-S</span></td><td>Return Note Shifted</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">60</span></td><td><span class="badge badge-danger">RU-CS</span></td><td>Return - Unable to Return</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">75</span></td><td><span class="badge badge-danger">RT-MR</span></td><td>Return - Misrouted</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">76</span></td><td><span class="badge badge-info">RT-MF</span></td><td>Return - Misroute Forwarded</td><td><span class="badge badge-warning">Return</span></td></tr>
+              <tr><td><span class="td-code">77</span></td><td><span class="badge badge-warning">RT-WM</span></td><td>Return - Without Manifest</td><td><span class="badge badge-warning">Return</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+    <!-- ===== WORKFLOW ===== -->
+    <section class="doc-section" id="workflow">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon teal">&#9881;</div>
+        <div><div class="section-title">Complete Workflow</div><div class="section-subtitle">End-to-end flow from admin setup to payment settlement</div></div>
+        <span class="collapse-icon">&#8964;</span>
+      </div>
+      <div class="section-body">
+
+        <!-- Phase overview diagram -->
+        <div class="flow-diagram" style="margin-bottom:32px">
+          <div class="flow-phase" style="border-top:3px solid #6366f1">
+            <div class="flow-phase-num">1</div>
+            <div class="flow-phase-title">Admin Setup</div>
+            <div class="flow-phase-desc">Admin enables shipper in wallet_shipper_settings</div>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-phase" style="border-top:3px solid #10b981">
+            <div class="flow-phase-num">2</div>
+            <div class="flow-phase-title">Wallet Signup</div>
+            <div class="flow-phase-desc">Shipper registers via Trax dashboard</div>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-phase" style="border-top:3px solid #3b82f6">
+            <div class="flow-phase-num">3</div>
+            <div class="flow-phase-title">Pending Sync</div>
+            <div class="flow-phase-desc">Backfill existing shipments to Finga</div>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-phase" style="border-top:3px solid #f59e0b">
+            <div class="flow-phase-num">4</div>
+            <div class="flow-phase-title">Status Sharing</div>
+            <div class="flow-phase-desc">Real-time status updates to Finga</div>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-phase" style="border-top:3px solid #8b5cf6">
+            <div class="flow-phase-num">5</div>
+            <div class="flow-phase-title">Settlement</div>
+            <div class="flow-phase-desc">COD funds settled to wallet</div>
+          </div>
+          <div class="flow-arrow">&#8594;</div>
+          <div class="flow-phase" style="border-top:3px solid #ef4444">
+            <div class="flow-phase-num">6</div>
+            <div class="flow-phase-title">Disable</div>
+            <div class="flow-phase-desc">Archive inactive wallet users</div>
+          </div>
+        </div>
+
+        <!-- Phase 1 -->
+        <div class="card" style="border-left:4px solid #6366f1">
+          <div class="card-header" style="background:rgba(99,102,241,.05)">
+            <h3 style="color:#6366f1">&#128100; Phase 1: Admin Setup</h3>
+          </div>
+          <div class="card-body">
+            <div class="vflow">
+              <div class="vflow-step">
+                <div class="vflow-num">1</div>
+                <div class="vflow-content">
+                  <h4>Admin adds shipper to wallet settings</h4>
+                  <p>Admin navigates to the wallet management panel and adds the shipper's <code>user_id</code> to <code>wallet_shipper_settings</code> with <code>status=1</code>.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">2</div>
+                <div class="vflow-content">
+                  <h4>Shipper sees wallet signup option</h4>
+                  <p>Once enabled, the shipper's dashboard shows the Finga wallet signup form. Without this setting, the option is hidden.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="card" style="border-left:4px solid #10b981">
+          <div class="card-header" style="background:rgba(16,185,129,.05)">
+            <h3 style="color:#10b981">&#128179; Phase 2: Wallet Signup</h3>
+          </div>
+          <div class="card-body">
+            <div class="vflow">
+              <div class="vflow-step">
+                <div class="vflow-num">1</div>
+                <div class="vflow-content">
+                  <h4>Shipper submits signup form</h4>
+                  <p>Shipper provides: name, email, phone, CNIC, and CNIC front/back images.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">2</div>
+                <div class="vflow-content">
+                  <h4>Validation &amp; API call</h4>
+                  <p><code>ShipperDashboardController::updateprofilewalletbulk()</code> validates data, then calls <code>FingaIntegrationController::signUp()</code> which POSTs to <code>wallet/onboard-users/</code>.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">3</div>
+                <div class="vflow-content">
+                  <h4>Store wallet_id &amp; set default bank</h4>
+                  <p>On success, creates <code>wallet_users</code> record with the returned <code>wallet_id</code>. Sets Finga bank as default: <code>bank_id=48</code>, IBAN: <code>PK06TMFB0000000087042403</code>.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">4</div>
+                <div class="vflow-content">
+                  <h4>Dispatch pending records job</h4>
+                  <p>Dispatches <code>WalletSignUpLPendingRecordLogs</code> job to queue <code>wallet_signup_pending_record_log</code> to backfill existing shipments.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="card" style="border-left:4px solid #3b82f6">
+          <div class="card-header" style="background:rgba(59,130,246,.05)">
+            <h3 style="color:#3b82f6">&#128260; Phase 3: Post-Signup Pending Records</h3>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info">
+              <span class="alert-icon">&#8505;</span>
+              <div>The <code class="inline">WalletSignUpLPendingRecordLogs</code> job handles backfilling all existing pending payments for the newly registered shipper.</div>
+            </div>
+            <div class="vflow">
+              <div class="vflow-step">
+                <div class="vflow-num">1</div>
+                <div class="vflow-content">
+                  <h4>Find all pending payments</h4>
+                  <p>Queries all existing pending payment shipments for the shipper that haven't been logged to Finga yet.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">2</div>
+                <div class="vflow-content">
+                  <h4>Send COD log for each shipment</h4>
+                  <p>For each pending shipment, sends COD log to Finga via <code>transactions/log/</code>. Updates <code>wallet_log_updated=true</code> in settlement records.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">3</div>
+                <div class="vflow-content">
+                  <h4>Send current status</h4>
+                  <p>After COD log is sent, sends the current shipment status to Finga via <code>shipments/update/</code>.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">4</div>
+                <div class="vflow-content">
+                  <h4>Chunked processing</h4>
+                  <p>Processes in chunks of <strong>50 shipments</strong> with a <strong>20-second sleep</strong> between chunks to avoid rate limiting.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 4 -->
+        <div class="card" style="border-left:4px solid #f59e0b">
+          <div class="card-header" style="background:rgba(245,158,11,.05)">
+            <h3 style="color:#f59e0b">&#128204; Phase 4: Ongoing Status Sharing</h3>
+          </div>
+          <div class="card-body">
+            <div class="vflow">
+              <div class="vflow-step">
+                <div class="vflow-num">1</div>
+                <div class="vflow-content">
+                  <h4>Status change triggers job</h4>
+                  <p>Every shipment status change dispatches <code>ShipmentStatusSharingWithWallet</code> job to queue <code>shipment_status_sharing_with_wallet</code>.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">2</div>
+                <div class="vflow-content">
+                  <h4>Check COD log sent</h4>
+                  <p>Job checks <code>finja_log_settlement_records.wallet_log_updated</code>. If <code>false</code>, sends COD log first before proceeding.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">3</div>
+                <div class="vflow-content">
+                  <h4>Check COD amount change</h4>
+                  <p>If COD amount has changed since last log, dispatches <code>CODAmountChangeSendToWallet</code> job to notify Finga of the new amount.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">4</div>
+                <div class="vflow-content">
+                  <h4>Send status update</h4>
+                  <p>Sends status update to <code>shipments/update/</code>. Updates <code>status_sharing_with_wallets.is_send=1</code>.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">5</div>
+                <div class="vflow-content">
+                  <h4>Cron catch-up</h4>
+                  <p>Cron <code>bulk:status-sharing-wallet</code> runs every 5 minutes to pick up any missed statuses (where <code>is_send=0</code>).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 5 -->
+        <div class="card" style="border-left:4px solid #8b5cf6">
+          <div class="card-header" style="background:rgba(139,92,246,.05)">
+            <h3 style="color:#8b5cf6">&#128184; Phase 5: Payment Settlement</h3>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-warning">
+              <span class="alert-icon">&#9888;</span>
+              <div>Settlement runs daily (except Sunday) via cron <code class="inline">wallet-users:make-to-done</code> at 06:00. Admin can also trigger manually via <code class="inline">mark_settlement()</code>.</div>
+            </div>
+            <div class="vflow">
+              <div class="vflow-step">
+                <div class="vflow-num">1</div>
+                <div class="vflow-content">
+                  <h4>Move pending to done payments</h4>
+                  <p>Cron moves pending wallet payments to done payments for all active wallet users.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">2</div>
+                <div class="vflow-content">
+                  <h4>WalletBulkSettlementFromDonePayments job</h4>
+                  <p>Processes each done payment shipment based on <code>wallet_action_bid</code> value:</p>
+                </div>
+              </div>
+            </div>
+            <div class="table-wrap" style="margin:12px 0">
+              <table>
+                <thead><tr><th>wallet_action_bid</th><th>Action</th><th>API Endpoint</th><th>Settlement Record Updated</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="badge badge-info">0</span></td><td>Send arrival charge log</td><td><span class="td-code">transactions/log/charge</span></td><td><span class="td-code">wallet_log_charges_updated</span></td></tr>
+                  <tr><td><span class="badge badge-success">1</span></td><td>Send settlement</td><td><span class="td-code">transactions/log/settlement</span></td><td><span class="td-code">wallet_settlement_updated</span></td></tr>
+                  <tr><td><span class="badge badge-warning">2</span></td><td>Send adjustment</td><td><span class="td-code">transactions/log/adjustment</span></td><td><span class="td-code">wallet_adjustment_updated</span></td></tr>
+                  <tr><td><span class="badge badge-gray">3</span></td><td>Already processed</td><td>—</td><td>No action needed</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="vflow">
+              <div class="vflow-step">
+                <div class="vflow-num">3</div>
+                <div class="vflow-content">
+                  <h4>Update settlement records</h4>
+                  <p>After each successful API call, updates the corresponding boolean flag in <code>finja_log_settlement_records</code>.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">4</div>
+                <div class="vflow-content">
+                  <h4>Update payment status</h4>
+                  <p>Updates the shipment's <code>payment_status_id</code> to reflect the completed settlement.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phase 6 -->
+        <div class="card" style="border-left:4px solid #ef4444">
+          <div class="card-header" style="background:rgba(239,68,68,.05)">
+            <h3 style="color:#ef4444">&#128683; Phase 6: Wallet User Disable</h3>
+          </div>
+          <div class="card-body">
+            <div class="vflow">
+              <div class="vflow-step">
+                <div class="vflow-num">1</div>
+                <div class="vflow-content">
+                  <h4>Cron runs twice daily</h4>
+                  <p>Cron <code>disable_wallet_users</code> runs at 13:00 and 18:00 to check for users that should be disabled.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">2</div>
+                <div class="vflow-content">
+                  <h4>Check for pending payments</h4>
+                  <p>Only disables a wallet user if they have <strong>no pending wallet payments</strong>. Users with outstanding payments are skipped.</p>
+                </div>
+              </div>
+              <div class="vflow-step">
+                <div class="vflow-num">3</div>
+                <div class="vflow-content">
+                  <h4>Archive to wallet_users_disables</h4>
+                  <p>Moves the record from <code>wallet_users</code> to <code>wallet_users_disables</code> for audit trail purposes.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+    <!-- ===== QUEUES & CRONS ===== -->
+    <section class="doc-section" id="queues-crons">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon orange">&#9200;</div>
+        <div><div class="section-title">Queues &amp; Cron Jobs</div><div class="section-subtitle">Background job queues and scheduled commands</div></div>
+        <span class="collapse-icon">&#8964;</span>
+      </div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div>
+            <h3 style="font-size:15px;font-weight:700;margin-bottom:12px">&#128260; Queue Names</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Queue Name</th><th>Job Class</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="td-code">wallet_signup_pending_record_log</span></td><td>WalletSignUpLPendingRecordLogs</td></tr>
+                  <tr><td><span class="td-code">wallet_log_dispatch_log</span></td><td>WalletLogDispatchJob</td></tr>
+                  <tr><td><span class="td-code">shipment_status_sharing_with_wallet</span></td><td>ShipmentStatusSharingWithWallet</td></tr>
+                  <tr><td><span class="td-code">shipment_status_sharing_with_wallet_bulk</span></td><td>BulkStatusSharingWithWalletJob</td></tr>
+                  <tr><td><span class="td-code">cod_amount_change_send_to_wallet</span></td><td>CODAmountChangeSendToWallet</td></tr>
+                  <tr><td><span class="td-code">wallet_settlement_form_done_payment</span></td><td>WalletSettlementFromDonePayments</td></tr>
+                  <tr><td><span class="td-code">wallet_settlement_form_done_payment_bulk</span></td><td>WalletBulkSettlementFromDonePayments</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3 style="font-size:15px;font-weight:700;margin-bottom:12px">&#9200; Cron Schedule</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Command</th><th>Schedule</th><th>Purpose</th></tr></thead>
+                <tbody>
+                  <tr>
+                    <td><span class="td-code">bulk:status-sharing-wallet</span></td>
+                    <td><span class="badge badge-info">Every 5 min</span></td>
+                    <td>Push pending statuses to Finga</td>
+                  </tr>
+                  <tr>
+                    <td><span class="td-code">bulk:status-sharing-wallet-replicate</span></td>
+                    <td><span class="badge badge-info">Every 5 min</span></td>
+                    <td>Replicate status sharing</td>
+                  </tr>
+                  <tr>
+                    <td><span class="td-code">wallet-users:make-to-done</span></td>
+                    <td><span class="badge badge-success">Daily 06:00 (Mon-Sat)</span></td>
+                    <td>Auto-settle wallet payments</td>
+                  </tr>
+                  <tr>
+                    <td><span class="td-code">disable_wallet_users</span></td>
+                    <td><span class="badge badge-warning">13:00 &amp; 18:00</span></td>
+                    <td>Disable removed wallet users</td>
+                  </tr>
+                  <tr>
+                    <td><span class="td-code">update:shipment_additional_charges</span></td>
+                    <td><span class="badge badge-gray">Periodic</span></td>
+                    <td>Sync additional charges</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== KEY FILES ===== -->
+    <section class="doc-section" id="key-files">
+      <div class="section-header" onclick="toggleSection(this)">
+        <div class="section-icon red">&#128193;</div>
+        <div><div class="section-title">Key Files</div><div class="section-subtitle">Source files involved in the Finga wallet integration</div></div>
+        <span class="collapse-icon">&#8964;</span>
+      </div>
+      <div class="section-body">
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><h3>&#9881; Controllers</h3></div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div>
+                  <div class="td-code" style="display:inline-block;margin-bottom:4px">FingaIntegrationController.php</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Core integration controller. Handles signup, login URL, and all API calls to Finga.</div>
+                  <div style="font-size:11px;color:#94a3b8;margin-top:2px">app/Http/Controllers/</div>
+                </div>
+                <div>
+                  <div class="td-code" style="display:inline-block;margin-bottom:4px">AdminFinanceController.php</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Settlement logic. Contains <code class="inline">mark_settlement()</code> for manual settlement triggers.</div>
+                  <div style="font-size:11px;color:#94a3b8;margin-top:2px">app/Http/Controllers/Admins/</div>
+                </div>
+                <div>
+                  <div class="td-code" style="display:inline-block;margin-bottom:4px">ShipperDashboardController.php</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Shipper-facing signup. Contains <code class="inline">updateprofilewalletbulk()</code>.</div>
+                  <div style="font-size:11px;color:#94a3b8;margin-top:2px">app/Http/Controllers/Shippers/</div>
+                </div>
+                <div>
+                  <div class="td-code" style="display:inline-block;margin-bottom:4px">ShipperAPIController.php</div>
+                  <div style="font-size:12px;color:var(--text-muted)">API endpoints for shipper-facing wallet operations.</div>
+                  <div style="font-size:11px;color:#94a3b8;margin-top:2px">app/Http/Controllers/</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>&#128196; Models &amp; Traits</h3></div>
+            <div class="card-body">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div>
+                  <div class="td-code" style="display:inline-block;margin-bottom:4px">FinSurgentLogTrait.php</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Trait containing <code class="inline">arrival_shipment_logs()</code> for sending COD logs to Finga.</div>
+                  <div style="font-size:11px;color:#94a3b8;margin-top:2px">app/Http/Traits/</div>
+                </div>
+                <div>
+                  <div class="td-code" style="display:inline-block;margin-bottom:4px">FingaApiLog.php</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Eloquent model for <code class="inline">finga_api_logs</code> table.</div>
+                  <div style="font-size:11px;color:#94a3b8;margin-top:2px">app/Models/</div>
+                </div>
+                <div>
+                  <div class="td-code" style="display:inline-block;margin-bottom:4px">FinjaLogSettlementRecord.php</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Eloquent model for <code class="inline">finja_log_settlement_records</code> table.</div>
+                  <div style="font-size:11px;color:#94a3b8;margin-top:2px">app/Models/</div>
+                </div>
+                <div>
+                  <div class="td-code" style="display:inline-block;margin-bottom:4px">WalletUser.php</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Eloquent model for <code class="inline">wallet_users</code> table.</div>
+                  <div style="font-size:11px;color:#94a3b8;margin-top:2px">app/Http/Models/</div>
+                </div>
+                <div>
+                  <div class="td-code" style="display:inline-block;margin-bottom:4px">ShipmentAdditionalCharges.php</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Eloquent model for <code class="inline">shipment_additional_charges</code> table.</div>
+                  <div style="font-size:11px;color:#94a3b8;margin-top:2px">app/</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="alert alert-info" style="margin-top:16px">
+          <span class="alert-icon">&#8505;</span>
+          <div>Queue jobs are located in <code class="inline">app/Jobs/</code>. Console commands are in <code class="inline">app/Console/Commands/</code>. Look for files prefixed with <code class="inline">Wallet</code>, <code class="inline">Finga</code>, or <code class="inline">BulkStatus</code>.</div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- end content-body -->
+</main><!-- end main -->
+<script>
+// ===== SIDEBAR TOGGLE =====
+function toggleSidebar() {
+  var sidebar = document.getElementById('sidebar');
+  var overlay = document.getElementById('overlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
+}
+
+// ===== ACTIVE NAV ITEM =====
+function setActive(el) {
+  document.querySelectorAll('.nav-item').forEach(function(item) {
+    item.classList.remove('active');
+  });
+  el.classList.add('active');
+}
+
+// ===== COLLAPSIBLE SECTIONS =====
+function toggleSection(headerEl) {
+  var body = headerEl.nextElementSibling;
+  var icon = headerEl.querySelector('.collapse-icon');
+  if (body.classList.contains('collapsed')) {
+    body.classList.remove('collapsed');
+    icon.style.transform = 'rotate(0deg)';
+  } else {
+    body.classList.add('collapsed');
+    icon.style.transform = 'rotate(-90deg)';
+  }
+}
+
+// ===== COPY CODE BUTTON =====
+function copyCode(btn) {
+  var pre = btn.closest('.code-block-wrap').querySelector('pre');
+  var text = pre.getAttribute('data-raw') || pre.innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  }).catch(function() {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// ===== SEARCH FUNCTIONALITY =====
+function searchDocs(query) {
+  query = query.toLowerCase().trim();
+  var sections = document.querySelectorAll('.doc-section');
+  var navItems = document.querySelectorAll('.nav-item');
+
+  if (!query) {
+    sections.forEach(function(s) { s.style.display = ''; });
+    navItems.forEach(function(n) { n.style.display = ''; });
+    removeHighlights();
+    return;
+  }
+
+  sections.forEach(function(section) {
+    var text = section.textContent.toLowerCase();
+    if (text.includes(query)) {
+      section.style.display = '';
+      // Expand collapsed sections that match
+      var body = section.querySelector('.section-body');
+      if (body && body.classList.contains('collapsed')) {
+        body.classList.remove('collapsed');
+        var icon = section.querySelector('.collapse-icon');
+        if (icon) icon.style.transform = 'rotate(0deg)';
+      }
+    } else {
+      section.style.display = 'none';
+    }
+  });
+
+  navItems.forEach(function(item) {
+    var href = item.getAttribute('href');
+    if (!href) return;
+    var targetId = href.replace('#', '');
+    var target = document.getElementById(targetId);
+    if (target && target.style.display !== 'none') {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+function removeHighlights() {
+  document.querySelectorAll('.search-highlight').forEach(function(el) {
+    el.outerHTML = el.innerHTML;
+  });
+}
+
+// ===== SCROLL SPY =====
+window.addEventListener('scroll', function() {
+  var sections = document.querySelectorAll('.doc-section');
+  var scrollPos = window.scrollY + 100;
+  sections.forEach(function(section) {
+    if (section.offsetTop <= scrollPos && section.offsetTop + section.offsetHeight > scrollPos) {
+      var id = section.getAttribute('id');
+      document.querySelectorAll('.nav-item').forEach(function(item) {
+        item.classList.remove('active');
+        if (item.getAttribute('href') === '#' + id) {
+          item.classList.add('active');
+        }
+      });
+    }
+  });
+}, { passive: true });
+
+// ===== KEYBOARD SHORTCUT: / to focus search =====
+document.addEventListener('keydown', function(e) {
+  if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+    e.preventDefault();
+    document.getElementById('search-box').focus();
+  }
+  if (e.key === 'Escape') {
+    document.getElementById('search-box').value = '';
+    searchDocs('');
+    document.getElementById('search-box').blur();
+  }
+});
+
+// ===== SMOOTH SCROLL FOR ANCHOR LINKS =====
+document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+  anchor.addEventListener('click', function(e) {
+    var target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Close mobile sidebar
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('show');
+    }
+  });
+});
+</script>
+
+</div><!-- end #app-content -->
+
+<script>
+// ===== PASSWORD GATE =====
+// Password is stored as SHA-256 hash — plain text is never in the source
+var _H = '55dfaf9ebd890ecb48db7a5f7f7147da5a8aacddbecbede369d7421c4869e747';
+var _SK = 'fwsg_unlocked';
+
+async function _sha256(str) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+}
+
+function unlockApp() {
+  document.getElementById('pw-gate').classList.add('hidden');
+  document.getElementById('app-content').style.display = '';
+  sessionStorage.setItem(_SK, '1');
+}
+
+async function checkPassword() {
+  var val = document.getElementById('pw-input').value;
+  if (!val) return;
+  var hash = await _sha256(val);
+  if (hash === _H) {
+    unlockApp();
+  } else {
+    var inp = document.getElementById('pw-input');
+    var err = document.getElementById('pw-error');
+    inp.classList.add('error');
+    err.textContent = 'Incorrect password. Please try again.';
+    inp.value = '';
+    setTimeout(function(){ inp.classList.remove('error'); }, 400);
+    inp.focus();
+  }
+}
+
+function togglePwVisibility() {
+  var inp = document.getElementById('pw-input');
+  var btn = document.getElementById('pw-toggle');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.innerHTML = '&#128064;';
+  } else {
+    inp.type = 'password';
+    btn.innerHTML = '&#128065;';
+  }
+}
+
+// Allow Enter key to submit
+document.getElementById('pw-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') checkPassword();
+});
+
+// Auto-unlock if already authenticated this session
+if (sessionStorage.getItem(_SK) === '1') {
+  unlockApp();
+}
+</script>
+</body>
+</html>
