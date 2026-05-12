@@ -104,36 +104,38 @@ class NonWalletMakeToDonePayment extends Command
     }
 
     /**
-     * Calculate the cutoff date based on today's weekday and the shipper's T value.
+     * Calculate cutoff date based on T value.
      *
-     * Rules:
-     *  - Payment runs Mon–Fri. Weekends are skipped (not counted as business days).
-     *  - T-0 means "up to and including today's previous business day".
-     *  - T-1 means one additional business day back, and so on up to T-5.
+     * Rule:
+     * - Only Saturday is skipped.
+     * - Sunday is treated as a valid day.
+     * - T-0 means previous day.
+     * - T-1 means one more valid day back.
      *
-     * Examples (T-0 to T-5):
-     *  Monday:    T-0 = Friday,    T-1 = Thursday, T-2 = Wednesday, T-3 = Tuesday, T-4 = Monday,   T-5 = Friday (prev week)
-     *  Tuesday:   T-0 = Monday,    T-1 = Friday,   T-2 = Thursday,  T-3 = Wednesday,T-4 = Tuesday, T-5 = Monday
-     *  Wednesday: T-0 = Tuesday,   T-1 = Monday,   T-2 = Friday,    T-3 = Thursday, T-4 = Wednesday,T-5 = Tuesday
-     *  Thursday:  T-0 = Wednesday, T-1 = Tuesday,  T-2 = Monday,    T-3 = Friday,   T-4 = Thursday, T-5 = Wednesday
-     *  Friday:    T-0 = Thursday,  T-1 = Wednesday,T-2 = Tuesday,   T-3 = Monday,   T-4 = Friday,   T-5 = Thursday
+     * Example:
+     * Monday:
+     *   T-0 = Sunday
+     *   T-1 = Friday
+     *   T-2 = Thursday
      */
     private function calculateCutoffDate(Carbon $today, int $T): Carbon
     {
-        // Start from yesterday (T-0 baseline = last business day)
-        // and step back T more business days.
-        $stepsBack = $T + 1; // +1 because T-0 already means "previous business day"
+        // T-0 = previous day
+        // T-1 = one more valid day back
+        // Only Saturday is skipped, Sunday is allowed
+
+        $stepsBack = $T + 1;
         $date = $today->copy();
 
         for ($i = 0; $i < $stepsBack; $i++) {
             $date->subDay();
-            // Skip over Saturday and Sunday
-            while ($date->isWeekend()) {
+
+            // Skip only Saturday
+            while ($date->dayOfWeek === Carbon::SATURDAY) {
                 $date->subDay();
             }
         }
 
-        // Set to end of that day so all shipments created on that day are included
         return $date->endOfDay();
     }
 
