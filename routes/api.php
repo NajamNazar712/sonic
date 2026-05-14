@@ -56,6 +56,7 @@ use Illuminate\Http\Request;
 
         Route::prefix('shipment')->name('shipment.')->group(function () {
             Route::post('book', 'APIController@shipment_book')->name('book');
+            Route::post('validate', 'APIController@shipment_validate')->name('validate');
             Route::post('book/intl', 'APIController@shipment_book_international')->name('book.intl');
             Route::post('book/gul_ahmed', 'APIController@shipment_book_gul_ahmed')->name('book.gul_ahmed');
             Route::get('air_waybill', 'APIController@shipment_air_waybill')->name('air_waybill');

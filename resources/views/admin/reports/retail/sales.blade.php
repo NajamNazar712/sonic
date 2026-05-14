@@ -124,6 +124,7 @@
                         <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">RNCC Number</th>
                         <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">No. Of Flyers</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -157,6 +158,26 @@
                     </thead>
                 </table>
 
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="flyers_modal" data-backdrop="static" role="dialog" aria-labelledby="flyers_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="flyers_modal_title">Flyer(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -464,6 +485,7 @@
                     { data:'payment_id' ,name: 'dps.id', class: 'align-middle payment_status'},
                     { data:'pncc_id' ,name: 'rcds.cash_deposit_id', class: 'align-middle pncc_id'},
                     { data:'service_type' ,name: 'rsm.name', class: 'align-middle service_type'},
+                    {data: 'flyers_count_link', name: 'flyers_count_link', class: 'align-middle flyers_count_link text-center'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
@@ -532,6 +554,36 @@
                         return false;
                     }
                 }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.flyers_count_link button', function () {
+                var id = $(this)
+                    .closest('td')
+                    .find('input[name="shipment_id_for_flyer"]')
+                    .val();
+
+                $('#flyers_modal .modal-body').html('');
+                $('#flyers_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.reports.retail_sales.flyers') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipment_id': id
+                    }
+                })
+                    .done(function (data) {
+                        if (data) {
+                            var html = '';
+                            $.each(data.data, function (index, number) {
+                                html += number + '<br>';
+                            });
+                            
+                            $('#flyers_modal .modal-body').html(html);
+                        }
+                    });
+
             });
 
 

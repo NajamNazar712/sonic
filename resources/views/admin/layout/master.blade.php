@@ -25,6 +25,7 @@
 @include('admin.components.modals')
 @include('admin.layout.footer')
 @include('admin.layout.sonic_search')
+@include('admin.human_resource.employee_directory.partials.attachments-modal')
 <audio id="audio_success" autostart="false">
     <source src="{{asset('file/success_sound.mp3')}}" type="audio/ogg">
     <source src="{{asset('file/success_sound.mp3')}}" type="audio/mpeg">

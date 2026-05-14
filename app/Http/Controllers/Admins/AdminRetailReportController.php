@@ -16,6 +16,7 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
+use App\Models\RetailShipmentFlyerNumber;
 
 class AdminRetailReportController extends Controller
 {
@@ -223,6 +224,17 @@ class AdminRetailReportController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('flyers_count_link', function ($shipment) {
+                $count = DB::connection('reports')->table('retail_shipment_flyer_numbers')->where('shipment_id',$shipment->shipment_id)->count();
+                if( $count != 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $count . '</button>
+                     <input type="hidden" name="shipment_id_for_flyer" value="'.$shipment->shipment_id.'">
+                     ';
+                } else {
+                    return 0;
+                }
+                
+            })
             ->addColumn('franchise_center_name', function ($shipment) {
                 if($shipment->retail_cat == 1){
                     $shipment_franchise = RetailFranchise::where('id',$shipment->retail_cat_id)->select('name');
@@ -283,7 +295,7 @@ class AdminRetailReportController extends Controller
                 {
                     return '-';
                 }
-            })->rawColumns(['tracking_number_link']);
+            })->rawColumns(['tracking_number_link', 'flyers_count_link']);
 
         return $datatable->make(true);
     }
@@ -697,5 +709,14 @@ class AdminRetailReportController extends Controller
         $from = Carbon::parse($from)->toDateString();
         $to = Carbon::parse($to)->toDateString();
         return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
+    }
+
+
+    public function flyers_list(Request $request) {
+
+        $data = RetailShipmentFlyerNumber::where('shipment_id', $request->shipment_id)->pluck('flyer_number');
+         
+        return ['status' => 0, 'success' => 'Flyer Numbers', 'data' => $data];
+
     }
 }

@@ -2442,6 +2442,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('retail_sales')->name('retail_sales.')->group(function () {
             Route::get('', 'Admins\AdminRetailReportController@sales_index')->name('index');
             Route::post('list', 'Admins\AdminRetailReportController@sales_list')->name('list');
+            Route::post('flyers', 'Admins\AdminRetailReportController@flyers_list')->name('flyers');
+
         });
 
         Route::prefix('shipper_insurance')->name('shipper_insurance.')->group(function () {
@@ -2685,6 +2687,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('shipment_attempt_performance')->name('shipment_attempt_performance.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@shipment_attempt_performance_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@shipment_attempt_performance_list')->name('list');
+        });
+
+        Route::prefix('negative_balance')->name('negative_balance.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@negative_balance_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@negative_balance_list')->name('list');
         });
     });
 

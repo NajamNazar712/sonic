@@ -103,7 +103,24 @@ class ShipperReportsController extends Controller
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
+//            ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
+            //exclude paid payment status and make sperate column
+            ->leftJoin('shipments_payment_journey as spj', function ($join) use ($connection) {
+                $join->on('spj.shipment_id','=','shipments.id')
+                    ->where( 'spj.id',
+                        '=',
+                        DB::connection($connection)->raw('( SELECT MAX(id) FROM shipments_payment_journey WHERE shipment_id = shipments.id AND status_id != 3)'));
+            })
+            ->leftjoin('shipment_payment_status as sps', 'spj.status_id', '=', 'sps.id')
+
+            ->leftJoin('shipments_payment_journey as spj_d', function ($join) use ($connection) {
+                $join->on('spj_d.shipment_id','=','shipments.id')
+                    ->where( 'spj_d.id',
+                        '=',
+                        DB::connection($connection)->raw('( SELECT MAX(id) FROM shipments_payment_journey WHERE shipment_id = shipments.id AND status_id = 3)'));
+            })
+            ->leftjoin('shipment_payment_status as sps_d', 'spj_d.status_id', '=', 'sps_d.id')
+            
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id');
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
@@ -308,7 +325,7 @@ class ShipperReportsController extends Controller
         }
 
 
-        $sales->select('p.product_name as product_name','ssreason.name as reason_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),'shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','sm.mode as shipping_mode','dr.created_at as delivered_or_returned','dr.received_or_refused_by','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','sod.order_date as order_date','shipments.estimated_weight','ssr.reference_1 as reference_1','ssr.reference_2 as reference_2','ssr.reference_3 as reference_3','ssr.reference_4 as reference_4','ssr.reference_5 as reference_5','dr.shipper_status_id as dr_status_id','usi.vendor',DB::raw('MAX(dps.done_payment_id) as payment_id'),'shipments.shipper_status_id as shipment_status','shipments.chargeable_weight','shipments.insurance_charges','shipments.packaging_material_charges','shipments.fuel_surcharge','shipments.return_charges','shipments.replacement_charges','shipments.try_and_buy_charges','shipments.nsa_osa_charges','shipments.gst','shipments.intercept_charges','shipments.packaging_charges','u.account_type_id as account_type_id','usi.pickup_address as pickup_address','dr.cnic as dr_cnic','dr.relation as dr_relation','shipments.consignee_address as consignee_address','spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date','si.quantity as item_quantity','shipments.pieces as pieces','shipments.fintech_charges as fintech_amount','shipments.id as shipment_id', 'usi.pickup_brand_name', 'sac.faf_charges','flsc.wallet_charges_finova_settled','sac.wallet_charges'
+        $sales->select('p.product_name as product_name','ssreason.name as reason_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','sps_d.name as paid_payment_status',DB::raw('SUM(DISTINCT pps.charges) as p_total_charges'),DB::raw('SUM(DISTINCT pps.amount) as p_collection_amount'),DB::raw('SUM(DISTINCT pps.payable) as p_net_payable'),DB::raw('SUM(DISTINCT pps.gst) as p_gst'),DB::raw('SUM(DISTINCT dps.amount) as d_collection_amount'),DB::raw('SUM(DISTINCT dps.charges) as d_total_charges'),DB::raw('SUM(DISTINCT dps.payable) as d_net_payable'),DB::raw('SUM(DISTINCT dps.gst) as d_gst'),DB::raw('SUM(DISTINCT is.gst) as is_gst'),DB::raw('SUM(DISTINCT pis.gst) as pis_gst'),'shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','sm.mode as shipping_mode','dr.created_at as delivered_or_returned','dr.received_or_refused_by','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','sod.order_date as order_date','shipments.estimated_weight','ssr.reference_1 as reference_1','ssr.reference_2 as reference_2','ssr.reference_3 as reference_3','ssr.reference_4 as reference_4','ssr.reference_5 as reference_5','dr.shipper_status_id as dr_status_id','usi.vendor',DB::raw('MAX(spj.payment_id) as payment_id'),DB::raw('MAX(spj_d.payment_id) as paid_payment_id'),'shipments.shipper_status_id as shipment_status','shipments.chargeable_weight','shipments.insurance_charges','shipments.packaging_material_charges','shipments.fuel_surcharge','shipments.return_charges','shipments.replacement_charges','shipments.try_and_buy_charges','shipments.nsa_osa_charges','shipments.gst','shipments.intercept_charges','shipments.packaging_charges','u.account_type_id as account_type_id','usi.pickup_address as pickup_address','dr.cnic as dr_cnic','dr.relation as dr_relation','shipments.consignee_address as consignee_address','spjpaid_date.created_at as paid_date','spjproceed_date.created_at as processed_date','si.quantity as item_quantity','shipments.pieces as pieces','shipments.fintech_charges as fintech_amount','shipments.id as shipment_id', 'usi.pickup_brand_name', 'sac.faf_charges','flsc.wallet_charges_finova_settled','sac.wallet_charges'
         )->whereNotIn('shipments.shipper_status_id', [1, 17]);
 
 

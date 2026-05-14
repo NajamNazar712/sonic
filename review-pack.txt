@@ -1,0 +1,795 @@
+===== PHP VERSION =====
+===== COMPOSER VALIDATE =====
+===== GIT STATUS =====
+On branch sprint_148
+Your branch is up to date with 'origin/sprint_148'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	review-pack.txt
+
+nothing added to commit but untracked files present (use "git add" to track)
+===== GIT LOG =====
+ddfab3fbf5 changes
+f0d5bab18c Merged in TO-7359 (pull request #2605)
+d7d0eee4c2 Merged in TO-7357-updates-changes-required-for-claims (pull request #2606)
+4e86602d7e Merged in TO-7353-faf-charges-logs (pull request #2607)
+86a0938ab7 Merge branch 'sprint_148' of bitbucket.org:traxdev/sonic into sprint_148
+===== GIT DIFF STAT =====
+===== GIT DIFF NAME ONLY =====
+===== SECURITY CHECK =====
+bootstrap/cache/.gitignore
+public/app-assets/vendors/js/extensions/jquery-file-upload/vendor/canvas-to-blob.min.js
+public/app-assets/vendors/js/extensions/jquery-file-upload/vendor/jquery.blueimp-gallery.min.js
+public/app-assets/vendors/js/extensions/jquery-file-upload/vendor/jquery.ui.widget.js
+public/app-assets/vendors/js/extensions/jquery-file-upload/vendor/load-image.all.min.js
+public/app-assets/vendors/js/extensions/jquery-file-upload/vendor/tmpl.min.js
+public/main/js/vendor/html5shiv.js
+public/main/js/vendor/jquery-2.2.4.min.js
+public/main/js/vendor/modernizr-2.8.3.min.js
+public/main/js/vendor/respond.min.js
+public/vendor/datatables/buttons.server-side.js
+public/vendors/js/extensions/jquery-file-upload/vendor/canvas-to-blob.min.js
+public/vendors/js/extensions/jquery-file-upload/vendor/jquery.blueimp-gallery.min.js
+public/vendors/js/extensions/jquery-file-upload/vendor/jquery.ui.widget.js
+public/vendors/js/extensions/jquery-file-upload/vendor/load-image.all.min.js
+public/vendors/js/extensions/jquery-file-upload/vendor/tmpl.min.js
+resources/views/admin/settings/brand_and_vendor/index.blade.php
+resources/views/vendor/datatables/print.blade.php
+resources/views/vendor/datatables/script.blade.php
+storage/logs/.gitignore
+===== ROUTE LIST =====
+===== MASTER MIGRATION STATUS =====
+===== PROMPT 0 VALIDATION =====
+===== IMPORTANT FILES =====
+
+===== FILE: bootstrap/app.php =====
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Create The Application
+|--------------------------------------------------------------------------
+|
+| The first thing we will do is create a new Laravel application instance
+| which serves as the "glue" for all the components of Laravel, and is
+| the IoC container for the system binding all of the various parts.
+|
+*/
+
+$app = new Illuminate\Foundation\Application(
+    realpath(__DIR__.'/../')
+);
+
+/*
+|--------------------------------------------------------------------------
+| Bind Important Interfaces
+|--------------------------------------------------------------------------
+|
+| Next, we need to bind some important interfaces into the container so
+| we will be able to resolve them when needed. The kernels serve the
+| incoming requests to this application from both the web and CLI.
+|
+*/
+
+$app->singleton(
+    Illuminate\Contracts\Http\Kernel::class,
+    App\Http\Kernel::class
+);
+
+$app->singleton(
+    Illuminate\Contracts\Console\Kernel::class,
+    App\Console\Kernel::class
+);
+
+$app->singleton(
+    Illuminate\Contracts\Debug\ExceptionHandler::class,
+    App\Exceptions\Handler::class
+);
+
+/*
+|--------------------------------------------------------------------------
+| Return The Application
+|--------------------------------------------------------------------------
+|
+| This script returns the application instance. The instance is given to
+| the calling script so we can separate the building of the instances
+| from the actual running of the application and sending responses.
+|
+*/
+
+return $app;
+
+===== FILE: config/database.php =====
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Database Connection Name
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify which of the database connections below you wish
+    | to use as your default connection for all database work. Of course
+    | you may use many connections at once using the Database library.
+    |
+    */
+
+    'default' => env('DB_CONNECTION', 'mysql'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Database Connections
+    |--------------------------------------------------------------------------
+    |
+    | Here are each of the database connections setup for your application.
+    | Of course, examples of configuring each database platform that is
+    | supported by Laravel is shown below to make development simple.
+    |
+    |
+    | All database work in Laravel is done through the PHP PDO facilities
+    | so make sure you have the driver for your particular database of
+    | choice installed on your machine before you begin development.
+    |
+    */
+
+    'connections' => [
+
+        'sqlite' => [
+            'driver' => 'sqlite',
+            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'prefix' => '',
+        ],
+
+        'mysql' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
+        'pgsql' => [
+            'driver' => 'pgsql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '5432'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'public',
+            'sslmode' => 'prefer',
+        ],
+
+        'sqlsrv' => [
+            'driver' => 'sqlsrv',
+            'host' => env('DB_HOST', 'localhost'),
+            'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE', 'forge'),
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+        ],
+
+        'reports' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_REPORTS', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_PORT_REPORTS', env('DB_PORT', '3306')),
+            'database' => env('DB_DATABASE_REPORTS', env('DB_DATABASE', 'forge')),
+            'username' => env('DB_USERNAME_REPORTS', env('DB_USERNAME', 'forge')),
+            'password' => env('DB_PASSWORD_REPORTS', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DB_SOCKET_REPORTS', env('DB_SOCKET', '')),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+        'reports_2' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_R2', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_PORT_R2', env('DB_PORT', '3306')),
+            'database' => env('DB_DATABASE_R2', env('DB_DATABASE', 'forge')),
+            'username' => env('DB_USERNAME_R2', env('DB_USERNAME', 'forge')),
+            'password' => env('DB_PASSWORD_R2', env('DB_PASSWORD', '')),
+            'unix_socket' => env('DB_SOCKET_R2', env('DB_SOCKET', '')),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
+        'apollo_db' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST_APOLLO', '127.0.0.1'),
+            'port' => env('DB_PORT_APOLLO', '3306'),
+            'database' => env('DB_DATABASE_APOLLO', 'forge'),
+            'username' => env('DB_USERNAME_APOLLO', 'forge'),
+            'password' => env('DB_PASSWORD_APOLLO', ''),
+            'unix_socket' => env('DB_SOCKET_APOLLO',  env('DB_SOCKET', '')),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+            'engine' => null,
+        ],
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Migration Repository Table
+    |--------------------------------------------------------------------------
+    |
+    | This table keeps track of all the migrations that have already run for
+    | your application. Using this information, we can determine which of
+    | the migrations on disk haven't actually been run in the database.
+    |
+    */
+
+    'migrations' => 'migrations',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redis Databases
+    |--------------------------------------------------------------------------
+    |
+    | Redis is an open source, fast, and advanced key-value store that also
+    | provides a richer set of commands than a typical key-value systems
+    | such as APC or Memcached. Laravel makes it easy to dig right in.
+    |
+    */
+
+    'redis' => [
+
+        'client' => 'predis',
+
+        'default' => [
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', 6379),
+            'database' => 0,
+        ],
+
+    ],
+
+];
+
+===== FILE: config/auth.php =====
+<?php
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication Defaults
+    |--------------------------------------------------------------------------
+    |
+    | This option controls the default authentication "guard" and password
+    | reset options for your application. You may change these defaults
+    | as required, but they're a perfect start for most applications.
+    |
+    */
+
+    'defaults' => [
+        'guard' => 'web',
+        'passwords' => 'users'
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Authentication Guards
+    |--------------------------------------------------------------------------
+    |
+    | Next, you may define every authentication guard for your application.
+    | Of course, a great default configuration has been defined for you
+    | here which uses session storage and the Eloquent user provider.
+    |
+    | All authentication drivers have a user provider. This defines how the
+    | users are actually retrieved out of your database or other storage
+    | mechanisms used by this application to persist your user's data.
+    |
+    | Supported: "session", "token"
+    |
+    */
+
+    'guards' => [
+        'web' => [
+            'driver' => 'session',
+            'provider' => 'users'
+        ],
+
+        'substitute_users' => [
+            'driver' => 'session',
+            'provider' => 'substitute_users'
+        ],
+
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admins'
+        ],
+
+        'api' => [
+            'driver' => 'token',
+            'provider' => 'users'
+        ],
+
+        'retail' => [
+            'driver' => 'session',
+            'provider' => 'retails'
+        ],
+        'agent' => [
+            'driver' => 'session',
+            'provider' => 'agents'
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Providers
+    |--------------------------------------------------------------------------
+    |
+    | All authentication drivers have a user provider. This defines how the
+    | users are actually retrieved out of your database or other storage
+    | mechanisms used by this application to persist your user's data.
+    |
+    | If you have multiple user tables or models you may configure multiple
+    | sources which represent each model / table. These sources may then
+    | be assigned to any extra authentication guards you have defined.
+    |
+    | Supported: "database", "eloquent"
+    |
+    */
+
+    'providers' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Http\Models\Shipper\User::class,
+        ],
+
+        'substitute_users' => [
+            'driver' => 'eloquent',
+            'model' => App\Http\Models\Shipper\SubstituteUser::class,
+        ],
+
+         'admins' => [
+             'driver' => 'eloquent',
+             'model' => App\Http\Models\Admin\Admin::class,
+         ],
+
+         'retails' => [
+             'driver' => 'eloquent',
+             'model' => App\Http\Models\Admin\Retail\RetailUser::class,
+         ],
+         'agents' => [
+             'driver' => 'eloquent',
+             'model' => App\Http\Models\Admin\Admin::class,
+         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Resetting Passwords
+    |--------------------------------------------------------------------------
+    |
+    | You may specify multiple password reset configurations if you have more
+    | than one user table or model in the application and you want to have
+    | separate password reset settings based on the specific user types.
+    |
+    | The expire time is the number of minutes that the reset token should be
+    | considered valid. This security feature keeps tokens short-lived so
+    | they have less time to be guessed. You may change this as needed.
+    |
+    */
+
+    'passwords' => [
+        'users' => [
+            'provider' => 'users',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+
+        'substitute_users' => [
+            'provider' => 'substitute_users',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+
+        'admins' => [
+            'provider' => 'admins',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+
+        'retail' => [
+            'provider' => 'retails',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+        'agent' => [
+            'provider' => 'agents',
+            'table' => 'password_resets',
+            'expire' => 60,
+        ],
+    ],
+
+];
+
+===== FILE: config/permission.php =====
+MISSING FILE
+
+===== FILE: config/tenancy.php =====
+MISSING FILE
+
+===== FILE: routes/web.php =====
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can changepickupstatus web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('test-fcm-token', function () {
+    return getFcmAccessToken();
+});
+// Route::get('/test-fcm-file', function () {
+//     $path = config('services.fcm.service_account');
+//     return [
+//         'path' => $path,
+//         'exists' => file_exists($path)
+//     ];
+// });
+Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
+Route::get('make', 'TrackingController@payment_details')->name('payment_details');
+
+Route::get('/', function () {
+    return redirect()->route('cod.login');
+});
+Route::get('test-email-check/{payment_id?}', function ($payment_id = null) {
+    Artisan::call('test:email_check', [
+        'payment_id' => $payment_id
+    ]);
+
+    return "Command executed for payment_id: $payment_id";
+});
+Route::get('paymentinsert', function () {
+    Artisan::call('make:payments');
+    return "Command executed for creating payments for missing shipments";
+});
+Route::prefix('survey_form')->name('survey.')->group(function () {
+    Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
+    Route::post('submit/email', 'Survey\DisabledAccountIntimationSurveyController@feedback_store')->name('feedback.submit');
+    Route::get('submit/email/{ids}', 'Survey\DisabledAccountIntimationSurveyController@feedback_index')->name('feedback.index');
+    Route::post('submit', 'Survey\DisabledAccountIntimationSurveyController@submit_survey')->name('submit');
+});
+
+Route::get('payment_details/{id}/{id1}', 'TrackingController@payment_details')->name('payment_details');
+
+Route::get('trax_pk_validation/{company_name}/{email_address}/{phone_number}', 'APIController@trax_pk_validation')->name('trax_pk_validation');
+Route::get('wp_custom_select_dropdown_data', 'APIController@wp_custom_select_dropdown_data')->name('wp_custom_select_dropdown_data');
+
+
+Auth::routes();
+
+Route::prefix('tracking')->name('tracking.')->group(function () {
+    Route::get('{tracking_number?}', 'TrackingController@index')->name('index');
+    Route::post('track', 'TrackingController@track')->name('track');
+    Route::post('add', 'TrackingController@add_request')->name('add');
+});
+
+Route::prefix('shipment')->name('shipment.')->group(function () {
+    Route::get('status/verify', 'ConsigneeShipmentResponseController@index')->name('status.verify');
+    Route::get('status/{tracking_number?}/verify/{delivery_note_id?}', 'ConsigneeShipmentResponseController@index')->name('status.verify');
+});
+
+Route::prefix('cod')->name('cod.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('cod.login');
+    });
+    Route::get('404', 'Auth\LoginController@not_found')->name('404');
+    Route::post('get/agreement', 'Shippers\ShipperDashboardController@get_agreement')->name('get_agreement');
+    Route::post('rate/daily_visit', 'Shippers\ShipperDashboardController@rate_daily_visit')->name('rate_daily_visit');
+
+    Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
+    
+    //Wordpress Register Via Leads (Trax.pk)
+    Route::get('/wp_register/{id}/{token}', 'Auth\LoginController@showLeadWordPressLoginForm')->name('signup');
+    Route::get('/wp_register/wordpress', 'Shippers\ShipperDashboardController@wordpressLeadRegistration')->name('wordpress.register');
+    Route::post('/wp_register/wordpress/salesPerson', 'Shippers\ShipperDashboardController@sales_person')->name('wordpress.salesPerson');
+    Route::post('/wp_register/wordpress/get_sub_segment', 'Shippers\ShipperDashboardController@get_sub_segment')->name('wordpress.get_sub_segment');
+    Route::get('/address1', 'Shippers\ShipperDashboardController@wordpressAddressView')->name('wordpress.new.address');
+    Route::get('/bank1', 'Shippers\ShipperDashboardController@wordpressBankView')->name('wordpress.new.bank');
+
+    Route::post('/login', 'Auth\LoginController@login')->middleware('login.check')->name('login.submit');
+    //    Route::get('/register/','Auth\GetStartedController@index')->name('register');
+    //    Route::get('/get-started', 'Auth\GetStartedController@index')->name('getstarted');
+    //    Route::post('/get-started','Auth\GetStartedController@getstarted_submit')->name('getstarted');
+    Route::get('/get-started-success', 'Auth\GetStartedController@getstarted_success')->name('getstarted.success');
+    Route::get('/register/{lead_id?}', 'Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::post('/register', 'Auth\RegisterController@register')->name('register.submit');
+    Route::get('/new/address', 'Auth\RegisterController@addressView')->name('new.address');
+    Route::get('/new/bank', 'Auth\RegisterController@bankView')->name('new.bank');
+
+ 
+
+
+    Route::get('/email/verified/{id?}', 'Auth\RegisterController@email_verified')->name('email.verified');
+    Route::post('/salesPerson', 'Auth\RegisterController@sales_person')->name('salesPerson');
+    Route::post('/territory', 'Auth\RegisterController@territory')->name('territory');
+    Route::post('/area', 'Auth\RegisterController@area')->name('area');
+    Route::post('update/agreement_status', 'Shippers\ShipperDashboardController@agreement_status')->name('update.agreement_status');
+
+    Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
+    Route::get('access_denied', 'Shippers\ShipperDashboardController@wordpress_access_denied')->name('wordpress_access_denied');
+
+    Route::get('ledger', 'Shippers\ShipperDashboardController@ledger_index')->name('ledger');
+    Route::get('ledger/list', 'Shippers\ShipperDashboardController@ledger_list')->name('ledger.list');
+
+    Route::get('/welcome', 'Shippers\ShipperDashboardController@welcome_index')->name('welcome');
+
+    Route::get('/documents', 'Shippers\ShipperDashboardController@documents_index')->name('documents');
+    Route::get('/{id}/{check}/{pdf}/documents', 'Shippers\ShipperDashboardController@viewUserDocuments')->name('documents.view');
+    Route::post('/documents/upload', 'Shippers\ShipperDashboardController@uploadDocuments')->name('documents.upload');
+    Route::post('/documents/confirm', 'Shippers\ShipperDashboardController@userDocumentsConfirm')->name('documents.confirm');
+    Route::post('/documents/edit', 'Shippers\ShipperDashboardController@userDocumentsEdit')->name('documents.edit');
+
+    Route::get('/welcome/list', 'Shippers\ShipperDashboardController@welcome_list')->name('welcome.list');
+    Route::post('/welcome/data', 'Shippers\ShipperDashboardController@welcome_data')->name('welcome.data');
+    Route::post('otp_verify', 'Shippers\ShipperDashboardController@opt_verify')->name('opt_verify');
+    Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
+    Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
+    Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+    Route::get('/sar_report', 'Shippers\ShipperDashboardController@sarReport')->name('sar_report');
+
+    Route::post('/crf/update', 'Shippers\ShipperDashboardController@updateCrfSign')->name('updateSignOffCrf');;
+
+    Route::post('get_sub_segment', 'Auth\RegisterController@get_sub_segment')->name('get_sub_segment');
+    Route::get('get_products', 'Auth\RegisterController@get_products')->name('get_products');
+
+    Route::get('referral', 'Auth\RegisterController@referral_valid')->name('referral.valid');
+    Route::get('check_email', 'Auth\RegisterController@check_email')->name('register.check_email');
+
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('', 'Shippers\ShipperDashboardController@orders_index')->name('index');
+        Route::get('list', 'Shippers\ShipperDashboardController@orders_list')->name('list');
+        Route::post('search', 'Shippers\ShipperDashboardController@statistics_search')->name('search');
+        Route::post('cancel', 'Shippers\ShipperDashboardController@order_cancel')->name('cancel');
+        Route::post('cancel_all', 'Shippers\ShipperDashboardController@order_cancel_all')->name('cancel_all');
+        Route::post('shipment_charges', 'Shippers\ShipperDashboardController@get_shipment_charges')->name('charges');
+        Route::prefix('consolidate')->name('consolidate.')->group(function () {
+            Route::post('shipment_info', 'Shippers\ShipperConsolidatedController@consolidate_shipment_info')->name('shipment_info');
+            Route::post('submit', 'Shippers\ShipperConsolidatedController@consolidate_shipment_submit')->name('submit');
+        });
+    });
+    //    Route::prefix('mentor_health')->name('mentor_health.')->group(function () {
+    //        Route::get('', 'Shippers\ShipperDashboardController@mentor_health_index')->name('index');
+    //        Route::post('add_request', 'Shippers\ShipperDashboardController@mentor_health_add_request')->name('add_request');
+    //    });
+    Route::prefix('shipment')->name('shipment.')->group(function () {
+        Route::middleware(['PauseShipperBooking'])->prefix('book')->name('book.')->group(function () {
+            Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
+            Route::get('address_verify', 'Shippers\ShipperShipmentBookController@address_verify')->name('address_verify');
+            Route::post('corporate_store', 'Shippers\ShipperShipmentBookController@corporate_store')->name('corporate.store');
+            Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
+            Route::get('restrict_order_id', 'Shippers\ShipperShipmentBookController@restrict_order_id')->name('restrict_order_id');
+            Route::post('shipping_modes', 'Shippers\ShipperShipmentBookController@shipping_modes')->name('shipping_modes');
+            Route::post('corporate_shipping_modes', 'Shippers\ShipperShipmentBookController@corporate_shipping_modes')->name('corporate_shipping_modes');
+            Route::post('corporate_min_chargeable_weight', 'Shippers\ShipperShipmentBookController@corporate_min_chargeable_weight')->name('corporate_min_chargeable_weight');
+            Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
+            Route::post('corporate_invoice', 'Shippers\ShipperShipmentBookController@corporate_invoice')->name('corporate_invoice');
+            Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
+            Route::post('shipment_check', 'Shippers\ShipperShipmentBookController@shipment_check')->name('shipment_check');
+            Route::get('get_consignee_infos', 'Shippers\ShipperShipmentBookController@get_consignee_infos')->name('get_consignee_infos');
+            Route::post('get_consignee_info', 'Shippers\ShipperShipmentBookController@get_consignee_info')->name('get_consignee_info');
+            Route::post('get_ftl_info', 'Shippers\ShipperShipmentBookController@get_ftl_info')->name('get_ftl_info');
+            Route::post('check_cod_cap_zone_classes', 'Shippers\ShipperShipmentBookController@check_cod_cap_zone_classes')->name('check_cod_cap_zone_classes');
+            Route::post('check_consignee_return_ratio', 'Shippers\ShipperShipmentBookController@check_consignee_return_ratio')->name('check_consignee_return_ratio');
+            Route::post('check_shipment_allowed_city', 'Shippers\ShipperShipmentBookController@check_shipment_allowed_city')->name('check_shipment_allowed_city');
+            Route::get('check_negative_payable', 'Shippers\ShipperShipmentBookController@check_negative_payable')->name('check_negative_payable');
+
+
+            Route::prefix('excel')->name('excel_')->group(function () {
+                Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
+                Route::post('', 'Shippers\ShipperShipmentBookController@excel_store')->name('store');
+            });
+            Route::prefix('corporate_excel')->name('corporate_excel_')->group(function () {
+                Route::get('', 'Shippers\ShipperShipmentBookController@corporate_excel_index')->name('index');
+                Route::post('', 'Shippers\ShipperShipmentBookController@corporate_excel_store')->name('store');
+
+                Route::get('/mms', 'Shippers\ShipperShipmentBookController@corporate_excel_mms_index')->name('mms');
+                Route::post('/mms', 'Shippers\ShipperShipmentBookController@corporate_excel_mms_store')->name('mms.store');
+
+                Route::get('/index', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_index')->name('distribution');
+                Route::post('/store', 'Shippers\ShipperShipmentBookController@corporate_excel_distribution_store')->name('distribution.store');
+            });
+            Route::prefix('international')->name('international.')->group(function () {
+                Route::get('', 'Shippers\ShipperInternationalShipmentBookController@index')->name('index');
+                Route::post('', 'Shippers\ShipperInternationalShipmentBookController@store')->name('store');
+                Route::prefix('excel')->name('excel_')->group(function () {
+                    Route::get('', 'Shippers\ShipperInternationalShipmentBookController@excel_index')->name('index');
+                    Route::post('', 'Shippers\ShipperInternationalShipmentBookController@excel_store')->name('store');
+                });
+            });
+
+
+            Route::prefix('return_address')->name('return_address.')->group(function () {
+                Route::prefix('excel')->name('excel.')->group(function () {
+                    Route::get('', 'Shippers\ShipmentReturnAddressController@excel_index')->name('index');
+                    Route::post('', 'Shippers\ShipmentReturnAddressController@excel_store')->name('store');
+                });
+            });
+        });
+
+        Route::middleware(['PauseShipperBooking'])->resource('book', 'Shippers\ShipperShipmentBookController');
+
+        Route::middleware(['PauseShipperBooking'])->prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('list', 'Shippers\ShipperReceivingSheetController@list')->name('list');
+            Route::get('receiving_sheet_list', 'Shippers\ShipperReceivingSheetController@receiving_sheet_list')->name('receiving_sheet_list');
+            Route::get('all', 'Shippers\ShipperReceivingSheetController@all')->name('all');
+            Route::put('add', 'Shippers\ShipperReceivingSheetController@add')->name('add');
+            Route::put('void', 'Shippers\ShipperReceivingSheetController@void')->name('void');
+            Route::post('print', 'Shippers\ShipperReceivingSheetController@print')->name('print');
+            Route::get('new', 'Shippers\ShipperReceivingSheetController@create_view')->name('new');
+            Route::post('info', 'Shippers\ShipperReceivingSheetController@get_shipment_details')->name('info');
+            Route::post('print_receiving_sheet_and_air_waybill', 'Shippers\ShipperReceivingSheetController@print_receiving_sheet_and_air_waybill')->name('print_receiving_sheet_and_air_waybill');
+            Route::post('cn/info', 'Shippers\ShipperReceivingSheetController@update_cn_info')->name('cn.info');
+            Route::post('cn/update', 'Shippers\ShipperReceivingSheetController@update_consignee_info_and_special_instructions')->name('cn.update');
+
+            Route::prefix('shipments')->name('shipments.')->group(function () {
+                Route::get('', 'Shippers\ShipperReceivingSheetController@shipments_index')->name('index');
+                Route::get('list', 'Shippers\ShipperReceivingSheetController@shipments_list')->name('list');
+            });
+
+            Route::prefix('excel')->name('excel.')->group(function () {
+                Route::get('', 'Shippers\ShipperReceivingSheetController@shipments_excel_index')->name('index');
+                Route::post('store', 'Shippers\ShipperReceivingSheetController@shipments_excel_store')->name('store');
+            });
+        });
+
+        Route::middleware(['PauseShipperBooking'])->resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
+
+        Route::prefix('receiving_sheet_history')->name('receiving_sheet_history.')->group(function () {
+            Route::get('short_received_list', 'Shippers\ShipperReceivingSheetHistoryController@short_received_list')->name('short_received_list');
+            Route::get('receiving_sheet_list', 'Shippers\ShipperReceivingSheetHistoryController@receiving_sheet_list')->name('receiving_sheet_list');
+            Route::post('booked_shipments', 'Shippers\ShipperReceivingSheetHistoryController@booked_shipments')->name('booked_shipments');
+            Route::post('received_shipments', 'Shippers\ShipperReceivingSheetHistoryController@received_shipments')->name('received_shipments');
+            Route::post('short_received_shipments', 'Shippers\ShipperReceivingSheetHistoryController@short_received_shipments')->name('short_received_shipments');
+            Route::put('void', 'Shippers\ShipperReceivingSheetHistoryController@void')->name('void');
+            Route::post('create', 'Shippers\ShipperReceivingSheetHistoryController@create')->name('create');
+        });
+
+        Route::resource('receiving_sheet_history', 'Shippers\ShipperReceivingSheetHistoryController');
+
+        Route::prefix('list')->name('list.')->group(function () {
+            Route::get('', 'Shippers\ShipperShipmentBookController@shipments_list_index')->name('index');
+            Route::post('', 'Shippers\ShipperShipmentBookController@shipments_list_store')->name('store');
+        });
+
+        Route::prefix('verify')->name('verify.')->group(function () {
+            Route::get('', 'Shippers\ShipperShipmentBookController@shipments_verify_index')->name('index');
+            Route::post('', 'Shippers\ShipperShipmentBookController@shipments_verify_store')->name('store');
+        });
+
+        Route::prefix('origin')->name('origin.')->group(function () {
+            Route::get('', 'Shippers\ShipmentOriginChangeController@shipments_origin_index')->name('index');
+            Route::post('store', 'Shippers\ShipmentOriginChangeController@shipments_origin_store')->name('store');
+        });
+
+===== FILE: routes/central.php =====
+MISSING FILE
+
+===== FILE: routes/tenant.php =====
+MISSING FILE
+
+===== FILE: app/Http/Middleware/IdentifyTenant.php =====
+MISSING FILE
+
+===== FILE: app/Http/Middleware/CentralOnly.php =====
+MISSING FILE
+
+===== FILE: app/Http/Middleware/TenantOnly.php =====
+MISSING FILE
+
+===== FILE: app/Http/Middleware/EnsureRoutePermission.php =====
+MISSING FILE
+
+===== FILE: app/Http/Middleware/SetLocale.php =====
+MISSING FILE
+
+===== FILE: app/Services/Tenancy/TenancyManager.php =====
+MISSING FILE
+
+===== FILE: app/Services/Tenancy/TenantProvisioner.php =====
+MISSING FILE
+
+===== FILE: app/Http/Controllers/Auth/AuthController.php =====
+MISSING FILE
+
+===== FILE: app/Http/Controllers/Central/DashboardController.php =====
+MISSING FILE
+
+===== FILE: app/Http/Controllers/Tenant/DashboardController.php =====
+MISSING FILE
+
+===== FILE: database/seeders/DatabaseSeeder.php =====
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+//        $this->call(AdminDepartmentTableSeeder::class);
+//        $this->call(AdminRoleModulePermissionsTableSeeder::class);
+//        $this->call(AdminRoleTableSeeder::class);
+//        $this->call(AdminsTableSeeder::class);
+//        $this->call(BanksListTableSeeder::class);
+//        $this->call(BookingTableSeeder::class);
+//        $this->call(CargoConsignmentStatusTableSeeder::class);
+//        $this->call(DisputeTypeTableSeeder::class);
+//        $this->call(ModulePermissionTableSeeder::class);
+//        $this->call(ModuleTableSeeder::class);
+//        $this->call(NewCityTableSeeder::class);
+//        $this->call(NotificationTableSeeder::class);
+//        $this->call(NotificationTypeTableSeeder::class);
+//        $this->call(PackagingMaterialStockHeadsTableSeeder::class);
+//        $this->call(PackagingPaymentModesTableSeeder::class);
+//        $this->call(PaymentModeTableSeeder::class);
+//        $this->call(PickupNoteStatusTableSeeder::class);
+//        $this->call(ProductsTableSeeder::class);
+//        $this->call(RiderCategoryTableSeeder::class);
+//        $this->call(RidersTableSeeder::class);
+//        $this->call(ShipmentPaymentStatusTableSeeder::class);
+//        $this->call(ShipmentStatusReasonTableSeeder::class);
+//        $this->call(ShipmentStatusShipmentStatusReasonTableSeeder::class);
+//        $this->call(ShipmentStatusTableSeeder::class);
+//        $this->call(ShippingModeSameDayTimingTableSeeder::class);
+//        $this->call(ShippingModeTableSeeder::class);
+//        $this->call(StandardBookingTypeChargesTableSeeder::class);
+//        $this->call(StandardCashHandlingChargesTableSeeder::class);
+//        $this->call(StandardFuelSurchargesTableSeeder::class);
+//        $this->call(StandardInsuranceChargesTableSeeder::class);
+//        $this->call(StandardPackagingChargesTableSeeder::class);
+//        $this->call(StandardReturnChargesTableSeeder::class);
+//        $this->call(StandardWeightChargesTableSeeder::class);
+//        $this->call(SubstituteUserModulePermissionSeeder::class);
+//        $this->call(TransportModeTableSeeder::class);
+//        $this->call(TransportModeVendorTableSeeder::class);
+//        $this->call(UsersTableSeeder::class);
+//        $this->call(UpdateBankNameTableSeeder::class);
+//        $this->call(UpdatePhoneNumbersTableSeeder::class);
+//        $this->call(AddContractualValueInStaffCategory::class);
+//        $this->call(AddContractualValueInGlobalSettings::class);
+    }
+}
+
+===== FILE: database/seeders/MasterSeeder.php =====
+MISSING FILE

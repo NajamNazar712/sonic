@@ -199,7 +199,8 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RemoveExpiredZeroCodShippers',
         'App\Console\Commands\SyncS3ToMinio',
         '\App\Console\Commands\NonWalletMakeToDonePayment',
-
+        'App\Console\Commands\AutoRejectLeaves',
+        'App\Console\Commands\MoveDailyPayableRecordsToLogsTable',
 
     ];
 
@@ -732,6 +733,9 @@ class Kernel extends ConsoleKernel
         //     ->cron('0 3 5 3 *')
         //     ->withoutOverlapping();
          $schedule->command('non-wallet-users:make-to-done')->dailyAt('06:00')->runInBackground();
+        $schedule->command('auto:reject-leaves')->everyFiveMinutes();
+        $schedule->command('dump:daily-payable-records-to-logs-table')->everyThreeHours()->withoutOverlapping()->runInBackground();
+
     }
     /**
      * Register the commands for the application.

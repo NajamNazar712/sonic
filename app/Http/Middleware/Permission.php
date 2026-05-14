@@ -1192,7 +1192,8 @@ class Permission
             'human_resource.employee_directory.reference.update' => 652,
             'human_resource.employee_directory.education.update' => 652,
             'human_resource.employee_directory.employment.update' => 652,
-            'human_resource.employee_directory.attachments.update' => 652,
+            // shahban bhai discussed
+//            'human_resource.employee_directory.attachments.update' => 652,
             'human_resource.employee_directory.rider.update' => 652,
             'human_resource.employee_directory.rider.deactivate' => 652,
             'human_resource.employee_directory.rider.activate' => 652,
@@ -1563,6 +1564,9 @@ class Permission
 
             'reports.wht.index' => 1036,
             'reports.wht.list' => 1036,
+
+            'reports.negative_balance.list' => 1070,
+            'reports.negative_balance.index' => 1070,
 
             'settings.product_tax.index' => 1037,
             'settings.product_tax_logs.index' => 1039,
