@@ -5611,9 +5611,32 @@ class AdminFinanceController extends Controller
     }
 
     public function dncc_wise_tracking_number_info_list(Request $request){
+        
+         $connection = 'reports';
+            
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 812);
         }
+        // if ($request->filled('date')) {
+        //         $referenceDate = Carbon::createFromFormat('d F, Y', $request->date)->startOfDay();
+        //         $start = $referenceDate->copy()->subMonths(6)->startOfDay();
+        //         $end   = $referenceDate->copy()->startOfDay();// exclusive
+        //         $date = Carbon::createFromFormat('d F, Y', $request->date)->format('Y-m-d');
+        // }else{
+        //      $start = Carbon::now()->subMonths(10)->startOfDay();
+        //     $end   = Carbon::now()->addDay()->startOfDay(); 
+        // }
+        // $sjMin = DB::connection($connection)->table('shipments_journey')
+        //     ->where('created_at', '>=', $start)
+        //     ->where('created_at', '<',  $end)
+        //     ->orderBy('created_at', 'asc')->orderBy('id', 'asc')
+        //     ->limit(1)->value('id');
+
+        // $sjMax = DB::connection($connection)->table('shipments_journey')
+        //     ->where('created_at', '>=', $start)
+        //     ->where('created_at', '<',  $end)
+        //     ->orderBy('created_at', 'desc')->orderBy('id', 'desc')
+        //     ->limit(1)->value('id');
         $dnccNumbers = explode(',', $request->dncc_numbers);
         $dncc_data = DeliveryNoteShipment::join('shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
             ->join('delivery_notes', 'delivery_note_shipments.delivery_note_id', '=', 'delivery_notes.id')
@@ -5621,15 +5644,34 @@ class AdminFinanceController extends Controller
             ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.shipper_status_id', '=', 2);
+                    // ->whereBetween('shipments_journey.id', [$sjMin, $sjMax]);
             })
-            ->whereIn('delivery_notes.id', $dnccNumbers)
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+             ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('cities as h', 'dc.hub_id', '=', 'h.id')
             ->select([
                 'shipments.id as shId',
                 'delivery_notes.id as dncc_no',
                 'shipments.tracking_number',
                 'shipments_journey.created_at',
-                'delivery_notes.status as status'
-            ])->get();
+                'delivery_notes.status as status',
+                'shipment_status.name as shipment_status',
+                'oc.name as origin',
+                'dc.name as destination',
+                'h.name as hub',
+                'shipments.updated_at as updated_date'
+            ]);
+        if ($request->filled('date')) {
+            $date = Carbon::createFromFormat('d F, Y', $request->date)->format('Y-m-d');
+            $dncc_data->whereBetween('delivery_notes.created_at', [
+                $date.' 00:00:00',
+                $date.' 23:59:59'
+            ]);
+        }elseif($request->filled('dncc_numbers')){
+                $dncc_data->whereIn('delivery_notes.id', $dnccNumbers);
+        }
+        $dncc_data->get();
         $datatables = Datatables::of($dncc_data)
         ->editColumn('dncc_no', function ($deliveries) {
             return str_pad($deliveries->dncc_no, 6, '0', STR_PAD_LEFT);
