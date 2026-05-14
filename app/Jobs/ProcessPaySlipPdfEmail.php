@@ -85,6 +85,8 @@ class ProcessPaySlipPdfEmail implements ShouldQueue
         $operations_incentive = ($payslip_salary_details['operation_incentive'] != NULL) ? number_format($payslip_salary_details['operation_incentive']) : '-';
         $retail_incentive = ($payslip_salary_details['retail_incentive'] != NULL) ? number_format($payslip_salary_details['retail_incentive']) : '-';
         $sales_incentive = ($payslip_salary_details['sales_incentive'] != NULL) ? number_format($payslip_salary_details['sales_incentive']) : '-';
+        $return_incentive = ($payslip_salary_details['return_incentive'] != NULL) ? number_format($payslip_salary_details['return_incentive']) : '-';
+        $attendance_allowance = ($payslip_salary_details['attendance_allowance'] != NULL) ? number_format($payslip_salary_details['attendance_allowance']) : '-';
         $extra_duty_allowance = ($payslip_salary_details['extra_duty_allowance'] != NULL) ? number_format($payslip_salary_details['extra_duty_allowance']) : '-';
         $others_addition = ($payslip_salary_details['others_addition'] != NULL) ? number_format($payslip_salary_details['others_addition']) : '-';
 
@@ -361,16 +363,28 @@ class ProcessPaySlipPdfEmail implements ShouldQueue
                             <td colspan="2"  class="border twice-right">' . $medical_insurance . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
-                            <td colspan="2"  class="border twice-right">' . $extra_duty_allowance  . '</td>
+                            <td colspan="2" class="border twice-right">Return Incentive</td>
+                            <td colspan="2"  class="border twice-right">'. $return_incentive .'</td>
                             <td colspan="2"  class="border twice-right">Van Deduction</td>
                             <td colspan="2"  class="border twice-right">' . $van_deduction . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Others Addition</td>
-                            <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
+                            <td colspan="2" class="border twice-right">Attendance Allowance</td>
+                            <td colspan="2"  class="border twice-right">'. $attendance_allowance .'</td>
                             <td colspan="2"  class="border twice-right">Others Deduction</td>
                             <td colspan="2"  class="border twice-right">' . $others_deduction . '</td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
+                            <td colspan="2"  class="border twice-right">' . $extra_duty_allowance  . '</td>
+                            <td colspan="2"  class="border twice-right"></td>
+                            <td colspan="2"  class="border twice-right"></td>
+                        </tr>
+                        <tr class="text-left">
+                            <td colspan="2" class="border twice-right">Others Addition</td>
+                            <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
+                            <td colspan="2"  class="border twice-right"></td>
+                            <td colspan="2"  class="border twice-right"></td>
                         </tr>
                         
                         <tr class="text-center">
