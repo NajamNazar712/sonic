@@ -212,6 +212,9 @@
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
 
                                         <th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
+                                        <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Status Date</th>
+                                        <th class="border-primary border-darken-1">Status Updated By</th>
                                         <th class="border-primary border-darken-1"></th>
                                     </tr>
                                 </thead>
@@ -786,6 +789,7 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.finance.make_payments.list') }}',
                         data: params,
+                        method: 'POST',
                         success: function(result) {
                             console.log(result)
                             head = [];
@@ -821,6 +825,9 @@
                             head.push('Payment Cycle');
                             head.push('Payment Cycle Days');
                             head.push('Return Shipments Avg. Aging');
+                            head.push('Status');
+                            head.push('Status Date');
+                            head.push('Status Updated By');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 
@@ -856,7 +863,9 @@
                                 row.push(values.payment_cycle);
                                 row.push(values.payment_cycle_days);
                                 row.push(values.return_shipments_average_aging);
-
+                                row.push(values.hold_status);
+                                row.push(values.hold_date);
+                                row.push(values.hold_by);
                                 body.push(row);
                             });
                         },
@@ -953,7 +962,93 @@
                         //         openNewTabWithData(selected_rows,selected_shippers_id);
                         //     }
                         // },
+                        {
+                            text: 'Hold',
+                            className: 'btn btn-primary hold_payment',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                $.ajax({
+                                    url: '{!! route('admin.finance.make_payments.hold') !!}',
+                                    method: 'PUT',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'ids': selected_rows,
+                                    },
+                                    beforeSend: function () {
+                                        node.prop('disabled', true);
+                                    }
+                                }).done(function(data) {
+                                        if (data.status == 0) {
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                                            // Show list of already paid IDs, if any
+                                            if (data.already_hold_ids && data.already_hold_ids.length > 0) {
+                                                let holdIdsText = data.already_hold_ids.join(', ');
+                                                toastr.info('The following payment IDs were already on hold and skipped: ' + holdIdsText, 'Info', {
+                                                    positionClass: 'toast-top-center',
+                                                    containerId: 'toast-top-center',
+                                                    timeOut: 8000
+                                                });
+                                            }
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }
+
+                                        table.rows().deselect();
+
+                                        selected_rows = [];
+
+                                        table.button('.make_payment').disable();
+                                        table.button('.hold_payment').disable();
+                                        table.button('.un_hold').disable();
+                                        table.draw('false');
+                                    });
+						    }
+                        }, 
+                        {
+                            text: 'UnHold',
+                            className: 'btn btn-primary un_hold',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                $.ajax({
+                                    url: '{!! route('admin.finance.make_payments.un_hold') !!}',
+                                    method: 'PUT',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'ids': selected_rows,
+                                    },
+                                    beforeSend: function () {
+                                        node.prop('disabled', true);
+                                    }
+                                }).done(function(data) {
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                        if (data.already_unhold_ids && data.already_unhold_ids.length > 0) {
+                                            let unHoldIdsText = data.already_unhold_ids.join(', ');
+                                            toastr.info('The following payment IDs were already not on hold and skipped: ' + unHoldIdsText, 'Info', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center',
+                                                timeOut: 8000
+                                            });
+                                        }
+                                    }
+                                    else {
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+
+                                    table.rows().deselect();
+
+                                    selected_rows = [];
+                                    table.button('.make_payment').disable();
+                                    table.button('.hold_payment').disable();
+                                    table.button('.un_hold').disable();
+
+                                    table.draw('false');
+                                });
+                            }
+                        },
                         {
                             extend: 'excel',
                             title: 'Make Payments',
@@ -984,6 +1079,8 @@
                                         }
 
                                         table.button('.make_payment').enable();
+                                        table.button('.hold_payment').enable();
+                                        table.button('.unhold').enable();
                                     }
                                 });
                             }
@@ -1013,6 +1110,9 @@
 
                                         if (selected_rows.length == 0) {
                                             table.button('.make_payment').disable();
+                                            table.button('.hold_payment').disable();
+                                            table.button('.unhold').disable();
+
                                         }
                                     }
                                 });
@@ -1051,7 +1151,9 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.finance.make_payments.list') }}',
+                    method: 'POST',
                     data: function(d) {
+                        d._token = '{{ csrf_token() }}'; 
                         d.payment_filter = $('#payment_cycle_filter_form select.payment_cycle_filter')
                             .val();
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
@@ -1253,6 +1355,21 @@
                         name: 'return_shipments_average_aging',
                         class: 'align-middle text-center return_shipments_average_aging',
                         orderable: false
+                    },
+                    {
+                        data: 'hold_status',
+                        name: 'pending_payments.is_hold',
+                        class: 'align-middle text-center hold_status'
+                    },
+                    {
+                        data: 'hold_date',
+                        name: 'pending_payments.hold_at',
+                        class: 'align-middle text-center hold_date'
+                    },
+                    {
+                        data: 'hold_by',
+                        name: 'ah.name',
+                        class: 'align-middle text-center hold_by'
                     },
                     {
                         data: 'action',
@@ -1796,8 +1913,12 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.make_payment').enable();
+                    table.button('.hold_payment').enable();
+                    table.button('.un_hold').enable();
                 } else {
                     table.button('.make_payment').disable();
+                    table.button('.hold_payment').disable();
+                    table.button('.un_hold').disable();
                 }
             });
 

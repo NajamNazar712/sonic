@@ -267,6 +267,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/accounts/add_contacts.store', 'Admins\AdminDashboardController@add_contacts_store')->name('accounts.add_contacts.store');
 
 
+    Route::get('/accounts/{id}/t_payments', 'Admins\AdminDashboardController@t_payments')->name('accounts.t_payments');
+    Route::put('/accounts/{id}/t_payments.store', 'Admins\AdminDashboardController@t_payments_store')->name('accounts.t_payments.store');
+    Route::post('/accounts/{id}/t_payments.approve', 'Admins\AdminDashboardController@t_payments_approve')->name('accounts.t_payments.approve');
 
     Route::prefix('corporate')->name('corporate.')->group(function () {
         Route::get('{id}/add/rates/{rate_type_id?}', 'Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
@@ -1749,7 +1752,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('make_payments')->name('make_payments.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@make_payments_index')->name('index');
-            Route::get('list', 'Admins\AdminFinanceController@make_payments_list')->name('list');
+            Route::post('list', 'Admins\AdminFinanceController@make_payments_list')->name('list');
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@make_payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Admins\AdminFinanceController@make_payments_returned_shipments')->name('returned_shipments');
             Route::post('adjusted_shipments', 'Admins\AdminFinanceController@make_payments_adjusted_shipments')->name('adjusted_shipments');
@@ -1769,6 +1772,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('payment_list_remaining', 'Admins\AdminFinanceController@payment_list_remaining')->name('payment_list_remaining');
             Route::post('fetch_shipper_ibft_charges_new', 'Admins\AdminFinanceController@fetch_shipper_ibft_charges_new')->name('fetch_shipper_ibft_charges_new');
             Route::get('make_payments_shipment_export_selected_new', 'Admins\AdminFinanceController@make_payments_shipment_export_selected_new')->name('make_payments_shipment_export_selected_new');
+
+            Route::put('hold', 'Admins\AdminFinanceController@make_payments_hold')->name('hold');
+            Route::put('un_hold', 'Admins\AdminFinanceController@make_payments_un_hold')->name('un_hold');
         });
 
         Route::prefix('make_payments_pickup_wise')->name('make_payments_pickup_wise.')->group(function () {
@@ -3045,6 +3051,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('mms_report_setting')->name('mms_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@mms_report_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@mms_report_store')->name('store');
+        });
+
+        Route::prefix('t_payment_exclude_shippers')->name('t_payment_exclude_shippers.')->group(function () {
+            Route::get('', 'Admins\Settings\GeneralSettingController@t_payment_exclude_shippers_index')->name('index');
+            Route::post('', 'Admins\Settings\GeneralSettingController@t_payment_exclude_shippers_store')->name('store');
+        });
+        Route::prefix('t_payment_cash_shippers')->name('t_payment_cash_shippers.')->group(function () {
+            Route::get('', 'Admins\Settings\GeneralSettingController@t_payment_cash_shippers_index')->name('index');
+            Route::post('', 'Admins\Settings\GeneralSettingController@t_payment_cash_shippers_store')->name('store');
         });
 
         Route::prefix('invoice_against_return_delivered_shipper')->name('invoice_against_return_delivered_shipper.')->group(function () {
