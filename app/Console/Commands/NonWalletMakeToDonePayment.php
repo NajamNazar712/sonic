@@ -51,11 +51,39 @@ class NonWalletMakeToDonePayment extends Command
 
         $walletUserIds = WalletUser::pluck('user_id')->toArray();
 
-        $pending_payments = PendingPayment::where('is_hold', 0)
-            ->whereNotIn('user_id', $excludedUserIds)
-            ->whereNotIn('user_id', $walletUserIds)
-            ->get();
+        //enable this when going live with all shippers and disable the below
+        // $pending_payments = PendingPayment::where('is_hold', 0)
+        //     ->whereNotIn('user_id', $excludedUserIds)
+        //     ->whereNotIn('user_id', $walletUserIds)
+        //     ->get();
 
+        $testIds = [
+            51175,
+            35393,
+            27733,
+            5018,
+            10881,
+            1870,
+            45541,
+            25722,
+            30753,
+            7002,
+            45711,
+            49715,
+            13580,
+            51094,
+            32032,
+            23032,
+            13060,
+            12139,
+            49349,
+            2969,
+            8190,
+            43416
+        ];
+        $pending_payments = PendingPayment::where('is_hold', 0)
+            ->whereIn('user_id', $testIds)
+            ->get();
 
         foreach ($pending_payments as $pending_payment) {
             $user_id = $pending_payment->user_id;
