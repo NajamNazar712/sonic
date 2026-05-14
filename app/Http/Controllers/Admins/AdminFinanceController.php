@@ -7723,28 +7723,17 @@ class AdminFinanceController extends Controller
     {
 
         $requestPendingShipmentIds = explode(',', $request->pending_payment_shipment_ids);
-        $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $requestPendingShipmentIds)->whereDate('created_at',date('Y-m-d'))->pluck('pending_payment_shipment_id')->toArray();
-        $idsToInsert = array_diff($requestPendingShipmentIds, $existingShipmentIds);
         $final_Array = [];
 
-        if (!empty($idsToInsert)) {
-
-            foreach ($idsToInsert as $pending_payment_shipment_id) {
-                MakePaymentTempTable::where('pending_payment_shipment_id', $pending_payment_shipment_id)->delete();  // Temp Solution if a date change occurs before data removal, the duplicates need to be manually handled, especially.
-                $insertData = [
-                    'pending_payment_shipment_id' => $pending_payment_shipment_id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-                try
-                {
-                    MakePaymentTempTable::insert($insertData);
-                    $final_Array[] = $pending_payment_shipment_id;
-                } catch (\Throwable $th) {
-
-                }
+        foreach ($requestPendingShipmentIds as $pending_payment_shipment_id) {
+            $inserted = DB::table('make_payment_temp_tables')->insertOrIgnore([
+                'pending_payment_shipment_id' => $pending_payment_shipment_id,
+                'created_at'                  => now(),
+                'updated_at'                  => now(),
+            ]);
+            if ($inserted) {
+                $final_Array[] = $pending_payment_shipment_id;
             }
-
         }
 
         if(count($final_Array) > 0) {
