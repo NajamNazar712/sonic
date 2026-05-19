@@ -89,7 +89,13 @@ class NonWalletMakeToDonePayment extends Command
             $user_id = $pending_payment->user_id;
 
             $user = User::select('id', 'payment_cycle_id', 'payment_cycle_days', 'created_at')
+                ->where('blacklist', 0)
                 ->find($user_id);
+
+            if (!$user) {
+
+                continue;
+            }
 
             // Check whether today matches user's payment cycle
             if (!$this->shouldRunPaymentToday($user, $today)) {
@@ -105,8 +111,14 @@ class NonWalletMakeToDonePayment extends Command
             // Collect shipment IDs whose created_at is on or before the cutoff date
             $filteredShipments = $pending_payment
                 ->pending_payment_shipments()
-                ->where('created_at', '<=', $cutoffDate)
-                ->get(['id', 'payable']);
+                ->join('shipments', 'shipments.id', '=', 'pending_payment_shipments.shipment_id')
+                ->where('pending_payment_shipments.created_at', '<=', $cutoffDate)
+                ->select(
+                    'pending_payment_shipments.id',
+                    'pending_payment_shipments.shipment_id',
+                    'pending_payment_shipments.payable'
+                )
+                ->get();
 
             // Skip if total payable of filtered shipments is zero or negative
             if ($filteredShipments->sum('payable') <= 0) {
