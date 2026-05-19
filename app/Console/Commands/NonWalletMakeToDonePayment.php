@@ -90,6 +90,7 @@ class NonWalletMakeToDonePayment extends Command
 
             $user = User::select('id', 'payment_cycle_id', 'payment_cycle_days', 'created_at')
                 ->where('blacklist', 0)
+                ->where('status', 3)
                 ->find($user_id);
 
             if (!$user) {
