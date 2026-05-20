@@ -75,6 +75,11 @@ class NonWalletMakeToDonePaymentNewFile extends Command
             $pending_payments = PendingPayment::where('is_hold', 0)
                 ->whereNotIn('user_id', $excludedUserIds)
                 ->whereNotIn('user_id', $walletUserIds)
+                ->where(function ($query) {
+                    $query->whereBetween('created_at', [now()->startOfYear(), now()])
+                        ->orWhereBetween('updated_at', [now()->startOfYear(), now()]);
+                })
+                ->orderBy('id', 'desc')
                 ->get();
 
         } catch (Throwable $th) {
