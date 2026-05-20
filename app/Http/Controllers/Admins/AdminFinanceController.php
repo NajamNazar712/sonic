@@ -7772,18 +7772,38 @@ class AdminFinanceController extends Controller
 
     public function make_payments_store(Request $request)
     {
-
-        $requestPendingShipmentIds = explode(',', $request->pending_payment_shipment_ids);
+        $requestPendingShipmentIds = array_filter(array_unique(array_map('trim', explode(',', $request->pending_payment_shipment_ids))));
         $final_Array = [];
 
-        foreach ($requestPendingShipmentIds as $pending_payment_shipment_id) {
-            $inserted = DB::table('make_payment_temp_tables')->insertOrIgnore([
-                'pending_payment_shipment_id' => $pending_payment_shipment_id,
-                'created_at'                  => now(),
-                'updated_at'                  => now(),
-            ]);
-            if ($inserted) {
-                $final_Array[] = $pending_payment_shipment_id;
+        foreach (array_chunk($requestPendingShipmentIds, 5000) as $shipmentIdsChunk) {
+
+            $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $shipmentIdsChunk)
+                ->whereDate('created_at', date('Y-m-d'))
+                ->pluck('pending_payment_shipment_id')
+                ->toArray();
+
+            $idsToInsert = array_diff($shipmentIdsChunk, $existingShipmentIds);
+
+            if (!empty($idsToInsert)) {
+
+                foreach ($idsToInsert as $pending_payment_shipment_id) {
+
+                    MakePaymentTempTable::where('pending_payment_shipment_id', $pending_payment_shipment_id)
+                        ->delete();
+
+                    $insertData = [
+                        'pending_payment_shipment_id' => $pending_payment_shipment_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+
+                    try {
+                        MakePaymentTempTable::insert($insertData);
+                        $final_Array[] = $pending_payment_shipment_id;
+                    } catch (\Throwable $th) {
+
+                    }
+                }
             }
         }
 
