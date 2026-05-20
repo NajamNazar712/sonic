@@ -7793,7 +7793,7 @@ class AdminFinanceController extends Controller
             //     return [$item['pending_payment_id'] => $item['id']];
             // })->toArray();
             $pending_payment_shipment_ids = [];
-            foreach (array_chunk($final_Array, 2) as $chunk) {
+            foreach (array_chunk($final_Array, 5000) as $chunk) {
                 $rows = PendingPaymentShipment::whereIn('id', $chunk)
                     ->select('pending_payment_id', 'id')
                     ->get();
