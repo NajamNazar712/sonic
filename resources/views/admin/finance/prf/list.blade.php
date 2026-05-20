@@ -420,7 +420,7 @@
                     }
                 }, @if(in_array(1049, session('permissions')) || session('role_id') == 1){
 
-                    text: '<i class="la la-cogs"></i> Completed/Done',
+                    text: '<i class="la la-cogs"></i> Complete/Done',
                     className: 'btn btn-primary complete',
                     enabled:false,
                     action: function (e, dt, node, config) {
