@@ -7772,6 +7772,7 @@ class AdminFinanceController extends Controller
 
     public function make_payments_store(Request $request)
     {
+
         $requestPendingShipmentIds = array_filter(array_unique(array_map('trim', explode(',', $request->pending_payment_shipment_ids))));
         $final_Array = [];
 
@@ -7838,10 +7839,10 @@ class AdminFinanceController extends Controller
             //        }
 
             $pending_logs = []; 
-            foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
+            foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_id_single) {
                 $finja_status = 0;
                 $total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
-                $selected_shipments = count($pending_payment_shipment_ids);
+                $selected_shipments = count($pending_payment_shipment_id_single);
 
                 $pending_payment = PendingPayment::find($pending_payment_id);
                 if ($pending_payment) {
