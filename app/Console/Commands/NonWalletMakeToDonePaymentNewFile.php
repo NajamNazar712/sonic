@@ -47,23 +47,50 @@ class NonWalletMakeToDonePaymentNewFile extends Command
             return 0;
         }
 
-        $excludedUserIds = GlobalSettings::where('type', 't_payment_exclude_shippers')->first()->text ?? '';
-        $excludedUserIds = array_filter(explode(',', $excludedUserIds));
 
-        $cashShipperIds = GlobalSettings::where('type', 't_payment_cash_shippers')->first()->text ?? '';
-        $cashShipperIds = array_filter(explode(',', $cashShipperIds));
+        // $excludedUserIds = GlobalSettings::where('type', 't_payment_exclude_shippers')->first()->text ?? '';
+        // $excludedUserIds = array_filter(explode(',', $excludedUserIds));
 
-        $walletUserIds = WalletUser::pluck('user_id')->toArray();
+        // $cashShipperIds = GlobalSettings::where('type', 't_payment_cash_shippers')->first()->text ?? '';
+        // $cashShipperIds = array_filter(explode(',', $cashShipperIds));
 
-        //enable this when going live with all shippers and disable the below
-        $pending_payments = PendingPayment::where('is_hold', 0)
-            ->whereNotIn('user_id', $excludedUserIds)
-            ->whereNotIn('user_id', $walletUserIds)
-            ->get();
+        // $walletUserIds = WalletUser::pluck('user_id')->toArray();
+
+        // //enable this when going live with all shippers and disable the below
+        // $pending_payments = PendingPayment::where('is_hold', 0)
+        //     ->whereNotIn('user_id', $excludedUserIds)
+        //     ->whereNotIn('user_id', $walletUserIds)
+        //     ->get();
+
+        try {
+            $excludedUserIds = GlobalSettings::where('type', 't_payment_exclude_shippers')->first()->text ?? '';
+            $excludedUserIds = array_filter(explode(',', $excludedUserIds));
+
+            $cashShipperIds = GlobalSettings::where('type', 't_payment_cash_shippers')->first()->text ?? '';
+            $cashShipperIds = array_filter(explode(',', $cashShipperIds));
+
+            $walletUserIds = WalletUser::pluck('user_id')->toArray();
+
+            // enable this when going live with all shippers and disable the below
+            $pending_payments = PendingPayment::where('is_hold', 0)
+                ->whereNotIn('user_id', $excludedUserIds)
+                ->whereNotIn('user_id', $walletUserIds)
+                ->get();
+
+        } catch (Throwable $th) {
+            Log::channel('non_wallet_payment_log')->error('NON_WALLET_PAYMENT_SETUP_FAILED', [
+                'error_message' => $th->getMessage(),
+                'error_file' => $th->getFile(),
+                'error_line' => $th->getLine(),
+            ]);
+
+            return 1;
+        }
 
         foreach ($pending_payments as $pending_payment) {
             try {
 
+                Log::channel('non_wallet_payment_log')->info("Payment Loop Enter: {$pending_payment->id}");
                 $user_id = $pending_payment->user_id;
 
                 $user = User::select('id', 'payment_cycle_id', 'payment_cycle_days', 'created_at')
