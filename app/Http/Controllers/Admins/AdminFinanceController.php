@@ -7789,9 +7789,19 @@ class AdminFinanceController extends Controller
 
         if(count($final_Array) > 0) {
 
-            $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', $final_Array)->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
-                return [$item['pending_payment_id'] => $item['id']];
-            })->toArray();
+            // $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', $final_Array)->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
+            //     return [$item['pending_payment_id'] => $item['id']];
+            // })->toArray();
+            $pending_payment_shipment_ids = [];
+            foreach (array_chunk($final_Array, 5000) as $chunk) {
+                $rows = PendingPaymentShipment::whereIn('id', $chunk)
+                    ->select('pending_payment_id', 'id')
+                    ->get();
+
+                foreach ($rows as $row) {
+                    $pending_payment_shipment_ids[$row->pending_payment_id][] = $row->id;
+                }
+            }
             $company_bank = $request->get('company_bank_id');
 
             $done_payment_ids = array();
