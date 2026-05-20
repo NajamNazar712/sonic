@@ -11,6 +11,8 @@ use App\Http\Models\WalletUser;
 use App\Models\TPaymentCycle;
 use Carbon\Carbon;
 use App\Http\Models\Shipper\User;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class NonWalletMakeToDonePayment extends Command
 {
@@ -39,7 +41,7 @@ class NonWalletMakeToDonePayment extends Command
 
         // Payment runs Monday to Friday only
         if ($today->isWeekend()) {
-            $this->info('Skipping: today is a weekend.');
+           Log::channel('non_wallet_payment_log')->info('Skipping: today is a weekend.');
             return 0;
         }
 
@@ -100,7 +102,7 @@ class NonWalletMakeToDonePayment extends Command
 
             // Check whether today matches user's payment cycle
             if (!$this->shouldRunPaymentToday($user, $today)) {
-                $this->info("Skipped user_id: {$user_id} | payment cycle does not match today");
+                Log::channel('non_wallet_payment_log')->info("Skipped user_id: {$user_id} | payment cycle does not match today");
                 continue;
             }
 
@@ -134,10 +136,29 @@ class NonWalletMakeToDonePayment extends Command
                     'company_bank_id' => $companyBankId,
                 ]);
     
-                $controller = new AdminFinanceController;
-                $controller->make_payments_store($request);
+                // $controller = new AdminFinanceController;
+                // $controller->make_payments_store($request);
 
-                $this->info("Processed payment for user_id: {$user_id} | T: {$T} | Cutoff: {$cutoffDate->toDateString()}");
+                try {
+                    $controller = new AdminFinanceController;
+                    $controller->make_payments_store($request);
+
+                } catch (Throwable $th) {
+                    Log::channel('non_wallet_payment_log')->error('NON_WALLET_PAYMENT_FAILED', [
+                        'user_id' => $user_id ?? null,
+                        'pending_payment_id' => $pending_payment->id ?? null,
+                        'shipment_count' => isset($pending_payment_shipment_ids) ? count($pending_payment_shipment_ids) : 0,
+                        'company_bank_id' => $companyBankId ?? null,
+                        'T' => $T ?? null,
+                        'cutoff_date' => isset($cutoffDate) ? $cutoffDate->toDateString() : null,
+                        'error_message' => $th->getMessage(),
+                        'error_file' => $th->getFile(),
+                        'error_line' => $th->getLine(),
+                    ]);
+
+                    continue;
+                }
+
             }
         }
 
