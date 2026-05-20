@@ -72,12 +72,15 @@ class NonWalletMakeToDonePaymentNewFile extends Command
             $walletUserIds = WalletUser::pluck('user_id')->toArray();
 
             // enable this when going live with all shippers and disable the below
+            $startOfYear = Carbon::now()->startOfYear(); // 2026-01-01 00:00:00
+            $currentMoment = Carbon::now();               // Current time right now
+
             $pending_payments = PendingPayment::where('is_hold', 0)
                 ->whereNotIn('user_id', $excludedUserIds)
                 ->whereNotIn('user_id', $walletUserIds)
-                ->where(function ($query) {
-                    $query->whereBetween('created_at', [now()->startOfYear(), now()])
-                        ->orWhereBetween('updated_at', [now()->startOfYear(), now()]);
+                ->where(function ($query) use ($startOfYear, $currentMoment) {
+                    $query->whereBetween('created_at', [$startOfYear, $currentMoment])
+                        ->orWhereBetween('updated_at', [$startOfYear, $currentMoment]);
                 })
                 ->orderBy('id', 'desc')
                 ->get();
