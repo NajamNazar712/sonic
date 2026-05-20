@@ -98,6 +98,12 @@ return [
             'path' => storage_path('logs/code_test.log'),
             'level' => 'debug',
         ],
+
+        'non_wallet_payment_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/non_wallet_payment.log'),
+            'level' => 'debug',
+        ]
     ],
 
 ];
