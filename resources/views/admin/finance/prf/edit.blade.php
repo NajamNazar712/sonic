@@ -39,10 +39,20 @@
 
                                     <div class="form-group">
                                         <label>NTN / CNIC</label>
-                                        <input type="text" name="ntn_cnic" value="{{ old('ntn_cnic', $requisition->ntn_cnic) }}" 
-                                               class="form-control" placeholder="NTN / CNIC*" required>
-                                    </div>
+                                            <input type="text"
+                                            name="ntn_cnic"
+                                            id="ntn_cnic"
+                                            value="{{ old('ntn_cnic', $requisition->ntn_cnic) }}"
+                                            class="form-control"
+                                            placeholder="NTN / CNIC*"
+                                            maxlength="13"
+                                            required>
 
+                                        <span id="ntn_no_error" class="danger" style="display: none;">
+                                            NTN / CNIC must be minimum 7 digits and maximum 13 digits
+                                        </span>
+                                    </div>
+                                   
                                     <div class="form-group">
                                         <label>Bank Name</label>
                                         <select name="bank_id" id="bank_name" class="select2" required>
@@ -67,10 +77,25 @@
                                                class="form-control" placeholder="IBAN*" required>
                                     </div>
 
-                                    <div class="form-group">
+                                    <!-- <div class="form-group">
                                         <label>Amount</label>
                                         <input type="text" name="amount" id="amount" value="{{ old('amount', $requisition->amount) }}" 
                                                class="form-control text-right" placeholder="Amount*" required>
+                                    </div> -->
+
+                                    <div class="form-group">
+                                        <label>Amount</label>
+                                        <input type="text"
+                                            name="amount"
+                                            id="amount"
+                                            value="{{ old('amount', $requisition->amount) }}"
+                                            class="form-control text-right"
+                                            placeholder="Amount*"
+                                            required>
+
+                                        <span id="amount_no_error" class="danger" style="display:none;">
+                                            Amount must be numeric, max 9 digits before decimal and max 2 digits after decimal
+                                        </span>
                                     </div>
 
                                     <div class="form-group">
@@ -194,11 +219,52 @@ $(document).ready(function () {
         allowClear: true
     });
 
-    $('#amount').inputmask({
-        'alias': 'integer',
-        'allowMinus': false,
-        'allowPlus': false,
-        'min': 1
+    // === Amount: max 9 digits before decimal and max 2 digits after decimal ===
+    $('#amount').on('input', function () {
+        let value = $(this).val();
+
+        value = value.replace(/[^0-9.]/g, '');
+
+        let parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+
+        parts = value.split('.');
+
+        parts[0] = parts[0].substring(0, 9);
+
+        if (parts[1] !== undefined) {
+            parts[1] = parts[1].substring(0, 2);
+            value = parts[0] + '.' + parts[1];
+        } else {
+            value = parts[0];
+        }
+
+        $(this).val(value);
+
+        let amountRegex = /^\d{1,9}(\.\d{1,2})?$/;
+
+        if (value.length > 0 && !amountRegex.test(value)) {
+            $('#amount_no_error').show();
+        } else {
+            $('#amount_no_error').hide();
+        }
+    });
+
+    $('#ntn_cnic').on('input keyup paste', function () {
+        let value = $(this).val().replace(/\D/g, '');
+
+        // max 13 digits only
+        value = value.substring(0, 13);
+
+        $(this).val(value);
+
+        if (value.length > 0 && (value.length < 7 || value.length > 13)) {
+            $('#ntn_no_error').show();
+        } else {
+            $('#ntn_no_error').hide();
+        }
     });
 
     $('#finance_request_form').validate({
@@ -211,6 +277,25 @@ $(document).ready(function () {
             error.addClass('w-100').appendTo(element.parent('.form-group'));
         },
         submitHandler: function(form) {
+            let ntn = $('#ntn_cnic').val().replace(/\D/g, '');
+            let amount = $('#amount').val().trim();
+
+            if (ntn.length < 7 || ntn.length > 13) {
+                $('#ntn_no_error').show();
+                return false;
+            } else {
+                $('#ntn_no_error').hide();
+            }
+
+            let amountRegex = /^\d{1,9}(\.\d{1,2})?$/;
+
+            if (amount.length === 0 || !amountRegex.test(amount)) {
+                $('#amount_no_error').show();
+                return false;
+            } else {
+                $('#amount_no_error').hide();
+            }
+
             form.submit();
         }
     });

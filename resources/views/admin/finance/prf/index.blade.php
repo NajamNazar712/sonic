@@ -34,8 +34,12 @@
 
                                     <div class="form-group">
                                         <label>NTN / CNIC</label>
-                                        <input type="text" name="ntn_cnic" id="ntn_cnic" class="form-control" placeholder="NTN / CNIC*" data-rule-required="true">
-                                        <span id="ntn_no_error" class="danger" style="display: none;">NTN / CNIC must be exactly 13 digits</span>
+                                        <input type="text" name="ntn_cnic" id="ntn_cnic" class="form-control" placeholder="NTN / CNIC*" maxlength="13" data-rule-required="true">
+                                        <!-- <span id="ntn_no_error" class="danger" style="display: none;">NTN / CNIC must be exactly 13 digits</span> -->
+                                        <span id="ntn_no_error" class="danger" style="display: none;">
+                                           NTN / CNIC must be minimum 7 digits and maximum 13 digits
+
+                                        </span>
                                     </div>
 
 
@@ -64,7 +68,10 @@
                                     <div class="form-group">
                                         <label>Amount</label>
                                         <input type="text" name="amount" id="amount" class="form-control text-right" placeholder="Amount*" data-rule-required="true">
-                                        <span id="amount_no_error" class="danger" style="display:none;">Amount cannot exceed 9 digits</span>
+                                        <!-- <span id="amount_no_error" class="danger" style="display:none;">Amount cannot exceed 9 digits</span> -->
+                                        <span id="amount_no_error" class="danger" style="display:none;">
+                                            Amount must be numeric, max 9 digits before decimal and max 2 digits after decimal
+                                        </span>
                                     </div>
 
                                     <div class="form-group">
@@ -188,33 +195,53 @@
                 allowClear:true
             });
 
-            $('#amount').inputmask({
-                mask: '999999999', // exactly 9 digits
-                placeholder: '',
-                showMaskOnHover: false,
-                showMaskOnFocus: false
-            });
+            // === Amount: max 9 digits before decimal and max 2 digits after decimal ===
+            $('#amount').on('input', function () {
+                let value = $(this).val();
 
-            $('#amount').on('input', function() {
-                let amount = $(this).val().replace(/\D/g, '');
-                if (amount.length > 9) {
+                // allow only digits and decimal point
+                value = value.replace(/[^0-9.]/g, '');
+
+                // allow only one decimal point
+                let parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
+                }
+
+                parts = value.split('.');
+
+                // max 9 digits before decimal
+                parts[0] = parts[0].substring(0, 9);
+
+                // max 2 digits after decimal
+                if (parts[1] !== undefined) {
+                    parts[1] = parts[1].substring(0, 2);
+                    value = parts[0] + '.' + parts[1];
+                } else {
+                    value = parts[0];
+                }
+
+                $(this).val(value);
+
+                let amountRegex = /^\d{1,9}(\.\d{1,2})?$/;
+
+                if (value.length > 0 && !amountRegex.test(value)) {
                     $('#amount_no_error').show();
                 } else {
                     $('#amount_no_error').hide();
                 }
             });
 
-            // === NTN / CNIC (exactly 13 digits) ===
-            $('#ntn_cnic').inputmask({
-                mask: '9999999999999', // 13 digits
-                placeholder: '',
-                showMaskOnHover: false,
-                showMaskOnFocus: false
-            });
+            // === NTN / CNIC: NTN 7 to 10 digits OR CNIC exactly 13 digits ===
+            $('#ntn_cnic').on('input', function () {
+                let value = $(this).val().replace(/\D/g, '');
 
-            $('#ntn_cnic').on('input', function() {
-                let ntn = $(this).val().replace(/\D/g, '');
-                if (ntn.length !== 13) {
+                // max 13 digits only
+                value = value.substring(0, 13);
+
+                $(this).val(value);
+
+                if (value.length > 0 && (value.length < 7 || value.length > 13)) {
                     $('#ntn_no_error').show();
                 } else {
                     $('#ntn_no_error').hide();
@@ -267,7 +294,7 @@
                 submitHandler: function(form) {
                     let iban = $('#iban').val().trim();
                     let ntn = $('#ntn_cnic').val().replace(/\D/g, '');
-                    let amount = $('#amount').val().replace(/\D/g, '');
+                    let amount = $('#amount').val().trim();
                     let defaultPrefix = 'PK';
 
                     if (iban.length !== 24 || !iban.startsWith(defaultPrefix)) {
@@ -277,20 +304,21 @@
                         $('#iban_no_error').hide();
                     }
 
-                     if (ntn.length !== 13) {
+                    if (ntn.length < 7 || ntn.length > 13) {
                         $('#ntn_no_error').show();
-                        console.log(ntn.length)
                         return false;
                     } else {
                         $('#ntn_no_error').hide();
                     }
 
-                    if (amount.length === 0 || amount.length > 9) {
+                    let amountRegex = /^\d{1,9}(\.\d{1,2})?$/;
+                    if (amount.length === 0 || !amountRegex.test(amount)) {
                         $('#amount_no_error').show();
                         return false;
                     } else {
                         $('#amount_no_error').hide();
                     }
+
                     form.submit();
                 }
             });
