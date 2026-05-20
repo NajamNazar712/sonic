@@ -732,7 +732,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('sync:s3-minio 2026-03-05')
         //     ->cron('0 3 5 3 *')
         //     ->withoutOverlapping();
-         $schedule->command('non-wallet-users:make-to-done-new-file')->dailyAt('18:45')->runInBackground();
+         $schedule->command('non-wallet-users:make-to-done-new-file')->dailyAt('05:00')->withoutOverlapping()->runInBackground();
         $schedule->command('auto:reject-leaves')->everyFiveMinutes();
         $schedule->command('dump:daily-payable-records-to-logs-table')->everyThreeHours()->withoutOverlapping()->runInBackground();
 
