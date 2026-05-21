@@ -7775,7 +7775,6 @@ class AdminFinanceController extends Controller
 
         $requestPendingShipmentIds = array_filter(array_unique(array_map('trim', explode(',', $request->pending_payment_shipment_ids))));
         $final_Array = [];
-
         foreach (array_chunk($requestPendingShipmentIds, 5000) as $shipmentIdsChunk) {
 
             $existingShipmentIds = MakePaymentTempTable::whereIn('pending_payment_shipment_id', $shipmentIdsChunk)

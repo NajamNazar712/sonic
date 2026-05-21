@@ -50,18 +50,17 @@ class WalletUsersMakeToDonePayments extends Command
                 ->whereNotIn('user_id', [46611, 47392, 47394, 47813, 33952, 27424, 44309, 44149, 3719, 2634, 18179, 49456, 043576, 22071, 2121, 39282, 49028, 12240, 1458, 7626, 23009,27519,25229, 4429, 4251,35393,44233, 25231, 10661, 51274, 2502, 47901]) // Remove Test Shipper
                 ->pluck('user_id')
                 ->toArray();
-    
+
                 $today_is_sunday = Carbon::now();
     
                 foreach($wallet_user_ids as $wallet_user_id) {
-                   
+
                     $pending_payment = PendingPayment::with(['pending_payment_shipments' => function ($query) {
                         $query->where('created_at', '<', Carbon::today()->format('Y-m-d H:i:s'));
                     }])
                         ->where('user_id', $wallet_user_id)
                         ->where('created_at', '<', Carbon::today()->format('Y-m-d H:i:s'))
                         ->first();
-
 
                     if ($pending_payment && $pending_payment->pending_payment_shipments->sum('payable') > 0) {
 
