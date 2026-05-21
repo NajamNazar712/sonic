@@ -54,25 +54,25 @@ class WalletUsersMakeToDonePayments extends Command
                 $today_is_sunday = Carbon::now();
     
                 foreach($wallet_user_ids as $wallet_user_id) {
-                    if($wallet_user_id != 23009) {
-                        $pending_payment = PendingPayment::with(['pending_payment_shipments' => function ($query) {
-                            $query->where('created_at', '<', Carbon::today()->format('Y-m-d H:i:s'));
-                        }])
-                            ->where('user_id', $wallet_user_id)
-                            ->where('created_at', '<', Carbon::today()->format('Y-m-d H:i:s'))
-                            ->first();
+                   
+                    $pending_payment = PendingPayment::with(['pending_payment_shipments' => function ($query) {
+                        $query->where('created_at', '<', Carbon::today()->format('Y-m-d H:i:s'));
+                    }])
+                        ->where('user_id', $wallet_user_id)
+                        ->where('created_at', '<', Carbon::today()->format('Y-m-d H:i:s'))
+                        ->first();
 
 
-                        if ($pending_payment && $pending_payment->pending_payment_shipments->sum('payable') > 0) {
+                    if ($pending_payment && $pending_payment->pending_payment_shipments->sum('payable') > 0) {
 
-                            $pending_payment_shipment_ids = $pending_payment->pending_payment_shipments->pluck('id')->toArray();
+                        $pending_payment_shipment_ids = $pending_payment->pending_payment_shipments->pluck('id')->toArray();
 
-                            $request = new Request(['pending_payment_shipment_ids' => implode(',', $pending_payment_shipment_ids), 'company_bank_id' => 48]);
+                        $request = new Request(['pending_payment_shipment_ids' => implode(',', $pending_payment_shipment_ids), 'company_bank_id' => 48]);
 
-                            $controller = new AdminFinanceController;
-                            $controller->make_payments_store($request);
-                        }
+                        $controller = new AdminFinanceController;
+                        $controller->make_payments_store($request);
                     }
+
     
                 }
             // }
