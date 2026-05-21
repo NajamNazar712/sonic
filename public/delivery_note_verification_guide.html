@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto Delivery Note Verification — System Guide & Bug Catalog</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { font-family: 'Segoe UI', sans-serif; background: #f8f9fa; }
+  .section-card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); margin-bottom: 28px; }
+  .section-header { border-radius: 10px 10px 0 0; padding: 14px 22px; font-weight: 700; font-size: 1.05rem; }
+  .bg-gate   { background: #1565c0; color: #fff; }
+  .bg-flow   { background: #2e7d32; color: #fff; }
+  .bg-bug    { background: #b71c1c; color: #fff; }
+  .bg-stuck  { background: #e65100; color: #fff; }
+  .bg-diag   { background: #37474f; color: #fff; }
+  .bg-fix    { background: #4527a0; color: #fff; }
+  .gate-box { border-left: 5px solid #1565c0; background: #e3f2fd; padding: 12px 16px; border-radius: 4px; margin-bottom: 10px; }
+  .bug-box  { border-left: 5px solid #b71c1c; background: #ffebee; padding: 12px 16px; border-radius: 4px; margin-bottom: 14px; }
+  .warn-box { border-left: 5px solid #e65100; background: #fff3e0; padding: 12px 16px; border-radius: 4px; margin-bottom: 10px; }
+  .ok-box   { border-left: 5px solid #2e7d32; background: #e8f5e9; padding: 12px 16px; border-radius: 4px; margin-bottom: 10px; }
+  .flow-step { display: flex; align-items: flex-start; margin-bottom: 10px; }
+  .flow-num  { width: 32px; height: 32px; border-radius: 50%; background: #1565c0; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; margin-right: 12px; margin-top: 2px; }
+  .flow-num.red  { background: #b71c1c; }
+  .flow-num.green{ background: #2e7d32; }
+  .flow-num.orange{ background: #e65100; }
+  code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: .88rem; color: #b71c1c; }
+  pre  { background: #1e1e1e; color: #d4d4d4; padding: 14px; border-radius: 6px; font-size: .82rem; overflow-x: auto; }
+  pre .kw  { color: #569cd6; }
+  pre .cm  { color: #6a9955; }
+  pre .st  { color: #ce9178; }
+  pre .nu  { color: #b5cea8; }
+  .badge-bug  { background: #b71c1c; color: #fff; font-size: .75rem; padding: 3px 8px; border-radius: 10px; }
+  .badge-warn { background: #e65100; color: #fff; font-size: .75rem; padding: 3px 8px; border-radius: 10px; }
+  .badge-ok   { background: #2e7d32; color: #fff; font-size: .75rem; padding: 3px 8px; border-radius: 10px; }
+  .arrow { color: #888; margin: 0 6px; }
+  h1 { color: #1565c0; }
+  .toc a { color: #1565c0; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .status-table th { background: #37474f; color: #fff; }
+  .impact-high { background: #ffcdd2 !important; }
+  .impact-med  { background: #fff9c4 !important; }
+  .impact-low  { background: #c8e6c9 !important; }
+</style>
+</head>
+<body>
+<div class="container py-5" style="max-width:1050px">
+
+  <h1 class="mb-1">Auto Delivery Note Verification</h1>
+  <p class="text-muted mb-4">System Guide &amp; Bug Catalog — Why Delivered Shipments Miss Pending Payments</p>
+
+  <!-- TOC -->
+  <div class="section-card p-4 mb-4 toc">
+    <strong>Contents</strong>
+    <ol class="mt-2 mb-0">
+      <li><a href="#overview">What the cron does</a></li>
+      <li><a href="#gates">The 5 gates a delivery note must pass</a></li>
+      <li><a href="#flow">Step-by-step processing flow</a></li>
+      <li><a href="#payment-logic">When payment is actually added</a></li>
+      <li><a href="#bugs">Bug catalog — every way a shipment can get stuck</a></li>
+      <li><a href="#double-dn">Double delivery note problem</a></li>
+      <li><a href="#diag">Diagnostic SQL queries</a></li>
+      <li><a href="#fix">Recommended fixes summary</a></li>
+    </ol>
+  </div>
+
+  <!-- 1. OVERVIEW -->
+  <div class="section-card" id="overview">
+    <div class="section-header bg-flow">1. What the Cron Does</div>
+    <div class="p-4">
+      <p>Command: <code>auto:deliverynoteverification</code><br>
+      File: <code>app/Console/Commands/AutoDeliveryNoteVerify.php</code><br>
+      Schedule: Configurable via <code>global_settings</code> (<code>type = delivery_note_auto_verification_time</code>). If that setting is missing, the cron is <strong>never scheduled</strong>.</p>
+
+      <p class="mb-0"><strong>Purpose:</strong> Every day at the configured time, find all unverified delivery notes that riders have submitted, re-stamp the latest shipment journey status for each shipment, trigger payment generation for delivered shipments, escalate stuck Reason-Validation shipments to Return Confirm, and finally mark all processed delivery notes as verified.</p>
+    </div>
+  </div>
+
+  <!-- 2. GATES -->
+  <div class="section-card" id="gates">
+    <div class="section-header bg-gate">2. The 5 Gates a Delivery Note Must Pass to Be Processed</div>
+    <div class="p-4">
+
+      <div class="gate-box">
+        <strong>Gate 1 — Feature flag ON</strong><br>
+        <code>global_settings</code> where <code>type = 'delivery_note_auto_verification'</code> must exist <em>and</em> <code>setting_value = 1</code>.<br>
+        <span class="text-danger">If the row is missing or value is 0 → the entire cron exits without processing anything.</span>
+      </div>
+
+      <div class="gate-box">
+        <strong>Gate 2 — Schedule configured</strong><br>
+        <code>global_settings</code> where <code>type = 'delivery_note_auto_verification_time'</code> must exist.<br>
+        <span class="text-danger">If missing → the cron command is never registered with the Laravel scheduler at all (Kernel.php line 593–598).</span>
+      </div>
+
+      <div class="gate-box">
+        <strong>Gate 3 — Hub not excluded</strong><br>
+        <code>global_settings</code> where <code>type = 'delivery_note_auto_verification_exclude_hubs'</code>: any hub ID in the comma-separated list is skipped completely.<br>
+        Delivery notes from excluded hubs never get auto-verified.
+      </div>
+
+      <div class="gate-box">
+        <strong>Gate 4 — Created within last 9 days</strong><br>
+        <code>DeliveryNote::whereDate('created_at', '>=', Carbon::today()->subDays(9))</code><br>
+        <span class="text-danger">Notes older than 9 days are permanently ignored. If a note was stuck for 10+ days, it will never be auto-verified.</span>
+      </div>
+
+      <div class="gate-box">
+        <strong>Gate 5 — Status = 0 AND pending_status = 1</strong><br>
+        <code>status = 0</code> means not yet verified.<br>
+        <code>pending_status = 1</code> means the rider has submitted the note for verification.<br>
+        <span class="text-danger">Notes where the rider never pressed "Submit" (pending_status = 0) are never picked up, no matter how old they are.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. FLOW -->
+  <div class="section-card" id="flow">
+    <div class="section-header bg-flow">3. Step-by-Step Processing Flow</div>
+    <div class="p-4">
+
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div>Collect all matching delivery note IDs (pass Gates 1–5 above)</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div>Get all <code>delivery_note_shipments.shipment_id</code> for those notes → <code>DISTINCT</code> list so a shipment in two notes is only processed once</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div>Chunk shipments in groups of 1,000 for memory safety</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div>For each chunk, load shipments excluding:
+          <ul class="mb-0 mt-1">
+            <li><code>shipper_status_id IN (30, 36, 37, 56)</code> — RP-EC, TB-DE, TB-PD, special types already finalised</li>
+            <li><code>booking_type_id = 6</code> — excluded booking type</li>
+          </ul>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num green">5</div>
+        <div><strong>Re-stamp journey:</strong> Call <code>ShipmentsJourneyController::add()</code> with the shipment's latest journey — essentially creating a new identical journey entry with <code>verified_by = 346</code>. This is what "verifying" the delivery means technically.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num green">6</div>
+        <div><strong>Trigger payment</strong> if <code>shipper_status_id == 14</code> (Delivered):
+          <ul class="mb-0 mt-1">
+            <li><code>booking_type_id = 1</code> → <code>AdminFinanceController::add_payment($shipment->id, 0)</code></li>
+            <li><code>booking_type_id = 4</code> → <code>AdminFinanceController::done_payment($shipment->id, 0)</code></li>
+          </ul>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num orange">7</div>
+        <div><strong>Handle Reason Validation (status 12):</strong> If reason is Damaged (27) or Delivery Stopped (35) and journey count > 2 → auto-escalate to Return Confirm (status 20) and trigger return payment</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num red">8</div>
+        <div><strong>Mark ALL collected delivery notes verified in one bulk UPDATE</strong> — regardless of whether individual shipments succeeded or threw exceptions inside the loop</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. PAYMENT LOGIC -->
+  <div class="section-card" id="payment-logic">
+    <div class="section-header bg-flow">4. When Payment Is Actually Added</div>
+    <div class="p-4">
+
+      <h6 class="fw-bold">booking_type_id = 1 (Normal / Standard Shipment)</h6>
+      <pre><code><span class="kw">if</span> ($shipment->shipper_status_id == <span class="nu">14</span>) {
+    <span class="kw">if</span> ($shipment->booking_type_id == <span class="nu">1</span>) {
+        <span class="kw">if</span> (
+            ($shipment->packaging_material_request == <span class="nu">1</span> &amp;&amp; $shipment->packaging_material_charges != <span class="st">''</span>)
+            || $shipment->packaging_material_request == <span class="nu">0</span>
+        ) {
+            AdminFinanceController::add_payment($shipment->id, <span class="nu">0</span>); <span class="cm">// ← payment added here</span>
+        }
+        <span class="cm">// If packaging_material_request=1 AND charges=NULL → payment is SILENTLY SKIPPED</span>
+    }
+}</code></pre>
+      <p class="mb-3">Inside <code>add_payment()</code>, there is one more guard:
+        <br><code>CorporateUserOnDeliveredInvoice</code> — if the shipper is on this list and the type is return (1) or adjustment (3), payment is skipped with a silent <code>return</code>.
+      </p>
+
+      <h6 class="fw-bold">booking_type_id = 4 (Walk-in)</h6>
+      <pre><code><span class="kw">if</span> ($shipment->booking_type_id == <span class="nu">4</span>) {
+    AdminFinanceController::done_payment($shipment->id, <span class="nu">0</span>);
+}
+
+<span class="cm">// Inside done_payment():</span>
+<span class="kw">if</span> (DonePaymentShipment::where(<span class="st">'shipment_id'</span>, $shipment_id)->where(<span class="st">'type'</span>, $type)->exists()) {
+    <span class="cm">// creates new DonePayment ONLY if a DonePaymentShipment already exists</span>
+    <span class="cm">// For a fresh walk-in delivery → no prior record → payment is NEVER created</span>
+}</code></pre>
+
+      <div class="warn-box mt-2">
+        <strong>Other booking types (2, 3, 5, etc.):</strong> No payment is triggered at all for these booking types — the cron only handles 1 and 4. If your operation uses other types, those shipments will never get payment from this cron.
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. BUGS -->
+  <div class="section-card" id="bugs">
+    <div class="section-header bg-bug">5. Bug Catalog — Every Way a Shipment Can Get Stuck</div>
+    <div class="p-4">
+
+      <!-- BUG 1 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 1</span> Delivery note never submitted (pending_status = 0)</strong><br>
+        <strong>Cause:</strong> Rider creates the note but never taps "Submit for Verification" in the app. <code>pending_status</code> stays 0.<br>
+        <strong>Effect:</strong> Gate 5 fails. Note is never picked up by the cron, ever.<br>
+        <strong>Scope:</strong> All shipments on that note are stuck in their current status. Payment never drops.<br>
+        <strong>Detection:</strong> <code>SELECT * FROM delivery_notes WHERE status=0 AND pending_status=0 AND created_at &lt; NOW()-INTERVAL 2 DAY;</code>
+      </div>
+
+      <!-- BUG 2 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 2</span> Delivery note older than 9 days</strong><br>
+        <strong>Cause:</strong> Note was stuck (wrong hub, feature flag off, excluded hub) for more than 9 days. Cron's date window is <code>Carbon::today()->subDays(9)</code>.<br>
+        <strong>Effect:</strong> Gate 4 fails. Note is permanently outside the cron's window. It will never be auto-verified.<br>
+        <strong>Detection:</strong> <code>SELECT * FROM delivery_notes WHERE status=0 AND pending_status=1 AND created_at &lt; NOW()-INTERVAL 9 DAY;</code>
+      </div>
+
+      <!-- BUG 3 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 3</span> Hub is in the excluded list</strong><br>
+        <strong>Cause:</strong> Hub ID added to <code>global_settings</code> (<code>type = 'delivery_note_auto_verification_exclude_hubs'</code>) for operational or cash-collection reasons and never removed.<br>
+        <strong>Effect:</strong> Every delivery note from that hub skips auto-verification permanently until the hub is removed from the list.<br>
+        <strong>Detection:</strong> Cross-check hub IDs in the excluded setting against hubs with stuck notes.
+      </div>
+
+      <!-- BUG 4 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 4</span> Packaging material charges missing (silent payment block)</strong><br>
+        <strong>Cause:</strong> Shipment has <code>packaging_material_request = 1</code> but <code>packaging_material_charges</code> is NULL or empty string.<br>
+        <strong>Effect:</strong> The condition <code>($packaging_material_request == 1 &amp;&amp; $packaging_material_charges != '')</code> is FALSE. Payment is silently skipped. No error, no log.<br>
+        <strong>Scope:</strong> Shipment is marked delivered, delivery note gets verified, but payment is never added to pending_payments.<br>
+        <strong>Detection:</strong><br>
+        <code>SELECT id, tracking_number, shipper_status_id, packaging_material_request, packaging_material_charges FROM shipments WHERE shipper_status_id=14 AND packaging_material_request=1 AND (packaging_material_charges IS NULL OR packaging_material_charges='') AND payment_status_id NOT IN (1,5);</code>
+      </div>
+
+      <!-- BUG 5 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 5</span> latest_shipment_journey is NULL → fatal exception → entire batch skipped</strong><br>
+        <strong>Cause:</strong> A shipment in the delivery note has zero rows in <code>shipments_journey</code> (data integrity gap).<br>
+        <strong>Effect:</strong> <code>$journey->shipment_id</code> on line 103 throws <em>Call to member function on null</em>. The outer try/catch on line 58 catches it. The cron logs the error and exits. All remaining shipments in that chunk are skipped. But line 173 bulk-marks ALL delivery notes as verified anyway.<br>
+        <strong>Result:</strong> Shipments after the bad one in the chunk are silently skipped but their notes are still marked verified — permanent payment loss with no easy recovery.<br>
+        <strong>Detection:</strong><br>
+        <code>SELECT dns.shipment_id FROM delivery_note_shipments dns LEFT JOIN shipments_journey sj ON sj.shipment_id = dns.shipment_id WHERE sj.id IS NULL GROUP BY dns.shipment_id;</code>
+      </div>
+
+      <!-- BUG 6 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 6</span> Exception inside shipment loop marks ALL notes verified anyway</strong><br>
+        <strong>Cause:</strong> Any unhandled exception in the per-shipment processing (NULL journey, failed DB write, missing relation) propagates to the outer try/catch on line 58.<br>
+        <strong>Effect:</strong> Line 173 <code>DeliveryNote::whereIn(...)->update(['status' => 1])</code> is inside the <code>if($delivery_notes->exists())</code> block, which runs <em>before</em> the exception is thrown during the loop. So all notes get verified even though only some shipments were processed.<br>
+        <strong>Important:</strong> Actually looking at the code structure — line 173 is AFTER the foreach loop but INSIDE the same <code>if</code> block. If an exception escapes the foreach, line 173 is never reached. But the notes are NOT rolled back to status=0 either. On the next cron run, <code>status=0 AND pending_status=1</code> still matches so they are re-processed — but only if they are still within the 9-day window.
+      </div>
+
+      <!-- BUG 7 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 7</span> Walk-in (booking_type_id=4) payment never created for new shipments</strong><br>
+        <strong>Cause:</strong> <code>done_payment()</code> only creates a payment if <code>DonePaymentShipment::where('shipment_id', $id)->where('type', 0)->exists()</code> is TRUE. For a first-time walk-in delivery, no prior record exists.<br>
+        <strong>Effect:</strong> Every walk-in delivered shipment processed by this cron gets its journey re-stamped but zero payment is created.<br>
+        <strong>Note:</strong> Walk-in payments may be intended to be created by a separate manual process, but the cron calling <code>done_payment()</code> on them gives the impression it should work.
+      </div>
+
+      <!-- BUG 8 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 8</span> Shipment is already in pending_payments — add_payment called again</strong><br>
+        <strong>Cause:</strong> A shipment's status was updated to 14 earlier (manual verification or another cron), <code>add_payment</code> was already called, and the shipment is now also in a delivery note that the auto-verify cron picks up.<br>
+        <strong>Effect:</strong> <code>add_payment</code> runs again. Depending on its internal duplicate-check logic, this may create a duplicate <code>pending_payment_shipments</code> row — causing the shipment to be counted twice in payment.<br>
+        <strong>Detection:</strong><br>
+        <code>SELECT shipment_id, COUNT(*) FROM pending_payment_shipments GROUP BY shipment_id HAVING COUNT(*) > 1;</code>
+      </div>
+
+      <!-- BUG 9 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 9</span> No transaction wrapping — partial success leaves inconsistent state</strong><br>
+        <strong>Cause:</strong> The entire cron runs outside a database transaction.<br>
+        <strong>Effect:</strong> If a DB write fails midway (e.g., journey inserted but payment insert fails), the journey is stamped but payment is not. There is no rollback. The delivery note gets marked verified. The shipment is permanently stuck without payment.<br>
+        <strong>Recommendation:</strong> Wrap each shipment's processing in a DB::transaction() with a per-shipment try/catch so a failure on one does not affect others and does not mark the note verified.
+      </div>
+
+      <!-- BUG 10 -->
+      <div class="bug-box">
+        <strong><span class="badge-bug">BUG 10</span> Feature flag missing → cron silently does nothing</strong><br>
+        <strong>Cause:</strong> If <code>global_settings</code> row for <code>delivery_note_auto_verification</code> does not exist, the outer <code>if($setting->exists())</code> is false and the cron exits with no output, no log, no error.<br>
+        <strong>Effect:</strong> Zero delivery notes are ever processed. All shipments silently accumulate without payment.<br>
+        <strong>Verification:</strong><br>
+        <code>SELECT * FROM global_settings WHERE type IN ('delivery_note_auto_verification','delivery_note_auto_verification_time','delivery_note_auto_verification_exclude_hubs');</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. DOUBLE DN -->
+  <div class="section-card" id="double-dn">
+    <div class="section-header bg-stuck">6. Double Delivery Note — Duplicate &amp; Stuck Shipment Problem</div>
+    <div class="p-4">
+      <p>A shipment can be added to <strong>more than one delivery note</strong> at the same time because there is no UNIQUE constraint on <code>delivery_note_shipments.shipment_id</code>. This creates several problems:</p>
+
+      <div class="warn-box">
+        <strong>Scenario A — Shipment in two OPEN notes, both submitted</strong><br>
+        The cron collects shipment IDs with <code>DISTINCT</code>, so the shipment is only processed once (correct). But BOTH delivery notes are marked verified at the end. If the first note was for Hub A and the second for Hub B, both hubs show the shipment as verified — confusing operational records.
+      </div>
+
+      <div class="warn-box">
+        <strong>Scenario B — Shipment in one VERIFIED note + one NEW note</strong><br>
+        The shipment already got its payment from the first note. When the second note is picked up, <code>add_payment</code> is called again.<br>
+        If <code>add_payment</code> has no duplicate guard → <strong>duplicate pending_payment_shipments row → double payment</strong>.<br>
+        If <code>add_payment</code> has a duplicate guard → the second call is silently ignored, but the second note is still marked verified. Operational records show a note was verified for a shipment that was already processed.
+      </div>
+
+      <div class="warn-box">
+        <strong>Scenario C — New note created while old note is still OPEN</strong><br>
+        Most common field scenario: rider returns without delivering, supervisor creates a new note for the next day. The old note is still open (status=0, pending_status=1). Both notes are picked up by the cron. The shipment is processed once (DISTINCT). The old note gets verified even though the actual delivery happened under the new note. Delivery records are attributed to the wrong date/rider.
+      </div>
+
+      <div class="bug-box">
+        <strong>Root cause of double notes:</strong> No validation at delivery note creation to check if a shipment already belongs to an open (status=0) note. The creation flow allows the same shipment to be added to multiple notes without warning.
+      </div>
+
+      <h6 class="fw-bold mt-3">Detection query for double delivery notes:</h6>
+      <pre><code>SELECT dns.shipment_id, COUNT(DISTINCT dns.delivery_note_id) AS note_count,
+       GROUP_CONCAT(dn.id) AS note_ids,
+       GROUP_CONCAT(dn.status) AS statuses
+FROM delivery_note_shipments dns
+JOIN delivery_notes dn ON dn.id = dns.delivery_note_id
+GROUP BY dns.shipment_id
+HAVING note_count > 1
+ORDER BY note_count DESC
+LIMIT 100;</code></pre>
+    </div>
+  </div>
+
+  <!-- 7. DIAGNOSTICS -->
+  <div class="section-card" id="diag">
+    <div class="section-header bg-diag">7. Diagnostic SQL — Find Stuck Shipments</div>
+    <div class="p-4">
+
+      <h6 class="fw-bold">7.1 Delivered but not in pending_payments</h6>
+      <pre><code>SELECT s.id, s.tracking_number, s.user_id, s.shipper_status_id,
+       s.booking_type_id, s.packaging_material_request, s.packaging_material_charges,
+       s.payment_status_id, s.created_at
+FROM shipments s
+WHERE s.shipper_status_id = 14              -- Delivered
+  AND s.booking_type_id = 1                -- Normal
+  AND s.payment_status_id NOT IN (1, 5)    -- Not in pending or done payment
+  AND s.shipment_type = 1                  -- Standard shipment
+  AND NOT EXISTS (
+    SELECT 1 FROM pending_payment_shipments pps
+    WHERE pps.shipment_id = s.id
+  )
+ORDER BY s.created_at DESC
+LIMIT 200;</code></pre>
+
+      <h6 class="fw-bold mt-3">7.2 Delivery notes never submitted by rider</h6>
+      <pre><code>SELECT dn.id, dn.hub_id, dn.rider_id, dn.created_at,
+       COUNT(dns.id) AS shipment_count
+FROM delivery_notes dn
+LEFT JOIN delivery_note_shipments dns ON dns.delivery_note_id = dn.id
+WHERE dn.status = 0
+  AND dn.pending_status = 0
+  AND dn.created_at &lt; NOW() - INTERVAL 2 DAY
+GROUP BY dn.id
+ORDER BY dn.created_at ASC;</code></pre>
+
+      <h6 class="fw-bold mt-3">7.3 Open notes older than 9 days (cron blind spot)</h6>
+      <pre><code>SELECT dn.id, dn.hub_id, dn.rider_id, dn.pending_status, dn.created_at,
+       COUNT(dns.id) AS shipment_count
+FROM delivery_notes dn
+LEFT JOIN delivery_note_shipments dns ON dns.delivery_note_id = dn.id
+WHERE dn.status = 0
+  AND dn.created_at &lt; NOW() - INTERVAL 9 DAY
+GROUP BY dn.id
+ORDER BY dn.created_at ASC;</code></pre>
+
+      <h6 class="fw-bold mt-3">7.4 Shipments with packaging charges missing (payment silently blocked)</h6>
+      <pre><code>SELECT s.id, s.tracking_number, s.user_id,
+       s.packaging_material_request, s.packaging_material_charges, s.payment_status_id
+FROM shipments s
+WHERE s.shipper_status_id = 14
+  AND s.packaging_material_request = 1
+  AND (s.packaging_material_charges IS NULL OR s.packaging_material_charges = '')
+  AND s.payment_status_id NOT IN (1, 5);</code></pre>
+
+      <h6 class="fw-bold mt-3">7.5 Verify global_settings are all configured</h6>
+      <pre><code>SELECT type, setting_value, text
+FROM global_settings
+WHERE type IN (
+  'delivery_note_auto_verification',
+  'delivery_note_auto_verification_time',
+  'delivery_note_auto_verification_exclude_hubs'
+);</code></pre>
+
+      <h6 class="fw-bold mt-3">7.6 Shipments with no journey records (Bug 5 — crash trigger)</h6>
+      <pre><code>SELECT dns.shipment_id
+FROM delivery_note_shipments dns
+LEFT JOIN shipments_journey sj ON sj.shipment_id = dns.shipment_id
+WHERE sj.id IS NULL
+GROUP BY dns.shipment_id;</code></pre>
+
+      <h6 class="fw-bold mt-3">7.7 Duplicate pending_payment_shipments (double payment risk)</h6>
+      <pre><code>SELECT shipment_id, COUNT(*) AS cnt
+FROM pending_payment_shipments
+GROUP BY shipment_id
+HAVING cnt > 1
+ORDER BY cnt DESC;</code></pre>
+    </div>
+  </div>
+
+  <!-- 8. FIXES -->
+  <div class="section-card" id="fix">
+    <div class="section-header bg-fix">8. Recommended Fixes Summary</div>
+    <div class="p-4">
+      <table class="table table-bordered status-table">
+        <thead>
+          <tr>
+            <th>Bug</th>
+            <th>Severity</th>
+            <th>Fix</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="impact-high">
+            <td>BUG 5 — NULL latest_shipment_journey crashes batch</td>
+            <td>Critical</td>
+            <td>Wrap each shipment in <code>try/catch</code> inside the foreach. Log and skip bad shipments without crashing the batch.</td>
+          </tr>
+          <tr class="impact-high">
+            <td>BUG 9 — No transaction → partial success</td>
+            <td>Critical</td>
+            <td>Wrap each shipment's journey + payment in <code>DB::transaction()</code> per shipment.</td>
+          </tr>
+          <tr class="impact-high">
+            <td>BUG 6 — Notes marked verified even on crash</td>
+            <td>Critical</td>
+            <td>Move the bulk <code>DeliveryNote::update(['status'=>1])</code> to <em>after</em> all per-shipment processing. Track which notes had errors and exclude them from the verified update.</td>
+          </tr>
+          <tr class="impact-high">
+            <td>BUG 4 — Packaging charges missing silently blocks payment</td>
+            <td>High</td>
+            <td>Log a warning when this condition is skipped. Add an operational alert for shipments with <code>packaging_material_request=1</code> and no charges.</td>
+          </tr>
+          <tr class="impact-high">
+            <td>BUG 7 — Walk-in payment never created</td>
+            <td>High</td>
+            <td>Review the <code>done_payment()</code> gate logic. For walk-in deliveries via this cron, the guard should check if payment does NOT already exist (not if it does).</td>
+          </tr>
+          <tr class="impact-med">
+            <td>BUG 1 — Rider never submits note</td>
+            <td>Medium</td>
+            <td>Daily alert to hub managers listing notes older than 24h with <code>pending_status=0</code>.</td>
+          </tr>
+          <tr class="impact-med">
+            <td>BUG 2 — Notes older than 9 days</td>
+            <td>Medium</td>
+            <td>Extend the window to 14–21 days, or build a separate recovery tool for aged notes.</td>
+          </tr>
+          <tr class="impact-med">
+            <td>Double delivery notes</td>
+            <td>Medium</td>
+            <td>Add validation at note creation: prevent a shipment already on an open note from being added to a new note. Alert the creator.</td>
+          </tr>
+          <tr class="impact-med">
+            <td>BUG 8 — Duplicate pending_payment_shipments</td>
+            <td>Medium</td>
+            <td>Add UNIQUE constraint on <code>pending_payment_shipments(shipment_id, type)</code> or add explicit exists-check in <code>add_payment</code> before insert.</td>
+          </tr>
+          <tr class="impact-low">
+            <td>BUG 10 — Feature flag missing</td>
+            <td>Low</td>
+            <td>Add a startup health check that logs CRITICAL if the three required global_settings rows are missing.</td>
+          </tr>
+          <tr class="impact-low">
+            <td>BUG 3 — Hub excluded indefinitely</td>
+            <td>Low</td>
+            <td>Audit excluded hubs list quarterly. Add a UI note showing when each hub was added to the exclusion list.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="ok-box mt-3">
+        <strong>Quick win:</strong> Run diagnostic queries 7.1 and 7.4 on production right now. Any shipments returned are already stuck and need manual <code>add_payment()</code> calls or a one-off recovery script.
+      </div>
+    </div>
+  </div>
+
+  <div class="text-muted text-center mt-2" style="font-size:.8rem">Generated <?php echo date('Y-m-d'); ?> &nbsp;|&nbsp; sonic_9 codebase &nbsp;|&nbsp; AutoDeliveryNoteVerify.php</div>
+</div>
+</body>
+</html>
