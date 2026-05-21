@@ -7902,9 +7902,9 @@ class AdminFinanceController extends Controller
                         $done_payment->save();
 
                         $pending_payment->delete();
-                        foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
+                        foreach ($pending_payment_shipment_id_single as $pending_payment_shipment_id) {
                             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
-                            
+
                             if ($pending_payment_shipment) {
 
                                 $shipment = Shipment::with(['user.wallet'])->find($pending_payment_shipment->shipment_id);
@@ -8053,7 +8053,7 @@ class AdminFinanceController extends Controller
                         $adjusted_shipments = 0;
                         $arrival_shipments = 0;
 
-                        foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
+                        foreach ($pending_payment_shipment_id_single as $pending_payment_shipment_id) {
                             $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
                             if ($pending_payment_shipment) {
                                 $shipment = Shipment::with(['user.wallet'])->find($pending_payment_shipment->shipment_id);
