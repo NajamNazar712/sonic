@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daraz Booking API — Technical Reference</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+body            { font-family:'Segoe UI',Arial,sans-serif; background:#f2f4f8; color:#1a1a2e; font-size:.92rem; }
+a               { color:#1565c0; }
+
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.page-wrap      { max-width:1080px; margin:0 auto; padding:0 16px 60px; }
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.hero           { background:linear-gradient(120deg,#1a237e 0%,#e65100 100%); color:#fff;
+                  padding:2.6rem 2.2rem 2rem; border-radius:0 0 16px 16px; margin-bottom:2.2rem; }
+.hero h1        { font-size:1.9rem; font-weight:800; margin-bottom:.25rem; letter-spacing:-.3px; }
+.hero .sub      { opacity:.88; font-size:.96rem; max-width:760px; }
+.hero .meta     { margin-top:1rem; display:flex; gap:1rem; flex-wrap:wrap; }
+.hero .meta span{ background:rgba(255,255,255,.15); border-radius:20px; padding:3px 14px; font-size:.78rem; font-weight:600; }
+
+/* ── Section card ─────────────────────────────────────────────────────────── */
+.card-section   { background:#fff; border-radius:10px; box-shadow:0 1px 5px rgba(0,0,0,.08);
+                  margin-bottom:1.6rem; overflow:hidden; }
+.cs-head        { padding:11px 20px; font-weight:700; font-size:.92rem; display:flex; align-items:center; gap:8px; }
+.cs-body        { padding:1.4rem 1.6rem; }
+.cs-num         { background:rgba(255,255,255,.25); border-radius:50%; width:24px; height:24px;
+                  display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:800; flex-shrink:0; }
+
+/* ── Section head colours ─────────────────────────────────────────────────── */
+.h-navy  { background:#1a237e; color:#fff; }
+.h-blue  { background:#1565c0; color:#fff; }
+.h-teal  { background:#00695c; color:#fff; }
+.h-green { background:#2e7d32; color:#fff; }
+.h-amber { background:#e65100; color:#fff; }
+.h-red   { background:#b71c1c; color:#fff; }
+.h-purple{ background:#4527a0; color:#fff; }
+.h-grey  { background:#37474f; color:#fff; }
+
+/* ── Section heading inside body ─────────────────────────────────────────── */
+h3.sh { font-size:.9rem; font-weight:700; color:#1a237e; border-bottom:2px solid #e8eaf6;
+        padding-bottom:5px; margin:1.4rem 0 .7rem; }
+h3.sh:first-child { margin-top:0; }
+
+/* ── Endpoint block ──────────────────────────────────────────────────────── */
+.endpoint-block { background:#0d1b2a; border-radius:8px; padding:14px 18px; font-family:monospace;
+                  font-size:.85rem; color:#cdd6f4; margin-bottom:1rem; }
+.ep-method      { color:#f9a825; font-weight:800; margin-right:8px; }
+.ep-url         { color:#89dceb; }
+.ep-comment     { color:#6c7086; font-size:.76rem; display:block; margin-top:4px; }
+
+/* ── Tables ──────────────────────────────────────────────────────────────── */
+.ref-table      { font-size:.81rem; width:100%; border-collapse:collapse; }
+.ref-table th   { background:#1a237e; color:#fff; padding:8px 10px; font-size:.74rem;
+                  text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
+.ref-table td   { padding:7px 10px; border-bottom:1px solid #e8eaf6; vertical-align:top; }
+.ref-table tr:last-child td { border-bottom:none; }
+.ref-table tr:hover td      { background:#f5f7ff; }
+.ref-table .gr  { background:#f0f4ff; }  /* group row */
+.ref-table .gr td { font-weight:700; color:#1a237e; font-size:.76rem; text-transform:uppercase;
+                    letter-spacing:.05em; padding:5px 10px; border-bottom:1px solid #c5cae9; }
+.ref-table .hw  { background:#fff8f0; }  /* hardcoded row */
+.ref-table .hw td { color:#888; }
+
+.fn   { font-family:monospace; font-size:.82rem; background:#eef; padding:1px 5px; border-radius:3px; color:#1a237e; }
+.req  { color:#2e7d32; font-weight:700; font-size:.76rem; }
+.opt  { color:#757575; font-size:.76rem; }
+.hrd  { color:#9e9e9e; font-size:.76rem; font-style:italic; }
+
+/* ── Code / pre ──────────────────────────────────────────────────────────── */
+pre   { background:#0d1b2a; color:#cdd6f4; border-radius:8px; padding:14px 16px;
+        font-size:.79rem; overflow-x:auto; margin:0; line-height:1.55; }
+pre .k  { color:#cba6f7; }   /* key */
+pre .v  { color:#a6e3a1; }   /* string value */
+pre .n  { color:#fab387; }   /* number value */
+pre .c  { color:#6c7086; }   /* comment */
+pre .e  { color:#f38ba8; }   /* error key */
+code  { background:#eef0ff; padding:1px 5px; border-radius:3px; font-size:.82rem; color:#c62828; }
+
+/* ── Info boxes ──────────────────────────────────────────────────────────── */
+.box      { border-radius:6px; padding:10px 14px; font-size:.84rem; margin-bottom:.9rem; }
+.box-info { border-left:4px solid #1565c0; background:#e8f0fe; }
+.box-warn { border-left:4px solid #e65100; background:#fff3e0; }
+.box-err  { border-left:4px solid #b71c1c; background:#fce4ec; }
+.box-ok   { border-left:4px solid #2e7d32; background:#e8f5e9; }
+.box-tip  { border-left:4px solid #4527a0; background:#ede7f6; }
+.box b    { color:inherit; }
+
+/* ── Example pair ────────────────────────────────────────────────────────── */
+.ex-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+            margin-bottom:4px; color:#37474f; }
+.ex-label.green { color:#2e7d32; }
+.ex-label.red   { color:#b71c1c; }
+
+/* ── Response badges ─────────────────────────────────────────────────────── */
+.res-ok  { border-left:3px solid #2e7d32; }
+.res-err { border-left:3px solid #b71c1c; }
+.res-wrn { border-left:3px solid #e65100; }
+
+/* ── Comparison table colours ─────────────────────────────────────────────── */
+.dc   { background:#fff8f0; }
+.nc   { background:#f0f7ff; }
+.sc   { background:#fafafa; }
+.cmp-table th { background:#37474f; color:#fff; font-size:.75rem; padding:7px 10px; }
+.cmp-table td { font-size:.81rem; padding:7px 10px; vertical-align:top; border-bottom:1px solid #e8eaf6; }
+.cmp-table .gr td { background:#e8eaf6; font-weight:700; font-size:.74rem; color:#283593;
+                    text-transform:uppercase; letter-spacing:.04em; }
+
+.tick  { color:#2e7d32; font-weight:800; }
+.cross { color:#b71c1c; font-weight:800; }
+
+/* ── Badges ──────────────────────────────────────────────────────────────── */
+.b-d  { background:#e65100; color:#fff; font-size:.68rem; font-weight:700; padding:1px 7px; border-radius:10px; }
+.b-n  { background:#1565c0; color:#fff; font-size:.68rem; font-weight:700; padding:1px 7px; border-radius:10px; }
+.b-m  { background:#b71c1c; color:#fff; font-size:.68rem; font-weight:700; padding:1px 7px; border-radius:10px; }
+.b-ok { background:#2e7d32; color:#fff; font-size:.68rem; font-weight:700; padding:1px 7px; border-radius:10px; }
+.b-w  { background:#e65100; color:#fff; font-size:.68rem; font-weight:700; padding:1px 7px; border-radius:10px; }
+
+/* ── Gap / unique items ──────────────────────────────────────────────────── */
+.gap-item  { border-left:4px solid #b71c1c; background:#fce4ec; border-radius:5px;
+             padding:8px 12px; margin-bottom:7px; font-size:.84rem; }
+.uniq-item { border-left:4px solid #e65100; background:#fff3e0; border-radius:5px;
+             padding:8px 12px; margin-bottom:7px; font-size:.84rem; }
+.gap-n     { font-weight:800; color:#b71c1c; margin-right:5px; }
+.uniq-n    { font-weight:800; color:#e65100; margin-right:5px; }
+
+/* ── Flow steps ──────────────────────────────────────────────────────────── */
+.flow      { display:flex; flex-direction:column; gap:.5rem; }
+.flow-step { display:flex; align-items:flex-start; gap:10px; }
+.fn-circle { width:26px; height:26px; border-radius:50%; flex-shrink:0; margin-top:1px;
+             display:flex; align-items:center; justify-content:center;
+             font-weight:800; font-size:.75rem; color:#fff; background:#1a237e; }
+
+/* ── Phone table ─────────────────────────────────────────────────────────── */
+.ph-table td { font-family:monospace; font-size:.82rem; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="page-wrap" style="padding-bottom:0">
+    <h1>Daraz Booking API — Technical Reference</h1>
+    <p class="sub">Complete reference for the Daraz-specific shipment booking endpoint: request format, parameters, example payloads, and a full technical comparison with the standard Sonic booking API.</p>
+    <div class="meta">
+      <span>POST /api/shipment/book/daraz</span>
+      <span>Auth: APIToken middleware</span>
+      <span>Accounts: 7306 · 7308 · 10389</span>
+      <span>Service Type: Standard (1) only</span>
+      <span>Shipping Modes: Rush (1) · Saver (2)</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 1 — API REQUEST FORMAT
+═══════════════════════════════════════════════════════════════ -->
+<div class="card-section">
+  <div class="cs-head h-navy">
+    <span class="cs-num">1</span> API Request Format
+  </div>
+  <div class="cs-body">
+
+    <!-- Endpoint -->
+    <h3 class="sh">Endpoint</h3>
+    <div class="endpoint-block">
+      <span class="ep-method">POST</span><span class="ep-url">https://&lt;domain&gt;/api/shipment/book/daraz</span>
+      <span class="ep-comment">// Route: routes/api.php → middleware('APIToken') → APIController@shipment_book_daraz</span>
+    </div>
+
+    <!-- Authentication -->
+    <h3 class="sh">Authentication &amp; Headers</h3>
+    <div class="box box-warn">
+      <b>Important:</b> The <code>Authorization</code> header holds a raw API token (no <em>Bearer</em> prefix). The middleware looks up the user from <code>users.api_token</code> and injects <code>user_id</code> into the request automatically. <b>Do not send <code>user_id</code> in the request body.</b>
+    </div>
+    <table class="ref-table mb-3">
+      <thead><tr><th>Header</th><th>Required</th><th>Value</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="fn">Authorization</span></td>
+          <td><span class="req">Required</span></td>
+          <td>Raw API token string</td>
+          <td>Matched against <code>users.api_token</code>. Account must be active (status=3), not blacklisted, phone verified. <b>No "Bearer" prefix.</b></td>
+        </tr>
+        <tr>
+          <td><span class="fn">Content-Type</span></td>
+          <td><span class="req">Required</span></td>
+          <td><code>application/json</code></td>
+          <td>Body must be JSON.</td>
+        </tr>
+        <tr>
+          <td><span class="fn">Via</span></td>
+          <td><span class="opt">Optional</span></td>
+          <td><code>1</code> for Trax App</td>
+          <td>Used internally to detect app_type. Omit for direct API calls.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Parameters -->
+    <h3 class="sh">Request Body Parameters</h3>
+
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th style="min-width:195px">Parameter</th>
+          <th style="min-width:65px">Type</th>
+          <th style="min-width:75px">Required</th>
+          <th style="min-width:200px">Validation</th>
+          <th>Description</th>
+          <th style="min-width:160px">Example</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr class="gr"><td colspan="6">TRACKING NUMBER</td></tr>
+        <tr>
+          <td><span class="fn">tracking_number</span></td>
+          <td>integer</td>
+          <td><span class="req">Required</span></td>
+          <td>Unique in <code>shipments</code>, first N chars = prebook prefix</td>
+          <td>Daraz's own tracking number. System books internally, then overwrites the auto-generated TN with this value. The prefix (e.g. <code>MYP</code>) is configured in <code>shipment_prebooks</code> for each Daraz account.</td>
+          <td><code>MYP0012345678</code></td>
+        </tr>
+
+        <tr class="gr"><td colspan="6">PICKUP ADDRESS</td></tr>
+        <tr>
+          <td><span class="fn">pickup_address_id</span></td>
+          <td>integer</td>
+          <td><span class="req">Required</span></td>
+          <td>Exists in <code>user_shipping_infos</code> for this user (hidden=0), passes origin serviceability check</td>
+          <td>ID of the Daraz warehouse/pickup address. The city must be active, have a zone, and have pickup enabled.</td>
+          <td><code>142</code></td>
+        </tr>
+
+        <tr class="gr"><td colspan="6">RETURN ADDRESS — all 6 fields required; system auto-creates record if not found</td></tr>
+        <tr>
+          <td><span class="fn">return_vendor</span></td>
+          <td>string</td>
+          <td><span class="req">Required</span></td>
+          <td>between:1,100</td>
+          <td>Vendor/brand name. Used as a lookup key together with <code>return_city_id</code>. If a matching <code>user_shipping_infos</code> record exists, it is reused and the other return fields below are ignored.</td>
+          <td><code>Daraz Warehouse KHI</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">return_city_id</span></td>
+          <td>integer</td>
+          <td><span class="req">Required</span></td>
+          <td>Exists in <code>cities</code> (business_category_id=1, status=1)</td>
+          <td>City of the return warehouse. Validated for return serviceability via <code>check_return_destination()</code>.</td>
+          <td><code>1</code> (Karachi)</td>
+        </tr>
+        <tr>
+          <td><span class="fn">return_address</span></td>
+          <td>string</td>
+          <td><span class="req">Required</span></td>
+          <td>between:1,255</td>
+          <td>Full physical return address. Only written when a new record is created; ignored if existing vendor+city record is found.</td>
+          <td><code>Plot 47, Korangi Industrial Area, Karachi</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">return_contact_person</span></td>
+          <td>string</td>
+          <td><span class="req">Required</span></td>
+          <td>between:1,100</td>
+          <td>Point of contact at the return address. Only written on new record creation.</td>
+          <td><code>Ahmed Raza</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">return_phone_number</span></td>
+          <td>string</td>
+          <td><span class="req">Required</span></td>
+          <td>phone_number regex</td>
+          <td>Contact number for return address. Accepted formats: <code>03XXXXXXXXX</code>, <code>0300-XXXXXXX</code>, <code>92XXXXXXXXXX</code>, <code>+92XXXXXXXXXX</code>, <code>0092XXXXXXXXXX</code>, landline <code>021-XXXXXXXX</code>. Only written on new record creation.</td>
+          <td><code>03001234567</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">return_email_address</span></td>
+          <td>string</td>
+          <td><span class="req">Required</span></td>
+          <td>email, between:0,100</td>
+          <td>Email for return address. Only written on new record creation.</td>
+          <td><code>returns.khi@daraz.pk</code></td>
+        </tr>
+
+        <tr class="gr"><td colspan="6">CONSIGNEE (CUSTOMER)</td></tr>
+        <tr>
+          <td><span class="fn">consignee_name</span></td>
+          <td>string</td>
+          <td><span class="req">Required</span></td>
+          <td>between:1,100</td>
+          <td>Full name of the customer receiving the shipment.</td>
+          <td><code>Muhammad Usman</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">consignee_address</span></td>
+          <td>string</td>
+          <td><span class="req">Required</span></td>
+          <td>between:1,255</td>
+          <td>Full delivery address including street, area, and city. Avoid bare city names that trigger NSA keywords.</td>
+          <td><code>House 12-B, Street 5, Gulberg III, Lahore</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">consignee_city_id</span></td>
+          <td>integer</td>
+          <td><span class="req">Required</span></td>
+          <td>Exists in <code>cities</code> (business_category_id=1), passes destination serviceability check</td>
+          <td>City ID of the delivery destination. Must be active, have a zone, and have delivery enabled for service_type=1 + the given shipping_mode in <code>city_deliveries</code>.</td>
+          <td><code>2</code> (Lahore)</td>
+        </tr>
+        <tr>
+          <td><span class="fn">consignee_phone_number_1</span></td>
+          <td>string</td>
+          <td><span class="req">Required</span></td>
+          <td>phone_number regex</td>
+          <td>Primary delivery phone. Same accepted formats as return_phone_number.</td>
+          <td><code>03214567890</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">consignee_phone_number_2</span></td>
+          <td>string</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, filled, phone_number</td>
+          <td>Alternate delivery phone. Omit or send null if not available.</td>
+          <td><code>03001112222</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">consignee_email_address</span></td>
+          <td>string</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, filled, email</td>
+          <td>Customer email for notifications.</td>
+          <td><code>usman@gmail.com</code></td>
+        </tr>
+
+        <tr class="gr"><td colspan="6">SHIPMENT DETAILS</td></tr>
+        <tr>
+          <td><span class="fn">shipping_mode_id</span></td>
+          <td>integer</td>
+          <td><span class="req">Required</span></td>
+          <td>between:1,2, exists in <code>shipping_modes</code>, account must have active rate</td>
+          <td><b>1 = Rush</b> (express, 1–2 days). <b>2 = Saver Plus</b> (economy, 3–5 days). Modes 3 (Swift) and 4 (Same-Day) are not available for Daraz accounts.</td>
+          <td><code>1</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">estimated_weight</span></td>
+          <td>numeric</td>
+          <td><span class="req">Required</span></td>
+          <td>between:0.1,100000</td>
+          <td>Weight of the shipment in kilograms. Used for rate calculation. Minimum 0.1 kg.</td>
+          <td><code>0.5</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">amount</span></td>
+          <td>numeric</td>
+          <td><span class="req">Required</span></td>
+          <td>nullable, numeric, between:0,1000000</td>
+          <td>Cash on Delivery (COD) amount in PKR. Use <code>0</code> for prepaid/online-paid orders. Inter-city COD is capped per zone class (configured in global_settings). Payment mode is always COD (1) — hardcoded.</td>
+          <td><code>2500</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">item_description</span></td>
+          <td>string</td>
+          <td><span class="req">Required</span></td>
+          <td>between:0,500</td>
+          <td>Description of the product. Daraz typically sends the product name from their OMS. Product type is hardcoded to ID 24 — not configurable.</td>
+          <td><code>Women Printed Lawn Suit</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">item_quantity</span></td>
+          <td>integer</td>
+          <td><span class="req">Required</span></td>
+          <td>integer, between:1,10000</td>
+          <td>Number of product units in the shipment. Note: the number of physical boxes (pieces_quantity) is hardcoded to 1 regardless of this value.</td>
+          <td><code>1</code></td>
+        </tr>
+
+        <tr class="gr"><td colspan="6">OPTIONAL FIELDS</td></tr>
+        <tr>
+          <td><span class="fn">order_id</span></td>
+          <td>string</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, filled, between:0,100</td>
+          <td>Daraz order reference number. Stored in <code>shipments.order_id</code>. No uniqueness check in Daraz API (unlike normal API which enforces uniqueness per user when a prebook exists).</td>
+          <td><code>DRZ-8821009234</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">order_date</span></td>
+          <td>date</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, date_format:Y-m-d</td>
+          <td>Date the order was placed on Daraz. Stored in <code>shipment_order_dates</code>. Does not affect delivery scheduling.</td>
+          <td><code>2026-05-22</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">special_instructions</span></td>
+          <td>string</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, filled, between:0,190</td>
+          <td>Delivery instructions for the rider, printed on the airway bill.</td>
+          <td><code>Call before delivery</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">shipper_reference_number_1</span></td>
+          <td>string</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, between:0,190</td>
+          <td>Custom reference field 1. Stored in <code>shipment_shipper_references.reference_1</code>. Use for seller IDs, batch codes, or internal Daraz references.</td>
+          <td><code>SEL-00123</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">shipper_reference_number_2</span></td>
+          <td>string</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, between:0,190</td>
+          <td>Custom reference field 2.</td>
+          <td><code>BATCH-0522</code></td>
+        </tr>
+        <tr>
+          <td><span class="fn">shipper_reference_number_3</span></td>
+          <td>string</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, between:0,190</td>
+          <td>Custom reference field 3.</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><span class="fn">shipper_reference_number_4</span></td>
+          <td>string</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, between:0,190</td>
+          <td>Custom reference field 4.</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td><span class="fn">shipper_reference_number_5</span></td>
+          <td>string</td>
+          <td><span class="opt">Optional</span></td>
+          <td>nullable, between:0,190</td>
+          <td>Custom reference field 5.</td>
+          <td>—</td>
+        </tr>
+
+        <tr class="gr"><td colspan="6">HARDCODED BY SYSTEM — Do not send these fields; they have no effect</td></tr>
+        <tr class="hw">
+          <td><span class="fn">service_type_id</span></td><td>—</td><td><span class="hrd">Hardcoded</span></td>
+          <td>Always 1</td><td>Standard Delivery only. Daraz does not use Replacement (2), Try &amp; Buy (3), Pickup (5), or FTL (6).</td><td><em>N/A</em></td>
+        </tr>
+        <tr class="hw">
+          <td><span class="fn">payment_mode_id</span></td><td>—</td><td><span class="hrd">Hardcoded</span></td>
+          <td>Always 1</td><td>COD only. Daraz always collects cash at delivery.</td><td><em>N/A</em></td>
+        </tr>
+        <tr class="hw">
+          <td><span class="fn">charges_mode_id</span></td><td>—</td><td><span class="hrd">Hardcoded</span></td>
+          <td>Always 3</td><td>Corporate prepaid billing.</td><td><em>N/A</em></td>
+        </tr>
+        <tr class="hw">
+          <td><span class="fn">item_product_type_id</span></td><td>—</td><td><span class="hrd">Hardcoded</span></td>
+          <td>Always 24</td><td>Fixed product category agreed with Daraz.</td><td><em>N/A</em></td>
+        </tr>
+        <tr class="hw">
+          <td><span class="fn">pieces_quantity</span></td><td>—</td><td><span class="hrd">Hardcoded</span></td>
+          <td>Always 1</td><td>Multi-piece (multi-box) not supported in Daraz API.</td><td><em>N/A</em></td>
+        </tr>
+        <tr class="hw">
+          <td><span class="fn">open_shipment</span></td><td>—</td><td><span class="hrd">Hardcoded</span></td>
+          <td>Always 0</td><td>Open-box delivery not available.</td><td><em>N/A</em></td>
+        </tr>
+        <tr class="hw">
+          <td><span class="fn">delivery_type_id</span></td><td>—</td><td><span class="hrd">Hardcoded</span></td>
+          <td>Always 1</td><td>Door delivery only. TRAX-office collection not available.</td><td><em>N/A</em></td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <!-- Phone formats -->
+    <h3 class="sh">Accepted Phone Number Formats</h3>
+    <div class="box box-warn">
+      The Daraz API uses an <b>older phone regex</b> that is more permissive than the current normal API. All formats below are accepted for both <code>consignee_phone_number_1</code> and <code>return_phone_number</code>.
+    </div>
+    <table class="ref-table ph-table">
+      <thead><tr><th>Format</th><th>Example</th><th>Daraz API</th><th>Normal API</th></tr></thead>
+      <tbody>
+        <tr><td>03XX-XXXXXXX</td><td><code>0300-1234567</code></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td></tr>
+        <tr><td>03XXXXXXXXX (11 digits)</td><td><code>03001234567</code></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td></tr>
+        <tr><td>92-XXX-XXXXXXX</td><td><code>92-300-1234567</code></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td></tr>
+        <tr><td>+92XXXXXXXXXX</td><td><code>+923001234567</code></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td></tr>
+        <tr><td>0092XXXXXXXXXX</td><td><code>00923001234567</code></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td></tr>
+        <tr><td>Landline XXXX-XXXXXXX</td><td><code>021-38772222</code></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td></tr>
+        <tr><td>XXX-XXXXXXX (no leading 0)</td><td><code>300-1234567</code></td><td><span class="tick">✓</span> (old regex allows)</td><td><span class="cross">✗</span></td></tr>
+        <tr><td>XXXXXXXXXX (10 digits, no prefix)</td><td><code>3001234567</code></td><td><span class="tick">✓</span> (old regex allows)</td><td><span class="cross">✗</span></td></tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 2 — EXAMPLE PAYLOADS
+═══════════════════════════════════════════════════════════════ -->
+<div class="card-section">
+  <div class="cs-head h-teal">
+    <span class="cs-num">2</span> Example Payloads (Pakistan)
+  </div>
+  <div class="cs-body">
+
+    <!-- ── Example A ───────────────────────────────────────────────── -->
+    <h3 class="sh">Example A — Inter-City COD &nbsp;·&nbsp; Karachi → Lahore &nbsp;·&nbsp; Rush Mode</h3>
+    <p style="font-size:.84rem;color:#555;margin-bottom:1rem;">
+      Fashion order. Pickup from Daraz Karachi warehouse. New return vendor — system creates a new <code>user_shipping_infos</code> record automatically.
+    </p>
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="ex-label">HTTP REQUEST</div>
+        <pre>POST /api/shipment/book/daraz HTTP/1.1
+Host: trax.com.pk
+<span class="k">Authorization:</span> <span class="v">xYzAbC1234567890daraztoken</span>
+<span class="k">Content-Type:</span>  <span class="v">application/json</span>
+
+{
+  <span class="c">// Tracking — Daraz TN, prefix must match prebook</span>
+  <span class="k">"tracking_number"</span>:          <span class="v">"MYP0012345678"</span>,
+
+  <span class="c">// Pickup warehouse in Karachi</span>
+  <span class="k">"pickup_address_id"</span>:        <span class="n">142</span>,
+
+  <span class="c">// Return — new vendor, system will create the record</span>
+  <span class="k">"return_vendor"</span>:            <span class="v">"Daraz Warehouse KHI"</span>,
+  <span class="k">"return_city_id"</span>:           <span class="n">1</span>,
+  <span class="k">"return_address"</span>:           <span class="v">"Plot 47, Korangi Industrial Area, Karachi"</span>,
+  <span class="k">"return_contact_person"</span>:    <span class="v">"Ahmed Raza"</span>,
+  <span class="k">"return_phone_number"</span>:      <span class="v">"03001234567"</span>,
+  <span class="k">"return_email_address"</span>:     <span class="v">"returns.khi@daraz.pk"</span>,
+
+  <span class="c">// Customer in Lahore</span>
+  <span class="k">"consignee_name"</span>:           <span class="v">"Muhammad Usman"</span>,
+  <span class="k">"consignee_address"</span>:        <span class="v">"House 12-B, Street 5, Gulberg III, Lahore"</span>,
+  <span class="k">"consignee_city_id"</span>:        <span class="n">2</span>,
+  <span class="k">"consignee_phone_number_1"</span>: <span class="v">"03214567890"</span>,
+  <span class="k">"consignee_phone_number_2"</span>: <span class="v">"03001112222"</span>,
+  <span class="k">"consignee_email_address"</span>:  <span class="v">"usman@gmail.com"</span>,
+
+  <span class="c">// Shipment</span>
+  <span class="k">"shipping_mode_id"</span>:         <span class="n">1</span>,
+  <span class="k">"estimated_weight"</span>:         <span class="n">0.5</span>,
+  <span class="k">"amount"</span>:                   <span class="n">2500</span>,
+
+  <span class="c">// Item (product_type 24 applied by system)</span>
+  <span class="k">"item_description"</span>:         <span class="v">"Women Printed Lawn Suit"</span>,
+  <span class="k">"item_quantity"</span>:            <span class="n">1</span>,
+
+  <span class="c">// Optional</span>
+  <span class="k">"order_id"</span>:                 <span class="v">"DRZ-8821009234"</span>,
+  <span class="k">"order_date"</span>:               <span class="v">"2026-05-22"</span>,
+  <span class="k">"special_instructions"</span>:     <span class="v">"Call customer before delivery"</span>,
+  <span class="k">"shipper_reference_number_1"</span>: <span class="v">"SEL-00123"</span>,
+  <span class="k">"shipper_reference_number_2"</span>: <span class="v">"BATCH-0522"</span>
+}</pre>
+      </div>
+      <div class="col-lg-5">
+        <div class="ex-label green">SUCCESS (HTTP 200)</div>
+        <pre class="res-ok mb-3">{
+  <span class="k">"status"</span>:          <span class="n">0</span>,
+  <span class="k">"message"</span>:         <span class="v">"Shipment has been Booked!"</span>,
+  <span class="k">"tracking_number"</span>: <span class="v">"MYP0012345678"</span>
+  <span class="c">// Returns the Daraz TN (not the internal Sonic TN)</span>
+}</pre>
+
+        <div class="ex-label red">VALIDATION ERRORS (HTTP 200, status:1)</div>
+        <pre class="res-err mb-3">{
+  <span class="e">"status"</span>:  <span class="n">1</span>,
+  <span class="k">"message"</span>: <span class="v">"Error(s) in Input"</span>,
+  <span class="k">"errors"</span>: {
+    <span class="e">"consignee_city_id"</span>: [
+      <span class="v">"The selected consignee city id is invalid."</span>
+    ],
+    <span class="e">"estimated_weight"</span>: [
+      <span class="v">"The estimated weight field is required."</span>
+    ]
+  }
+}</pre>
+
+        <div class="ex-label red">PREFIX MISMATCH</div>
+        <pre class="res-err mb-3">{
+  <span class="e">"status"</span>:  <span class="n">1</span>,
+  <span class="k">"message"</span>: <span class="v">"Prefix not matched with given tracking number"</span>
+  <span class="c">// tracking_number does not start with ShipmentPrebook.prefix</span>
+}</pre>
+
+        <div class="ex-label red">ACCOUNT NOT WHITELISTED</div>
+        <pre class="res-err">{
+  <span class="e">"status"</span>:  <span class="n">1</span>,
+  <span class="k">"message"</span>: <span class="v">"Shipper is not allowed."</span>
+  <span class="c">// user_id not in [7306, 7308, 10389]</span>
+}</pre>
+      </div>
+    </div>
+
+    <!-- ── Example B ───────────────────────────────────────────────── -->
+    <h3 class="sh" style="margin-top:2rem;">Example B — Same-City Prepaid &nbsp;·&nbsp; Lahore → Lahore &nbsp;·&nbsp; Saver Mode</h3>
+    <p style="font-size:.84rem;color:#555;margin-bottom:1rem;">
+      Electronics, customer paid online (COD = 0). Return vendor+city already exists in system — return address fields are passed but silently ignored, existing record is reused.
+    </p>
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="ex-label">HTTP REQUEST</div>
+        <pre>POST /api/shipment/book/daraz HTTP/1.1
+<span class="k">Authorization:</span> <span class="v">xYzAbC1234567890daraztoken</span>
+<span class="k">Content-Type:</span>  <span class="v">application/json</span>
+
+{
+  <span class="k">"tracking_number"</span>:          <span class="v">"MYP0098765432"</span>,
+
+  <span class="c">// Pickup — Lahore warehouse</span>
+  <span class="k">"pickup_address_id"</span>:        <span class="n">287</span>,
+
+  <span class="c">// Return — vendor+city found in DB, fields below ignored</span>
+  <span class="k">"return_vendor"</span>:            <span class="v">"Daraz Warehouse LHE"</span>,
+  <span class="k">"return_city_id"</span>:           <span class="n">2</span>,
+  <span class="k">"return_address"</span>:           <span class="v">"36-B, Sundar Industrial Estate, Lahore"</span>,
+  <span class="k">"return_contact_person"</span>:    <span class="v">"Ali Hassan"</span>,
+  <span class="k">"return_phone_number"</span>:      <span class="v">"03451112233"</span>,
+  <span class="k">"return_email_address"</span>:     <span class="v">"returns.lhe@daraz.pk"</span>,
+
+  <span class="c">// Customer — same city (Lahore)</span>
+  <span class="k">"consignee_name"</span>:           <span class="v">"Sara Khan"</span>,
+  <span class="k">"consignee_address"</span>:        <span class="v">"Flat 3, Johar Town, Block D2, Lahore"</span>,
+  <span class="k">"consignee_city_id"</span>:        <span class="n">2</span>,
+  <span class="k">"consignee_phone_number_1"</span>: <span class="v">"03338889900"</span>,
+
+  <span class="c">// Saver mode, prepaid (amount = 0)</span>
+  <span class="k">"shipping_mode_id"</span>:         <span class="n">2</span>,
+  <span class="k">"estimated_weight"</span>:         <span class="n">3.2</span>,
+  <span class="k">"amount"</span>:                   <span class="n">0</span>,
+
+  <span class="k">"item_description"</span>:         <span class="v">"Wireless Bluetooth Headphones"</span>,
+  <span class="k">"item_quantity"</span>:            <span class="n">1</span>,
+
+  <span class="k">"order_id"</span>:                 <span class="v">"DRZ-7712005511"</span>,
+  <span class="k">"order_date"</span>:               <span class="v">"2026-05-22"</span>
+}</pre>
+      </div>
+      <div class="col-lg-5">
+        <div class="ex-label green">SUCCESS</div>
+        <pre class="res-ok mb-3">{
+  <span class="k">"status"</span>:          <span class="n">0</span>,
+  <span class="k">"message"</span>:         <span class="v">"Shipment has been Booked!"</span>,
+  <span class="k">"tracking_number"</span>: <span class="v">"MYP0098765432"</span>
+}</pre>
+
+        <div class="ex-label red">COD CAP EXCEEDED (inter-city only)</div>
+        <pre class="res-err mb-3">{
+  <span class="e">"status"</span>:  <span class="n">1</span>,
+  <span class="k">"message"</span>: <span class="v">"Amount must be smaller then or equal to 50000"</span>
+  <span class="c">// amount exceeds zone class cap in global_settings</span>
+}</pre>
+
+        <div class="ex-label red">CITY DELIVERY NOT CONFIGURED</div>
+        <pre class="res-err mb-3">{
+  <span class="e">"status"</span>:  <span class="n">1</span>,
+  <span class="k">"message"</span>: <span class="v">"Delivery is not allowed for City ID #2 with Service Type ID #1 and Shipping Mode ID #2"</span>
+}</pre>
+
+        <div class="ex-label red">PICKUP ADDRESS DISABLED</div>
+        <pre class="res-err mb-3">{
+  <span class="e">"status"</span>:  <span class="n">1</span>,
+  <span class="k">"message"</span>: <span class="v">"Pickup Address ID #287 is disabled"</span>
+}</pre>
+
+        <div class="ex-label red">TN ALREADY USED</div>
+        <pre class="res-err">{
+  <span class="e">"status"</span>:  <span class="n">1</span>,
+  <span class="k">"message"</span>: <span class="v">"Error(s) in Input"</span>,
+  <span class="k">"errors"</span>: {
+    <span class="e">"tracking_number"</span>: [
+      <span class="v">"The tracking number has already been taken."</span>
+    ]
+  }
+}</pre>
+      </div>
+    </div>
+
+    <!-- ── Example C ───────────────────────────────────────────────── -->
+    <h3 class="sh" style="margin-top:2rem;">Example C — FMCG Bundle &nbsp;·&nbsp; 3 Units &nbsp;·&nbsp; 3 Reference Numbers</h3>
+    <p style="font-size:.84rem;color:#555;margin-bottom:1rem;">
+      Grocery / FMCG order with multiple units in one box. <code>item_quantity = 3</code> represents 3 product units inside the parcel. The physical box count (<code>pieces_quantity</code>) is always 1.
+    </p>
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="ex-label">HTTP REQUEST</div>
+        <pre>POST /api/shipment/book/daraz HTTP/1.1
+<span class="k">Authorization:</span> <span class="v">xYzAbC1234567890daraztoken</span>
+<span class="k">Content-Type:</span>  <span class="v">application/json</span>
+
+{
+  <span class="k">"tracking_number"</span>:          <span class="v">"MYP0034400021"</span>,
+  <span class="k">"pickup_address_id"</span>:        <span class="n">142</span>,
+
+  <span class="k">"return_vendor"</span>:            <span class="v">"Daraz Warehouse KHI"</span>,
+  <span class="k">"return_city_id"</span>:           <span class="n">1</span>,
+  <span class="k">"return_address"</span>:           <span class="v">"Plot 47, Korangi Industrial Area, Karachi"</span>,
+  <span class="k">"return_contact_person"</span>:    <span class="v">"Ahmed Raza"</span>,
+  <span class="k">"return_phone_number"</span>:      <span class="v">"03001234567"</span>,
+  <span class="k">"return_email_address"</span>:     <span class="v">"returns.khi@daraz.pk"</span>,
+
+  <span class="k">"consignee_name"</span>:           <span class="v">"Bilal Ahmed"</span>,
+  <span class="k">"consignee_address"</span>:        <span class="v">"Shop 4, Block 14, Federal B Area, Karachi"</span>,
+  <span class="k">"consignee_city_id"</span>:        <span class="n">1</span>,
+  <span class="k">"consignee_phone_number_1"</span>: <span class="v">"02138772222"</span>,
+
+  <span class="k">"shipping_mode_id"</span>:         <span class="n">1</span>,
+  <span class="k">"estimated_weight"</span>:         <span class="n">2.0</span>,
+  <span class="k">"amount"</span>:                   <span class="n">1800</span>,
+
+  <span class="c">// 3 bottles in 1 box — item_quantity=3, pieces_quantity hardcoded=1</span>
+  <span class="k">"item_description"</span>:         <span class="v">"Shampoo 200ml"</span>,
+  <span class="k">"item_quantity"</span>:            <span class="n">3</span>,
+
+  <span class="k">"order_id"</span>:                 <span class="v">"DRZ-9900123456"</span>,
+  <span class="k">"order_date"</span>:               <span class="v">"2026-05-22"</span>,
+  <span class="k">"shipper_reference_number_1"</span>: <span class="v">"FMCG-BATCH-001"</span>,
+  <span class="k">"shipper_reference_number_2"</span>: <span class="v">"SELLER-45678"</span>,
+  <span class="k">"shipper_reference_number_3"</span>: <span class="v">"CAMPAIGN-EID26"</span>
+}</pre>
+      </div>
+      <div class="col-lg-5">
+        <div class="ex-label green">SUCCESS</div>
+        <pre class="res-ok">{
+  <span class="k">"status"</span>:          <span class="n">0</span>,
+  <span class="k">"message"</span>:         <span class="v">"Shipment has been Booked!"</span>,
+  <span class="k">"tracking_number"</span>: <span class="v">"MYP0034400021"</span>
+}</pre>
+
+        <div class="box box-info mt-3">
+          <b>item_quantity vs pieces_quantity:</b><br>
+          <code>item_quantity = 3</code> → 3 units of Shampoo inside the parcel.<br>
+          <code>pieces_quantity = 1</code> → 1 physical box (hardcoded — cannot be changed via Daraz API).<br>
+          If Daraz ever ships multi-box orders, this API needs to be updated to accept <code>pieces_quantity</code>.
+        </div>
+
+        <div class="ex-label red mt-2">RETURN CITY NOT SERVICEABLE</div>
+        <pre class="res-err">{
+  <span class="e">"status"</span>:  <span class="n">1</span>,
+  <span class="k">"message"</span>: <span class="v">"Return city not allowed, please contact your sales person!"</span>
+}</pre>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 3 — DARAZ vs NORMAL COMPARISON
+═══════════════════════════════════════════════════════════════ -->
+<div class="card-section">
+  <div class="cs-head h-blue">
+    <span class="cs-num">3</span> Daraz vs Normal API — Full Comparison
+  </div>
+  <div class="cs-body">
+
+    <div class="box box-info mb-3">
+      <b>Legend:</b>
+      &nbsp;<span class="b-d">DARAZ</span> Daraz-specific behaviour &nbsp;
+      <span class="b-n">NORMAL</span> Normal API behaviour &nbsp;
+      <span class="b-m">MISSING</span> Not in Daraz, should be added &nbsp;
+      <span class="b-ok">SAME</span> Identical in both &nbsp;
+      <span class="b-w">STALE</span> Old code in Daraz
+    </div>
+
+    <div class="table-responsive">
+    <table class="ref-table cmp-table">
+      <thead>
+        <tr>
+          <th style="min-width:185px">Feature / Field</th>
+          <th class="dc" style="min-width:240px">Daraz API</th>
+          <th class="nc" style="min-width:240px">Normal API</th>
+          <th style="min-width:100px">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="gr"><td colspan="4">ACCESS CONTROL</td></tr>
+        <tr>
+          <td>Account gate</td>
+          <td class="dc">Whitelisted: <code>[7306, 7308, 10389]</code> only. All others rejected.</td>
+          <td class="nc">Any authenticated API user.</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+        <tr>
+          <td>Negative payable check</td>
+          <td class="dc"><span class="cross">Missing.</span> Zero-COD always allowed even if account is over limit.</td>
+          <td class="nc">Checks <code>check_negative_payable()</code> + <code>NegativePayableAllowShipperZeroCod</code>. Blocks zero-COD when frozen.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">PHONE VALIDATION</td></tr>
+        <tr>
+          <td>Phone regex</td>
+          <td class="dc">Fixed old multi-format regex — accepts <code>300-1234567</code>, 10-digit, and other legacy formats.</td>
+          <td class="nc">Dynamic dual-regex: strict <code>03\d{9}</code> format for 92/03 prefix, loose digits-only otherwise.</td>
+          <td><span class="b-w">STALE</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">TRACKING NUMBER</td></tr>
+        <tr>
+          <td><code>tracking_number</code></td>
+          <td class="dc">Caller provides Daraz's TN. System books internally, then overwrites with: <code>$shipment->tracking_number = $tracking_number; $shipment->save();</code></td>
+          <td class="nc">System-generated via <code>generate_tracking_number()</code> or <code>generate_prefix_tracking_number()</code>. Caller has no control.</td>
+          <td><span class="b-d">Daraz-unique</span></td>
+        </tr>
+        <tr>
+          <td>Prefix validation</td>
+          <td class="dc">Single prebook: first N chars of <code>tracking_number</code> vs first prebook prefix only.</td>
+          <td class="nc">Multi-prebook loop: <code>order_id</code> checked against all prebook prefixes for the account.</td>
+          <td><span class="b-m">Single-prefix only</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">RETURN ADDRESS</td></tr>
+        <tr>
+          <td>Return address input</td>
+          <td class="dc">Raw fields per request. Looks up by <code>(user_id, vendor, city_id)</code> — creates a new <code>user_shipping_infos</code> if not found. Existing record never updated.</td>
+          <td class="nc">Caller passes <code>return_address_id</code>. Only for omni users (checked via <code>global_settings</code>). Non-omni cannot set a return address.</td>
+          <td><span class="b-d">Daraz-unique</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">PICKUP ADDRESS</td></tr>
+        <tr>
+          <td>New address on-the-fly</td>
+          <td class="dc"><span class="cross">Not supported.</span> <code>pickup_address_id</code> always required.</td>
+          <td class="nc">Supported when <code>app_type=1</code>: caller can send <code>new_pickup_address</code>, <code>new_pickup_city_id</code>, etc. to create an address inline.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td>Geocoordinates</td>
+          <td class="dc"><span class="cross">Not accepted.</span></td>
+          <td class="nc"><code>pickup_address_latitude/longitude</code> saved to <code>user_shipping_infos</code>.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">PAYMENT &amp; CHARGES</td></tr>
+        <tr>
+          <td><code>payment_mode_id</code></td>
+          <td class="dc">Hardcoded 1 (COD).</td>
+          <td class="nc">From caller. CCD accounts can use mode 2. Validated via <code>global_settings type='ccd_booking'</code>.</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+        <tr>
+          <td><code>charges_mode_id</code></td>
+          <td class="dc">Hardcoded 3.</td>
+          <td class="nc">Dynamic: account_type=1 → 4, account_type=2 → 3.</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+        <tr>
+          <td><code>parcel_value</code></td>
+          <td class="dc"><span class="cross">Missing.</span> Zero-COD shipments have no declared value.</td>
+          <td class="nc">Required when amount=0 (unless bypass list). Passed to <code>book()</code>/<code>corporate_book()</code>.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">SERVICE &amp; SHIPPING</td></tr>
+        <tr>
+          <td><code>service_type_id</code></td>
+          <td class="dc">Hardcoded 1 (Standard). No replacement, T&amp;B, pickup, or FTL.</td>
+          <td class="nc">From caller: 1, 2, 3, 5, 6.</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+        <tr>
+          <td><code>shipping_mode_id</code></td>
+          <td class="dc">Range 1–2 only (Rush / Saver). Mode 3 and 4 not available.</td>
+          <td class="nc">Full range: 1, 2, 3, 4 (including Same-Day).</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+        <tr>
+          <td><code>delivery_type_id</code></td>
+          <td class="dc">Hardcoded 1 (door delivery).</td>
+          <td class="nc">From caller: 1 (door) or 2 (TRAX office) for corporate accounts.</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+        <tr>
+          <td><code>pieces_quantity</code></td>
+          <td class="dc">Hardcoded 1. Multi-piece not supported.</td>
+          <td class="nc">From caller. Up to 100 for premium segments, up to 500 for Saver Plus.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">ITEM DETAILS</td></tr>
+        <tr>
+          <td><code>item_product_type_id</code></td>
+          <td class="dc">Hardcoded 24.</td>
+          <td class="nc">From caller, validated against <code>products</code> table.</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+        <tr>
+          <td><code>item_insurance</code></td>
+          <td class="dc">Always false, <code>item_price = null</code>.</td>
+          <td class="nc">From caller with <code>product_value</code> for insured shipments.</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+        <tr>
+          <td>Replacement / T&amp;B / FTL</td>
+          <td class="dc">None supported.</td>
+          <td class="nc">Full replacement item flow, T&amp;B items array, FTL request linkage.</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">BOOKING FUNCTION</td></tr>
+        <tr>
+          <td>Which book() called</td>
+          <td class="dc">Always <code>corporate_book()</code>.</td>
+          <td class="nc"><code>book()</code> for account_type=1, <code>corporate_book()</code> for account_type=2.</td>
+          <td><span class="b-ok">OK</span> (all 3 Daraz accounts are corporate)</td>
+        </tr>
+        <tr>
+          <td><code>parcel_value</code> in call</td>
+          <td class="dc"><span class="cross">Not passed</span> to <code>corporate_book()</code>.</td>
+          <td class="nc">Passed to both book functions.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td><code>booked_by</code> / <code>channel_id</code></td>
+          <td class="dc"><span class="cross">Not captured or passed.</span></td>
+          <td class="nc">Both captured from request, passed to book functions.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">POST-BOOKING OPERATIONS</td></tr>
+        <tr>
+          <td><code>BookingApiLog</code></td>
+          <td class="dc"><span class="cross">Not created.</span> No audit trail.</td>
+          <td class="nc">Created with user_id, shipment_id, endpoint, IP, full payload.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td><code>PaymentModeLog</code></td>
+          <td class="dc"><span class="cross">Not created.</span></td>
+          <td class="nc">Created for finance reconciliation.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td><code>addressAreaConsigneeShipper()</code></td>
+          <td class="dc"><span class="cross">Not called.</span></td>
+          <td class="nc">Called after booking — sets area mapping for routing and reporting.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td>NSA keyword check</td>
+          <td class="dc"><span class="cross">Missing.</span> Blackspot addresses never flagged.</td>
+          <td class="nc">Scans <code>NonServiceArea</code> table, fires notification, returns warning in response.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td>Blacklisted consignee check</td>
+          <td class="dc"><span class="cross">Missing.</span> Blacklisted phones can book freely.</td>
+          <td class="nc">Checks <code>ConsigneeInformation</code> → <code>BlacklistedConsignee</code>, returns warning.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td><code>booking_enable_status</code> check</td>
+          <td class="dc"><span class="cross">Missing.</span> Can book to cities where booking is disabled.</td>
+          <td class="nc">Checked on <code>cities</code> table.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td>Error logging (<code>Log::error</code>)</td>
+          <td class="dc"><span class="cross">None.</span> Failures not logged.</td>
+          <td class="nc">Two <code>Log::error('Shipment Booking API', [...])</code> calls.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td>Substitute user</td>
+          <td class="dc">Not supported.</td>
+          <td class="nc">Supported via <code>substitute_user_email</code>.</td>
+          <td><span class="b-d">Intentional</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">ORDER ID &amp; REFERENCES</td></tr>
+        <tr>
+          <td><code>order_id</code> uniqueness</td>
+          <td class="dc">No uniqueness check. Duplicates accepted silently.</td>
+          <td class="nc">Enforced when prebook exists: unique per user.</td>
+          <td><span class="b-m">MISSING</span></td>
+        </tr>
+        <tr>
+          <td><code>order_date</code>, references 1–5</td>
+          <td class="sc" colspan="2">Identical behaviour in both APIs.</td>
+          <td><span class="b-ok">SAME</span></td>
+        </tr>
+
+        <tr class="gr"><td colspan="4">RESPONSE</td></tr>
+        <tr>
+          <td>Response fields</td>
+          <td class="dc"><code>status</code>, <code>message</code>, <code>tracking_number</code> only.</td>
+          <td class="nc">Same base + optional <code>non_service_area</code> and <code>blacklisted_consignee</code> warnings.</td>
+          <td><span class="b-m">Warning fields missing</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 4 — WHAT NEEDS TO BE ADDED
+═══════════════════════════════════════════════════════════════ -->
+<div class="card-section">
+  <div class="cs-head h-red">
+    <span class="cs-num">4</span> What Needs to Be Added to the Daraz API
+  </div>
+  <div class="cs-body">
+    <p style="font-size:.84rem;color:#555;">These features exist in the current normal API but are absent from the Daraz API. Priority order: highest risk first.</p>
+
+    <div class="gap-item"><span class="gap-n">1.</span><b>Negative payable balance check.</b> Add <code>PendingPayment::check_negative_payable()</code> + <code>NegativePayableAllowShipperZeroCod::isAllowed()</code> at the top of the method. Currently Daraz accounts can book unlimited zero-COD shipments even when the account is frozen for non-payment.</div>
+    <div class="gap-item"><span class="gap-n">2.</span><b>Blacklisted consignee check.</b> After booking, look up phone in <code>ConsigneeInformation</code> → <code>BlacklistedConsignee</code>. Return a <code>blacklisted_consignee</code> warning. Currently known bad consignees can book via Daraz without any flag.</div>
+    <div class="gap-item"><span class="gap-n">3.</span><b><code>booking_enable_status</code> city check.</b> Add <code>if (!$consignee_city->booking_enable_status)</code> check. Daraz can currently book to cities where system-wide booking is disabled.</div>
+    <div class="gap-item"><span class="gap-n">4.</span><b><code>BookingApiLog</code> creation.</b> Add <code>BookingApiLog::create(['user_id'=>$user_id, 'shipment_id'=>$shipment_id, 'endpoint'=>'book_daraz', 'ip'=>$request->ip(), 'payload'=>$request->all()])</code> after booking. Currently no audit trail exists for Daraz bookings.</div>
+    <div class="gap-item"><span class="gap-n">5.</span><b><code>PaymentModeLog</code> creation.</b> Add <code>PaymentModeLog::create([...])</code> after booking for finance reconciliation.</div>
+    <div class="gap-item"><span class="gap-n">6.</span><b><code>addressAreaConsigneeShipper()</code> call.</b> Add <code>ShipperShipmentBookController::addressAreaConsigneeShipper($shipment_id, $pickup_address_id, $consignee_city_id, $consignee_address)</code> after booking. This sets address area mapping used by routing and sub-hub reporting.</div>
+    <div class="gap-item"><span class="gap-n">7.</span><b>NSA keyword check.</b> Scan consignee address against <code>NonServiceArea</code> table and return a <code>non_service_area</code> warning in the response when matched.</div>
+    <div class="gap-item"><span class="gap-n">8.</span><b><code>parcel_value</code> support.</b> Accept <code>parcel_value</code> in validation rules and pass it to <code>corporate_book()</code>. When <code>amount=0</code>, require <code>parcel_value &gt; 0</code> (unless account is in bypass list).</div>
+    <div class="gap-item"><span class="gap-n">9.</span><b>Updated phone regex.</b> Replace the old static regex with the dynamic dual-regex used by the normal API (strict for 92/03 prefix, loose for others).</div>
+    <div class="gap-item"><span class="gap-n">10.</span><b><code>order_id</code> uniqueness.</b> Add <code>Rule::unique('shipments','order_id')->where(fn($q)=>$q->where('user_id',$user_id))</code> to the order_id rule. Prevents silent duplicate order submissions.</div>
+    <div class="gap-item"><span class="gap-n">11.</span><b>Validation error logging.</b> Add <code>Log::error('Daraz Booking API', ['user_id'=>$user_id, 'errors'=>$validate->errors()])</code> on validation failure for observability.</div>
+    <div class="gap-item"><span class="gap-n">12.</span><b>Multi-prefix tracking number support.</b> The current prefix check reads only the first <code>ShipmentPrebook</code> row. Replace with a loop over all prebook prefixes (same pattern as the normal API) to support multiple Daraz account prefixes.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 5 — UNIQUE TO DARAZ
+═══════════════════════════════════════════════════════════════ -->
+<div class="card-section">
+  <div class="cs-head h-amber">
+    <span class="cs-num">5</span> What is Unique to Daraz (Intentional Design)
+  </div>
+  <div class="cs-body">
+    <p style="font-size:.84rem;color:#555;">These are deliberate design choices for the Daraz integration. Do not remove them.</p>
+
+    <div class="uniq-item"><span class="uniq-n">→</span><b>Caller-provided tracking number.</b> Daraz sends their own TN format. The system books internally, then overwrites with <code>$shipment->tracking_number = $tracking_number; $shipment->save()</code>. This keeps Daraz's TN visible end-to-end. Normal API never accepts an external TN.</div>
+    <div class="uniq-item"><span class="uniq-n">→</span><b>Return address auto-creation by vendor+city.</b> Instead of requiring a pre-registered address ID, Daraz passes raw return fields per shipment. System looks up <code>(user_id, vendor, city_id)</code> — creates a new <code>user_shipping_infos</code> record if not found. This avoids requiring Daraz to pre-register addresses before booking.</div>
+    <div class="uniq-item"><span class="uniq-n">→</span><b>Hardcoded product type 24.</b> All Daraz items use a fixed product category. Agreed with Daraz — not configurable per shipment.</div>
+    <div class="uniq-item"><span class="uniq-n">→</span><b>Standard delivery only (service_type = 1).</b> Daraz does not use Replacement, Try &amp; Buy, Pickup, or FTL. Locking prevents accidental misuse.</div>
+    <div class="uniq-item"><span class="uniq-n">→</span><b>Account whitelist gate.</b> <code>[7306, 7308, 10389]</code> are the only Daraz Sonic accounts. The hardcoded gate prevents any other shipper from using this endpoint even if they have a valid API token.</div>
+    <div class="uniq-item"><span class="uniq-n">→</span><b>Shipping mode limited to 1–2.</b> Same-Day (4) and other modes not offered to Daraz as per commercial agreement.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 6 — STALE CODE
+═══════════════════════════════════════════════════════════════ -->
+<div class="card-section">
+  <div class="cs-head h-purple">
+    <span class="cs-num">6</span> Stale / Old Code in the Daraz API
+  </div>
+  <div class="cs-body">
+    <div class="box box-warn"><b>Old phone number regex.</b> The validator uses a legacy pattern that accepts formats like <code>300-1234567</code> (no leading zero) and bare 10-digit numbers. The normal API was updated to a stricter dual-regex and the Daraz one was never synced. Should be updated to match.</div>
+    <div class="box box-warn"><b>Dead <code>self_collection</code> code.</b> The method includes logic to handle <code>self_collection</code> from the request, but this field is not in the validation rules and Daraz never sends it. Copied from the original API and has no effect.</div>
+    <div class="box box-warn"><b><code>$shipment_pre_book = null</code> dead assignment.</b> After the prefix check block, <code>$shipment_pre_book = null</code> is set. This does nothing — leftover from an earlier refactor.</div>
+    <div class="box box-warn"><b>Unreachable <code>service_type_id == 5</code> branch.</b> The <code>origin_check</code> validator has <code>if ($service_type_id == 5) return true</code>. Since <code>$service_type_id</code> is hardcoded to 1 in that closure, this branch can never be reached.</div>
+    <div class="box box-warn"><b>Commented-out document status block.</b> Both APIs share the same commented-out block checking <code>document_status IN [0,3]</code>. Was live until 2026-03-31. Dead code in both.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 7 — TRACKING NUMBER FLOW
+═══════════════════════════════════════════════════════════════ -->
+<div class="card-section">
+  <div class="cs-head h-teal">
+    <span class="cs-num">7</span> Tracking Number Flow — Daraz vs Normal
+  </div>
+  <div class="cs-body">
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div style="font-size:.8rem;font-weight:700;color:#e65100;margin-bottom:6px;text-transform:uppercase;">DARAZ FLOW</div>
+        <div class="flow">
+          <div class="flow-step"><div class="fn-circle" style="background:#e65100;">1</div><div>Daraz sends <code>tracking_number</code> = their own TN (e.g. <code>MYP0012345678</code>).</div></div>
+          <div class="flow-step"><div class="fn-circle" style="background:#e65100;">2</div><div>Validated: unique in <code>shipments</code>, first N chars = <code>ShipmentPrebook.prefix</code>.</div></div>
+          <div class="flow-step"><div class="fn-circle" style="background:#e65100;">3</div><div><code>corporate_book()</code> called — system generates an internal Sonic TN temporarily.</div></div>
+          <div class="flow-step"><div class="fn-circle" style="background:#e65100;">4</div><div><b>TN override:</b> <code>$shipment->tracking_number = $tracking_number; $shipment->save()</code> — Sonic TN replaced with Daraz TN.</div></div>
+          <div class="flow-step"><div class="fn-circle" style="background:#e65100;">5</div><div>Response echoes the Daraz TN back to the caller.</div></div>
+        </div>
+        <div class="box box-err mt-3">
+          <b>Risk:</b> If <code>$shipment->save()</code> fails after booking, the shipment exists with the Sonic TN but the caller gets an error. The Daraz TN is never saved. No rollback or retry logic exists.
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div style="font-size:.8rem;font-weight:700;color:#1565c0;margin-bottom:6px;text-transform:uppercase;">NORMAL FLOW</div>
+        <div class="flow">
+          <div class="flow-step"><div class="fn-circle">1</div><div><code>book()</code> or <code>corporate_book()</code> creates the shipment.</div></div>
+          <div class="flow-step"><div class="fn-circle">2</div><div>If prebook exists: <code>generate_prefix_tracking_number($shipment_id, $order_id)</code> → prefix + numeric portion.</div></div>
+          <div class="flow-step"><div class="fn-circle">3</div><div>If no prebook: <code>generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id)</code> → standard Sonic format.</div></div>
+          <div class="flow-step"><div class="fn-circle">4</div><div>TN returned in response. Caller has no control over TN.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 8 — RETURN ADDRESS
+═══════════════════════════════════════════════════════════════ -->
+<div class="card-section">
+  <div class="cs-head h-green">
+    <span class="cs-num">8</span> Return Address Auto-Creation Logic
+  </div>
+  <div class="cs-body">
+    <div class="flow">
+      <div class="flow-step"><div class="fn-circle" style="background:#2e7d32;">1</div><div>Caller sends: <code>return_vendor</code>, <code>return_city_id</code>, <code>return_address</code>, <code>return_contact_person</code>, <code>return_phone_number</code>, <code>return_email_address</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle" style="background:#2e7d32;">2</div><div>Lookup: <code>UserShippingInfo::where('user_id',$user_id)->where('vendor',$return_vendor)->where('city_id',$return_city_id)</code></div></div>
+      <div class="flow-step"><div class="fn-circle" style="background:#2e7d32;">3</div><div><b>If found:</b> Use existing record ID as <code>return_address_id</code>. The address/contact/phone/email from the request are <b>silently ignored</b> — the existing record is NOT updated.</div></div>
+      <div class="flow-step"><div class="fn-circle" style="background:#2e7d32;">4</div><div><b>If not found:</b> <code>ShipperShipmentBookController::add_pickup_address(...)</code> creates a new record. New ID used as <code>return_address_id</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle" style="background:#2e7d32;">5</div><div>Return city validated for serviceability via <code>check_return_destination($return_address_id, $shipping_mode_id, $user_id)</code>.</div></div>
+    </div>
+    <div class="box box-warn mt-3"><b>Known issue — stale data:</b> If Daraz changes their warehouse address or contact details, the new values in the request are silently ignored because the old <code>(vendor, city_id)</code> record already exists. The old details remain on file until manually updated in the admin panel.</div>
+    <div class="box box-warn"><b>Known issue — silent creation failure:</b> If <code>add_pickup_address()</code> returns null, <code>$return_address_id</code> becomes null and the booking proceeds with an invalid return address ID. No error is thrown.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     SECTION 9 — STEP-BY-STEP BOOKING FLOW
+═══════════════════════════════════════════════════════════════ -->
+<div class="card-section">
+  <div class="cs-head h-grey">
+    <span class="cs-num">9</span> Daraz Booking — Complete Execution Flow
+  </div>
+  <div class="cs-body">
+    <div class="flow">
+      <div class="flow-step"><div class="fn-circle">1</div><div><b>Account gate</b> — reject if <code>user_id</code> (from token) not in <code>[7306, 7308, 10389]</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle">2</div><div><b>Validation</b> — tracking_number (required, unique, prefix check deferred), pickup_address_id, all 6 return fields, consignee fields, shipping_mode_id (1–2), estimated_weight, amount, item_description, item_quantity, reference fields.</div></div>
+      <div class="flow-step"><div class="fn-circle">3</div><div><b>Prefix check</b> — first N chars of <code>tracking_number</code> must equal <code>ShipmentPrebook.prefix</code> for this account.</div></div>
+      <div class="flow-step"><div class="fn-circle">4</div><div><b>Return address resolve</b> — lookup <code>user_shipping_infos</code> by <code>(user_id, vendor, city_id)</code>. Create new record if not found.</div></div>
+      <div class="flow-step"><div class="fn-circle">5</div><div><b>Return city serviceability</b> — <code>check_return_destination($return_address_id, $shipping_mode_id, $user_id)</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle">6</div><div><b>Pickup address checks</b> — status active, city status active, city has zone, pickup enabled for that city.</div></div>
+      <div class="flow-step"><div class="fn-circle">7</div><div><b>Return address checks</b> — status active, city status active, city has zone.</div></div>
+      <div class="flow-step"><div class="fn-circle">8</div><div><b>Consignee city checks</b> — status active, city has zone.</div></div>
+      <div class="flow-step"><div class="fn-circle">9</div><div><b>Same-day mode check</b> — if <code>shipping_mode_id=4</code> and pickup city ≠ consignee city, reject. (Mode 4 is actually blocked at validation, so this is a redundant safety check.)</div></div>
+      <div class="flow-step"><div class="fn-circle">10</div><div><b>COD cap check</b> — inter-city only: looks up zone class for consignee city, compares amount against <code>global_settings cod_cap_for_zone_class_X</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle">11</div><div><b>City delivery check</b> — <code>city_deliveries</code> table: consignee_city_id + service_type=1 + shipping_mode_id must have an active row.</div></div>
+      <div class="flow-step"><div class="fn-circle">12</div><div><b>Book shipment</b> — <code>corporate_book(service_type=1, payment_mode=1, charges_mode=3, delivery_type=1, pieces=1, open=0, return_address_id)</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle">13</div><div><b>Override tracking number</b> — <code>$shipment->tracking_number = $tracking_number; $shipment->save()</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle">14</div><div><b>Save order_date</b> — if provided, insert into <code>shipment_order_dates</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle">15</div><div><b>Save shipper references</b> — insert reference_1 through reference_5 into <code>shipment_shipper_references</code> if provided.</div></div>
+      <div class="flow-step"><div class="fn-circle">16</div><div><b>Add item</b> — <code>add_item($shipment_id, product_type=24, description, quantity, price=null, insurance=false, item_type=0)</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle">17</div><div><b>Invoice status</b> — if <code>users.logo_status=1</code>, set <code>shipments.shipment_invoice_status=1</code>.</div></div>
+      <div class="flow-step"><div class="fn-circle">18</div><div><b>Return response</b> — <code>{"status":0,"message":"Shipment has been Booked!","tracking_number":"MYP..."}</code></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="text-center text-muted mt-2" style="font-size:.74rem;">
+  Daraz Booking API — Sonic Logistics Internal Technical Reference
+</div>
+
+</div><!-- /page-wrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

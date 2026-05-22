@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sonic — Daraz Booking API Reference</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body            { font-family:'Segoe UI',Arial,sans-serif; background:#f2f4f8; color:#1a1a2e; font-size:.92rem; }
+a               { color:#1565c0; }
+.page-wrap      { max-width:1060px; margin:0 auto; padding:0 16px 60px; }
+
+/* Hero */
+.hero           { background:linear-gradient(120deg,#1a237e 0%,#c62828 100%); color:#fff;
+                  padding:2.6rem 2.2rem 2rem; border-radius:0 0 16px 16px; margin-bottom:2.2rem; }
+.hero h1        { font-size:2rem; font-weight:800; margin-bottom:.3rem; letter-spacing:-.3px; }
+.hero .sub      { opacity:.88; font-size:.96rem; max-width:740px; }
+.hero .meta     { margin-top:1.1rem; display:flex; gap:.8rem; flex-wrap:wrap; }
+.hero .meta span{ background:rgba(255,255,255,.18); border-radius:20px; padding:3px 14px; font-size:.78rem; font-weight:600; }
+
+/* Section card */
+.card-section   { background:#fff; border-radius:10px; box-shadow:0 1px 5px rgba(0,0,0,.08);
+                  margin-bottom:1.6rem; overflow:hidden; }
+.cs-head        { padding:11px 20px; font-weight:700; font-size:.92rem; display:flex; align-items:center; gap:8px; }
+.cs-body        { padding:1.4rem 1.6rem; }
+.cs-num         { background:rgba(255,255,255,.25); border-radius:50%; width:24px; height:24px;
+                  display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:800; flex-shrink:0; }
+
+.h-navy  { background:#1a237e; color:#fff; }
+.h-blue  { background:#1565c0; color:#fff; }
+.h-teal  { background:#00695c; color:#fff; }
+.h-green { background:#2e7d32; color:#fff; }
+.h-amber { background:#e65100; color:#fff; }
+.h-red   { background:#b71c1c; color:#fff; }
+.h-purple{ background:#4527a0; color:#fff; }
+
+h3.sh { font-size:.9rem; font-weight:700; color:#1a237e; border-bottom:2px solid #e8eaf6;
+        padding-bottom:5px; margin:1.4rem 0 .7rem; }
+h3.sh:first-child { margin-top:0; }
+
+/* Endpoint block */
+.endpoint-block { background:#0d1b2a; border-radius:8px; padding:14px 18px; font-family:monospace;
+                  font-size:.85rem; color:#cdd6f4; margin-bottom:1rem; }
+.ep-method      { color:#f9a825; font-weight:800; margin-right:8px; }
+.ep-url         { color:#a6e3a1; }
+
+/* Code blocks */
+pre             { background:#0d1b2a; color:#cdd6f4; border-radius:8px; padding:1.2rem 1.4rem;
+                  font-size:.8rem; line-height:1.65; overflow-x:auto; }
+code            { background:#e8eaf6; color:#880e4f; border-radius:4px; padding:1px 5px; font-size:.82rem; }
+
+/* Tables */
+.table          { font-size:.83rem; }
+.table th       { background:#e8eaf6; color:#1a237e; font-weight:700; white-space:nowrap; }
+.table-sm td,
+.table-sm th    { padding:.42rem .65rem; }
+.req-yes        { color:#2e7d32; font-weight:700; }
+.req-no         { color:#757575; }
+.req-cond       { color:#e65100; font-weight:600; }
+
+/* Badges */
+.badge-req      { background:#c8e6c9; color:#1b5e20; font-size:.7rem; padding:2px 7px; border-radius:10px; font-weight:700; }
+.badge-opt      { background:#fff3e0; color:#e65100; font-size:.7rem; padding:2px 7px; border-radius:10px; font-weight:600; }
+.badge-fixed    { background:#e8eaf6; color:#4527a0; font-size:.7rem; padding:2px 7px; border-radius:10px; font-weight:700; }
+.badge-cond     { background:#fce4ec; color:#c62828; font-size:.7rem; padding:2px 7px; border-radius:10px; font-weight:600; }
+
+/* Alert */
+.alert-info-custom { background:#e3f2fd; border-left:4px solid #1565c0; border-radius:6px; padding:.9rem 1.1rem; font-size:.86rem; margin-bottom:1rem; }
+.alert-warn-custom { background:#fff8e1; border-left:4px solid #f9a825; border-radius:6px; padding:.9rem 1.1rem; font-size:.86rem; margin-bottom:1rem; }
+.alert-ok-custom   { background:#e8f5e9; border-left:4px solid #2e7d32; border-radius:6px; padding:.9rem 1.1rem; font-size:.86rem; margin-bottom:1rem; }
+
+/* Flow steps */
+.flow-step      { display:flex; align-items:flex-start; gap:12px; margin-bottom:.9rem; }
+.flow-num       { background:#1a237e; color:#fff; border-radius:50%; width:26px; height:26px; font-size:.75rem;
+                  font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+.flow-text      { font-size:.86rem; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="page-wrap">
+    <h1>Sonic — Daraz Booking API</h1>
+    <div class="sub">Technical reference for integrating Daraz shipment booking with the Sonic logistics platform.</div>
+    <div class="meta">
+      <span>Version 2.0</span>
+      <span>May 2026</span>
+      <span>Confidential — Daraz × Sonic</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- ═══════════════════════════════════════════════════════════ 1. QUICK START -->
+  <div class="card-section">
+    <div class="cs-head h-navy"><span class="cs-num">1</span> Quick Start</div>
+    <div class="cs-body">
+      <div class="alert-info-custom">
+        <strong>Base URL:</strong> All API calls are made to the Sonic production endpoint. Daraz must send requests from whitelisted Daraz account IDs only — any other account will receive a <em>"Shipper is not allowed"</em> error.
+      </div>
+
+      <h3 class="sh">Endpoint</h3>
+      <div class="endpoint-block">
+        <span class="ep-method">POST</span>
+        <span class="ep-url">https://&lt;sonic-domain&gt;/api/shipment/book/daraz</span>
+      </div>
+
+      <h3 class="sh">Required Headers</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Header</th><th>Value / Format</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>Authorization</code></td>
+            <td><code>{api_token}</code></td>
+            <td>Raw token — <strong>no "Bearer" prefix</strong>. Issued per Daraz account by Sonic ops.</td>
+          </tr>
+          <tr>
+            <td><code>Content-Type</code></td>
+            <td><code>application/json</code></td>
+            <td>Request body must be JSON.</td>
+          </tr>
+          <tr>
+            <td><code>Via</code></td>
+            <td><code>daraz-integration</code> (recommended)</td>
+            <td>Optional. Logged for source identification.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Response Format</h3>
+      <p class="mb-1">All responses return HTTP 200 with a JSON body. Use the <code>status</code> field to determine success:</p>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>status</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>0</code></td><td>Success — shipment booked</td></tr>
+          <tr><td><code>1</code></td><td>Error — see <code>message</code> and optional <code>errors</code> fields</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ 2. PARAMETERS -->
+  <div class="card-section">
+    <div class="cs-head h-blue"><span class="cs-num">2</span> Request Parameters</div>
+    <div class="cs-body">
+
+      <h3 class="sh">Tracking Number</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>tracking_number</code></td>
+            <td>integer</td>
+            <td><span class="badge-req">Required</span></td>
+            <td>Must be unique across all shipments. Must begin with a prefix assigned to the Daraz account by Sonic. Example: if prefix is <code>TRX</code>, then <code>TRX00012345</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Pickup Address</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>pickup_address_id</code></td>
+            <td>integer</td>
+            <td><span class="badge-req">Required</span></td>
+            <td>ID of a pre-registered pickup address belonging to the authenticated Daraz account. Must not be hidden or disabled. City must be active and pickup-enabled.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Return Address</h3>
+      <p class="mb-2 text-muted" style="font-size:.82rem;">If no existing return address matches the <code>(vendor, city_id, phone)</code> combination, Sonic auto-creates one. Supply all 6 fields on every request.</p>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr><td><code>return_address</code></td><td>string</td><td><span class="badge-req">Required</span></td><td>1–255 characters. Full street address.</td></tr>
+          <tr><td><code>return_contact_person</code></td><td>string</td><td><span class="badge-req">Required</span></td><td>1–100 characters.</td></tr>
+          <tr><td><code>return_vendor</code></td><td>string</td><td><span class="badge-req">Required</span></td><td>1–100 characters. Used as the address label / vendor name.</td></tr>
+          <tr><td><code>return_phone_number</code></td><td>string</td><td><span class="badge-req">Required</span></td><td>Valid Pakistan phone number. See phone format table below.</td></tr>
+          <tr><td><code>return_email_address</code></td><td>string</td><td><span class="badge-req">Required</span></td><td>Valid email, max 100 characters.</td></tr>
+          <tr><td><code>return_city_id</code></td><td>integer</td><td><span class="badge-req">Required</span></td><td>Must be an active city ID in Sonic's city table (business_category = 1).</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Consignee</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr><td><code>consignee_name</code></td><td>string</td><td><span class="badge-req">Required</span></td><td>1–100 characters.</td></tr>
+          <tr><td><code>consignee_address</code></td><td>string</td><td><span class="badge-req">Required</span></td><td>1–255 characters. Full delivery address.</td></tr>
+          <tr><td><code>consignee_city_id</code></td><td>integer</td><td><span class="badge-req">Required</span></td><td>Active city ID with delivery enabled. Must be reachable under the selected shipping mode.</td></tr>
+          <tr><td><code>consignee_phone_number_1</code></td><td>string</td><td><span class="badge-req">Required</span></td><td>Valid Pakistan phone. See phone format table.</td></tr>
+          <tr><td><code>consignee_phone_number_2</code></td><td>string</td><td><span class="badge-opt">Optional</span></td><td>Valid Pakistan phone. Ignored if blank.</td></tr>
+          <tr><td><code>consignee_email_address</code></td><td>string</td><td><span class="badge-opt">Optional</span></td><td>Valid email. Ignored if blank.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Shipment Details</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>shipping_mode_id</code></td>
+            <td>integer</td>
+            <td><span class="badge-req">Required</span></td>
+            <td><strong>1</strong> = Rush &nbsp;|&nbsp; <strong>2</strong> = Saver. Mode must be active on the Daraz account's rate card. Modes 3 and 4 are not available for Daraz.</td>
+          </tr>
+          <tr>
+            <td><code>estimated_weight</code></td>
+            <td>numeric</td>
+            <td><span class="badge-req">Required</span></td>
+            <td>Weight in kg. Range: 0.1 – 100,000.</td>
+          </tr>
+          <tr>
+            <td><code>amount</code></td>
+            <td>numeric</td>
+            <td><span class="badge-req">Required</span></td>
+            <td>Cash on Delivery amount in PKR. Use <code>0</code> for prepaid. Range: 0 – 1,000,000. Must not exceed the COD cap for the destination zone class. If <code>0</code>, a <code>parcel_value</code> must be provided.</td>
+          </tr>
+          <tr>
+            <td><code>item_description</code></td>
+            <td>string</td>
+            <td><span class="badge-req">Required</span></td>
+            <td>Up to 500 characters. Description of shipment contents.</td>
+          </tr>
+          <tr>
+            <td><code>item_quantity</code></td>
+            <td>integer</td>
+            <td><span class="badge-req">Required</span></td>
+            <td>Number of items. Range: 1 – 10,000.</td>
+          </tr>
+          <tr>
+            <td><code>parcel_value</code></td>
+            <td>numeric</td>
+            <td><span class="badge-cond">Required if amount = 0</span></td>
+            <td>Declared value of the parcel in PKR. Range: 0 – 1,000,000. Required for prepaid shipments.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Optional Fields</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Field</th><th>Type</th><th>Rules</th></tr></thead>
+        <tbody>
+          <tr><td><code>order_id</code></td><td>string</td><td>Daraz order ID. Up to 100 characters. Stored on shipment for reference.</td></tr>
+          <tr><td><code>order_date</code></td><td>string</td><td>Format: <code>YYYY-MM-DD</code>. The Daraz order date.</td></tr>
+          <tr><td><code>special_instructions</code></td><td>string</td><td>Delivery instructions. Up to 190 characters.</td></tr>
+          <tr><td><code>shipper_reference_number_1</code></td><td>string</td><td>Up to 190 characters.</td></tr>
+          <tr><td><code>shipper_reference_number_2</code></td><td>string</td><td>Up to 190 characters.</td></tr>
+          <tr><td><code>shipper_reference_number_3</code></td><td>string</td><td>Up to 190 characters.</td></tr>
+          <tr><td><code>shipper_reference_number_4</code></td><td>string</td><td>Up to 190 characters.</td></tr>
+          <tr><td><code>shipper_reference_number_5</code></td><td>string</td><td>Up to 190 characters.</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">System-Fixed Values (Do Not Send)</h3>
+      <p class="text-muted mb-2" style="font-size:.82rem;">These fields are set by the Sonic platform automatically for all Daraz bookings. Sending them in the request body has no effect.</p>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Parameter</th><th>Fixed Value</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>service_type_id</code></td><td><span class="badge-fixed">1</span></td><td>Standard delivery</td></tr>
+          <tr><td><code>payment_mode_id</code></td><td><span class="badge-fixed">1</span></td><td>COD</td></tr>
+          <tr><td><code>charges_mode_id</code></td><td><span class="badge-fixed">3</span></td><td>Corporate charges</td></tr>
+          <tr><td><code>item_product_type_id</code></td><td><span class="badge-fixed">24</span></td><td>Daraz product category</td></tr>
+          <tr><td><code>pieces_quantity</code></td><td><span class="badge-fixed">1</span></td><td>Single piece per booking</td></tr>
+          <tr><td><code>open_shipment</code></td><td><span class="badge-fixed">0</span></td><td>Open-box inspection disabled</td></tr>
+          <tr><td><code>delivery_type_id</code></td><td><span class="badge-fixed">1</span></td><td>Standard delivery type</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Phone Number Format</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Accepted Format</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>11 digits starting with 03</td><td><code>03001234567</code></td></tr>
+          <tr><td>12 digits starting with 923</td><td><code>923001234567</code></td></tr>
+          <tr><td>Dash-separated 03XX-XXXXXXX</td><td><code>0300-1234567</code></td></tr>
+          <tr><td>+92 format</td><td><code>+923001234567</code></td></tr>
+          <tr><td>0092 format</td><td><code>00923001234567</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ 3. EXAMPLES -->
+  <div class="card-section">
+    <div class="cs-head h-teal"><span class="cs-num">3</span> Example API Calls</div>
+    <div class="cs-body">
+
+      <h3 class="sh">Example A — Karachi → Lahore, Rush, COD PKR 2,500</h3>
+      <p class="text-muted mb-2" style="font-size:.82rem;">New return address — system will auto-create it on first use.</p>
+
+      <strong style="font-size:.8rem; color:#555;">REQUEST</strong>
+      <pre>{
+  "tracking_number":       "TRX00012345",
+  "pickup_address_id":     101,
+
+  "return_address":        "Plot 12, SITE Industrial Area, Karachi",
+  "return_contact_person": "Daraz Returns Desk",
+  "return_vendor":         "Daraz PK",
+  "return_phone_number":   "02138772222",
+  "return_email_address":  "returns.pk@daraz.com",
+  "return_city_id":        1,
+
+  "consignee_name":           "Ahmed Raza",
+  "consignee_address":        "House 5, Block D, DHA Phase 1, Lahore",
+  "consignee_city_id":        2,
+  "consignee_phone_number_1": "03211234567",
+
+  "shipping_mode_id":   1,
+  "estimated_weight":   0.5,
+  "amount":             2500,
+  "item_description":   "Mobile Phone Case",
+  "item_quantity":      1,
+
+  "order_id":    "DRZ-PK-987654321",
+  "order_date":  "2026-05-22"
+}</pre>
+
+      <strong style="font-size:.8rem; color:#2e7d32;">SUCCESS RESPONSE</strong>
+      <pre>{
+  "status":          0,
+  "message":         "Shipment has been Booked!",
+  "tracking_number": "TRX00012345"
+}</pre>
+
+      <strong style="font-size:.8rem; color:#c62828;">ERROR RESPONSES</strong>
+      <pre>// Tracking number already used
+{ "status": 1, "message": "Error(s) in Input", "errors": { "tracking_number": ["The tracking number has already been taken."] } }
+
+// Prefix mismatch
+{ "status": 1, "message": "Prefix not matched with given tracking number" }
+
+// COD above zone cap
+{ "status": 1, "message": "Amount must be smaller then or equal to 50000" }
+
+// City booking disabled
+{ "status": 1, "message": "Delivery is not available for this City." }
+
+// Delivery mode not available for city
+{ "status": 1, "message": "Delivery is not allowed for City ID #2 with Service Type ID #1 and Shipping Mode ID #1" }</pre>
+
+      <hr class="my-4">
+
+      <h3 class="sh">Example B — Lahore → Lahore, Saver, Prepaid (amount = 0)</h3>
+      <p class="text-muted mb-2" style="font-size:.82rem;">Prepaid shipment — <code>parcel_value</code> is required when amount is 0.</p>
+
+      <strong style="font-size:.8rem; color:#555;">REQUEST</strong>
+      <pre>{
+  "tracking_number":       "TRX00012346",
+  "pickup_address_id":     205,
+
+  "return_address":        "12-A, Model Town, Lahore",
+  "return_contact_person": "Daraz Returns Lahore",
+  "return_vendor":         "Daraz PK",
+  "return_phone_number":   "03421234567",
+  "return_email_address":  "returns.lhe@daraz.com",
+  "return_city_id":        2,
+
+  "consignee_name":           "Sara Malik",
+  "consignee_address":        "Flat 3, Gulberg Residencia, Lahore",
+  "consignee_city_id":        2,
+  "consignee_phone_number_1": "03331234567",
+  "consignee_phone_number_2": "04235678901",
+
+  "shipping_mode_id":   2,
+  "estimated_weight":   1.2,
+  "amount":             0,
+  "parcel_value":       3500,
+  "item_description":   "Laptop Sleeve",
+  "item_quantity":      2,
+
+  "order_id":              "DRZ-PK-112233445",
+  "order_date":            "2026-05-22",
+  "special_instructions":  "Handle with care — fragile"
+}</pre>
+
+      <strong style="font-size:.8rem; color:#2e7d32;">SUCCESS RESPONSE</strong>
+      <pre>{
+  "status":          0,
+  "message":         "Shipment has been Booked!",
+  "tracking_number": "TRX00012346"
+}</pre>
+
+      <strong style="font-size:.8rem; color:#c62828;">ERROR — parcel_value missing for prepaid</strong>
+      <pre>{ "status": 1, "message": "Error(s) in Input",
+  "errors": "Parcel value is required when collection amount is zero, and should be greater than 0" }</pre>
+
+      <hr class="my-4">
+
+      <h3 class="sh">Example C — Multi-reference, High-quantity FMCG Bundle</h3>
+      <p class="text-muted mb-2" style="font-size:.82rem;">Using all 5 shipper reference fields for Daraz order tracking.</p>
+
+      <strong style="font-size:.8rem; color:#555;">REQUEST</strong>
+      <pre>{
+  "tracking_number":       "TRX00012347",
+  "pickup_address_id":     101,
+
+  "return_address":        "Plot 12, SITE Industrial Area, Karachi",
+  "return_contact_person": "Daraz Returns Desk",
+  "return_vendor":         "Daraz PK",
+  "return_phone_number":   "02138772222",
+  "return_email_address":  "returns.pk@daraz.com",
+  "return_city_id":        1,
+
+  "consignee_name":           "Bilal Ahmed",
+  "consignee_address":        "Shop 7, Tariq Road, Karachi",
+  "consignee_city_id":        1,
+  "consignee_phone_number_1": "03121234567",
+
+  "shipping_mode_id":   1,
+  "estimated_weight":   3.5,
+  "amount":             6000,
+  "item_description":   "FMCG Bundle — Shampoo, Soap, Conditioner",
+  "item_quantity":      12,
+
+  "order_id":                   "DRZ-PK-556677889",
+  "order_date":                 "2026-05-22",
+  "shipper_reference_number_1": "SELLER-KHI-001",
+  "shipper_reference_number_2": "CAMPAIGN-MAY26",
+  "shipper_reference_number_3": "WH-BIN-4C",
+  "shipper_reference_number_4": "ROUTE-KHI-S",
+  "shipper_reference_number_5": "PROMO-EID2026"
+}</pre>
+
+      <strong style="font-size:.8rem; color:#2e7d32;">SUCCESS RESPONSE</strong>
+      <pre>{
+  "status":          0,
+  "message":         "Shipment has been Booked!",
+  "tracking_number": "TRX00012347"
+}</pre>
+
+      <h3 class="sh">Warning Flags in Success Response</h3>
+      <p class="mb-2" style="font-size:.86rem;">Even with <code>status: 0</code>, the response may include additional warning keys. These do not block delivery but should be reviewed:</p>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Key</th><th>Meaning</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>non_service_area</code></td>
+            <td>A keyword in the consignee address matches a known non-service or out-of-service-area location.</td>
+            <td>Additional charges may apply. Shipment may be returned if area is fully non-serviceable.</td>
+          </tr>
+          <tr>
+            <td><code>blacklisted_consignee</code></td>
+            <td>The consignee phone number is on Sonic's blacklist.</td>
+            <td>Review the blacklist message. Shipment is still booked; take care with delivery.</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre>// Example success with NSA warning
+{
+  "status":          0,
+  "message":         "Shipment has been Booked!",
+  "tracking_number": "TRX00012348",
+  "non_service_area": "A Possible Address Anomaly: Gadap Detected! In case of, Out Of Service Area: Additional charges may apply..."
+}</pre>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ 4. TRACKING NUMBER -->
+  <div class="card-section">
+    <div class="cs-head h-green"><span class="cs-num">4</span> Tracking Number Rules</div>
+    <div class="cs-body">
+      <div class="alert-info-custom">
+        <strong>Key difference from standard Sonic booking:</strong> Daraz supplies its own tracking number in the request. Sonic stores it directly on the shipment after booking. The tracking number must be globally unique and must begin with a prefix pre-assigned to your Daraz account.
+      </div>
+
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Sonic ops assigns one or more <strong>tracking number prefixes</strong> to your Daraz account (e.g. <code>TRX</code>, <code>DRZ</code>).</div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Daraz generates a tracking number using that prefix: e.g. <code>TRX00012345</code>. Must be an integer (no non-numeric suffix characters).</div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">Send <code>tracking_number</code> in the booking request. Sonic validates uniqueness and prefix match.</div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">On success, Sonic returns <code>tracking_number</code> in the response — same value you sent. Use this for label printing and tracking lookups.</div></div>
+
+      <div class="alert-warn-custom mt-3">
+        <strong>If a prefix mismatch occurs:</strong> you will receive <code>"Prefix not matched with given tracking number"</code>. Contact Sonic ops to verify the prefix list assigned to your account.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ 5. RETURN ADDRESS -->
+  <div class="card-section">
+    <div class="cs-head h-amber"><span class="cs-num">5</span> Return Address — Auto-Creation Logic</div>
+    <div class="cs-body">
+      <p class="mb-3">You do not need to pre-register return addresses. Sonic looks up an existing address using the combination <strong>(vendor name + city + phone number)</strong>. If not found, it creates a new one automatically.</p>
+
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Sonic looks up <code>user_shipping_infos</code> for a row where <code>vendor = return_vendor</code>, <code>city_id = return_city_id</code>, <strong>and</strong> <code>phone = return_phone_number</code>.</div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-text"><strong>Match found:</strong> existing address ID is reused — no new record created.</div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-text"><strong>No match:</strong> Sonic creates a new address record using all 6 return fields and returns the new ID.</div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">The resolved return address must be in a city where return delivery is active for the selected shipping mode.</div></div>
+
+      <div class="alert-ok-custom">
+        <strong>Best practice:</strong> Send the same <code>return_vendor</code>, <code>return_city_id</code>, and <code>return_phone_number</code> consistently for the same warehouse. This avoids creating duplicate return address records over time.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ 6. VALIDATION ERRORS -->
+  <div class="card-section">
+    <div class="cs-head h-red"><span class="cs-num">6</span> Common Validation Errors &amp; Fixes</div>
+    <div class="cs-body">
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Error Message</th><th>Cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>Shipper is not allowed.</code></td>
+            <td>The authenticated user's ID is not on the Daraz whitelist.</td>
+            <td>Ensure you are using the correct API token for your Daraz account. Contact Sonic ops if a new account needs to be whitelisted.</td>
+          </tr>
+          <tr>
+            <td><code>Prefix not matched with given tracking number</code></td>
+            <td>The tracking number does not start with a prefix assigned to your account.</td>
+            <td>Confirm prefix list with Sonic ops and regenerate the tracking number.</td>
+          </tr>
+          <tr>
+            <td><code>The tracking number has already been taken.</code></td>
+            <td>Duplicate tracking number — already exists in Sonic's system.</td>
+            <td>Use a new unique tracking number. Never reuse a tracking number.</td>
+          </tr>
+          <tr>
+            <td><code>Delivery is not available for this City.</code></td>
+            <td>The destination city has booking disabled by Sonic ops.</td>
+            <td>Check city availability or contact Sonic ops. Retry when city is re-enabled.</td>
+          </tr>
+          <tr>
+            <td><code>Delivery is not allowed for City ID # with Service Type…</code></td>
+            <td>The selected shipping mode is not active for that city.</td>
+            <td>Switch to a different shipping mode (1 or 2) or choose a different destination city.</td>
+          </tr>
+          <tr>
+            <td><code>Amount must be smaller than or equal to {N}</code></td>
+            <td>COD amount exceeds the cap for the destination zone class.</td>
+            <td>Reduce the <code>amount</code> or split the order across multiple shipments.</td>
+          </tr>
+          <tr>
+            <td><code>Return city not allowed…</code></td>
+            <td>The return address city is not active for returns under the selected shipping mode.</td>
+            <td>Use a return address in a return-enabled city. Contact Sonic ops if needed.</td>
+          </tr>
+          <tr>
+            <td><code>Pickup Address ID # is disabled</code></td>
+            <td>The pickup address has been deactivated.</td>
+            <td>Use a different active pickup address ID. Contact Sonic ops.</td>
+          </tr>
+          <tr>
+            <td><code>Your payable amount balance has exceeded the negative limit.</code></td>
+            <td>Account has an outstanding negative payable and cannot book zero-COD shipments.</td>
+            <td>Settle outstanding payables with Sonic finance, or use a non-zero COD amount.</td>
+          </tr>
+          <tr>
+            <td><code>The consignee_phone_number_1 field is invalid.</code></td>
+            <td>Phone number format not recognized.</td>
+            <td>Use a valid Pakistan mobile format: <code>03XXXXXXXXX</code> (11 digits) or <code>+92XXXXXXXXXX</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ 7. BOOKING FLOW -->
+  <div class="card-section">
+    <div class="cs-head h-purple"><span class="cs-num">7</span> Booking Flow — What Happens After a Successful Call</div>
+    <div class="cs-body">
+      <div class="flow-step"><div class="flow-num">1</div><div class="flow-text">Authentication validated via <code>Authorization</code> header token. User ID injected automatically.</div></div>
+      <div class="flow-step"><div class="flow-num">2</div><div class="flow-text">Account whitelist checked — only approved Daraz account IDs can proceed.</div></div>
+      <div class="flow-step"><div class="flow-num">3</div><div class="flow-text">All request fields validated against the rules in Section 2.</div></div>
+      <div class="flow-step"><div class="flow-num">4</div><div class="flow-text">Tracking number prefix verified against all prefixes registered to the account.</div></div>
+      <div class="flow-step"><div class="flow-num">5</div><div class="flow-text">Return address resolved or auto-created.</div></div>
+      <div class="flow-step"><div class="flow-num">6</div><div class="flow-text">Return city / destination city / pickup city all validated for active status and zone coverage.</div></div>
+      <div class="flow-step"><div class="flow-num">7</div><div class="flow-text">COD cap checked for destination zone class (inter-city shipments only).</div></div>
+      <div class="flow-step"><div class="flow-num">8</div><div class="flow-text">Delivery mode availability checked for destination city.</div></div>
+      <div class="flow-step"><div class="flow-num">9</div><div class="flow-text">Negative payable guard checked for zero-COD bookings.</div></div>
+      <div class="flow-step"><div class="flow-num">10</div><div class="flow-text">Shipment record created in Sonic's system via the corporate booking engine.</div></div>
+      <div class="flow-step"><div class="flow-num">11</div><div class="flow-text">Daraz-supplied tracking number overrides the auto-generated one and is saved to the shipment.</div></div>
+      <div class="flow-step"><div class="flow-num">12</div><div class="flow-text">Booking API log recorded for audit trail.</div></div>
+      <div class="flow-step"><div class="flow-num">13</div><div class="flow-text">Payment mode log recorded.</div></div>
+      <div class="flow-step"><div class="flow-num">14</div><div class="flow-text">Consignee and shipper areas resolved and stored on the shipment (used for hub routing and reporting).</div></div>
+      <div class="flow-step"><div class="flow-num">15</div><div class="flow-text">Consignee address scanned for non-service-area keywords — warning added to response if found.</div></div>
+      <div class="flow-step"><div class="flow-num">16</div><div class="flow-text">Consignee phone checked against blacklist — warning added to response if flagged.</div></div>
+      <div class="flow-step"><div class="flow-num">17</div><div class="flow-text">Order date, shipper reference numbers, and item details recorded.</div></div>
+      <div class="flow-step"><div class="flow-num">18</div><div class="flow-text">Success response returned with <code>tracking_number</code>. The shipment is now visible in Sonic's portal and eligible for pickup scheduling.</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ 8. SUPPORT -->
+  <div class="card-section">
+    <div class="cs-head h-grey" style="background:#37474f; color:#fff;"><span class="cs-num">8</span> Support &amp; Escalation</div>
+    <div class="cs-body">
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Issue Type</th><th>Contact</th></tr></thead>
+        <tbody>
+          <tr><td>Account whitelisting / new Daraz user ID</td><td>Sonic Operations team</td></tr>
+          <tr><td>Tracking number prefix assignment</td><td>Sonic Operations team</td></tr>
+          <tr><td>City availability / shipping mode activation</td><td>Sonic Operations / Sales</td></tr>
+          <tr><td>Negative payable balance</td><td>Sonic Finance team</td></tr>
+          <tr><td>API integration issues / HTTP errors</td><td>Sonic Technology team</td></tr>
+        </tbody>
+      </table>
+      <div class="alert-ok-custom mt-2">
+        <strong>Helpline:</strong> 021-38772222 &nbsp;|&nbsp; <strong>Portal:</strong> Sonic Shipper Portal (for shipment tracking and payment visibility)
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
