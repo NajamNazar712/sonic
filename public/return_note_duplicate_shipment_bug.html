@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bug Report — Return Note Duplicate Shipment</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+body         { font-family:'Segoe UI',Arial,sans-serif; background:#f2f4f8; color:#1a1a2e; font-size:.92rem; }
+.page-wrap   { max-width:1060px; margin:0 auto; padding:0 16px 60px; }
+
+.hero        { background:linear-gradient(120deg,#7b1fa2 0%,#c62828 100%); color:#fff;
+               padding:2.4rem 2.2rem 1.8rem; border-radius:0 0 16px 16px; margin-bottom:2rem; }
+.hero h1     { font-size:1.85rem; font-weight:800; margin-bottom:.25rem; }
+.hero .sub   { opacity:.88; font-size:.94rem; }
+.hero .meta  { margin-top:1rem; display:flex; gap:.8rem; flex-wrap:wrap; }
+.hero .meta span { background:rgba(255,255,255,.18); border-radius:20px; padding:3px 14px; font-size:.77rem; font-weight:600; }
+
+.card-section  { background:#fff; border-radius:10px; box-shadow:0 1px 5px rgba(0,0,0,.08);
+                 margin-bottom:1.5rem; overflow:hidden; }
+.cs-head       { padding:11px 20px; font-weight:700; font-size:.92rem; display:flex; align-items:center; gap:8px; }
+.cs-body       { padding:1.3rem 1.6rem; }
+.cs-num        { background:rgba(255,255,255,.25); border-radius:50%; width:24px; height:24px;
+                 display:inline-flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:800; flex-shrink:0; }
+
+.h-red    { background:#b71c1c; color:#fff; }
+.h-navy   { background:#1a237e; color:#fff; }
+.h-purple { background:#4527a0; color:#fff; }
+.h-green  { background:#1b5e20; color:#fff; }
+.h-orange { background:#e65100; color:#fff; }
+.h-teal   { background:#004d40; color:#fff; }
+.h-grey   { background:#37474f; color:#fff; }
+
+h3.sh { font-size:.9rem; font-weight:700; color:#1a237e; border-bottom:2px solid #e8eaf6;
+        padding-bottom:5px; margin:1.4rem 0 .7rem; }
+h3.sh:first-child { margin-top:0; }
+
+pre  { background:#0d1b2a; color:#cdd6f4; border-radius:8px; padding:1.1rem 1.3rem;
+       font-size:.79rem; line-height:1.7; overflow-x:auto; }
+code { background:#e8eaf6; color:#880e4f; border-radius:4px; padding:1px 5px; font-size:.81rem; }
+
+.table      { font-size:.83rem; }
+.table th   { background:#e8eaf6; color:#1a237e; font-weight:700; }
+.table-sm td, .table-sm th { padding:.4rem .6rem; }
+
+.alert-red  { background:#ffebee; border-left:4px solid #c62828; border-radius:6px; padding:.85rem 1.1rem; margin-bottom:1rem; font-size:.86rem; }
+.alert-warn { background:#fff8e1; border-left:4px solid #f9a825; border-radius:6px; padding:.85rem 1.1rem; margin-bottom:1rem; font-size:.86rem; }
+.alert-ok   { background:#e8f5e9; border-left:4px solid #2e7d32; border-radius:6px; padding:.85rem 1.1rem; margin-bottom:1rem; font-size:.86rem; }
+.alert-info { background:#e3f2fd; border-left:4px solid #1565c0; border-radius:6px; padding:.85rem 1.1rem; margin-bottom:1rem; font-size:.86rem; }
+
+/* Timeline */
+.tl          { position:relative; padding-left:30px; }
+.tl::before  { content:''; position:absolute; left:9px; top:0; bottom:0; width:2px; background:#dee2e6; }
+.tl-item     { position:relative; margin-bottom:1rem; }
+.tl-dot      { position:absolute; left:-25px; top:3px; width:16px; height:16px; border-radius:50%;
+               border:2px solid #fff; box-shadow:0 0 0 2px #aaa; }
+.tl-ok       { background:#2e7d32; box-shadow:0 0 0 2px #2e7d32; }
+.tl-bug      { background:#c62828; box-shadow:0 0 0 2px #c62828; }
+.tl-warn     { background:#f9a825; box-shadow:0 0 0 2px #f9a825; }
+.tl-done     { background:#1565c0; box-shadow:0 0 0 2px #1565c0; }
+.tl-time     { font-size:.75rem; color:#757575; font-weight:600; margin-bottom:2px; }
+.tl-text     { font-size:.86rem; }
+
+/* Diff table */
+.bug-tag    { background:#ffcdd2; color:#b71c1c; border-radius:4px; padding:2px 7px; font-size:.72rem; font-weight:700; }
+.fix-tag    { background:#c8e6c9; color:#1b5e20; border-radius:4px; padding:2px 7px; font-size:.72rem; font-weight:700; }
+.ok-tag     { background:#e8eaf6; color:#1a237e; border-radius:4px; padding:2px 7px; font-size:.72rem; font-weight:700; }
+
+/* Status badge */
+.s-ok   { background:#c8e6c9; color:#1b5e20; padding:2px 8px; border-radius:10px; font-size:.75rem; font-weight:700; }
+.s-bad  { background:#ffcdd2; color:#b71c1c; padding:2px 8px; border-radius:10px; font-size:.75rem; font-weight:700; }
+.s-warn { background:#fff3e0; color:#e65100; padding:2px 8px; border-radius:10px; font-size:.75rem; font-weight:700; }
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="page-wrap">
+    <h1>Bug Report — Return Note: Duplicate Shipment via Bag Quick Receive</h1>
+    <div class="sub">A shipment assigned to an open return note gets reset to RT-AOC by a delayed bag scan submission, allowing a second return note to be created for the same shipment — leaving the first note permanently uncloseable.</div>
+    <div class="meta">
+      <span>Severity: High</span>
+      <span>Reported: May 2026</span>
+      <span>Affected: Return Operations</span>
+      <span>Status: Under Review</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- ═══ 1. INCIDENT SUMMARY ═══ -->
+  <div class="card-section">
+    <div class="cs-head h-red"><span class="cs-num">1</span> Incident Summary</div>
+    <div class="cs-body">
+      <div class="alert-red">
+        <strong>Problem:</strong> A shipment that is already dispatched on an open return note (status = RT-DP) gets its status overwritten back to RT-AOC by the <strong>Quick Receive Bag</strong> screen submission. Because the status returns to RT-AOC, the same shipment can be added to a <em>new</em> return note. The original return note cannot close because the shipment's entry in it is still pending (status = 0).
+      </div>
+
+      <h3 class="sh">Affected Case from Production</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Shipment ID</td><td><code>57705486</code></td></tr>
+          <tr><td>Tracking Number</td><td><code>20228857705486</code></td></tr>
+          <tr><td>Booking Type</td><td>1 (Standard)</td></tr>
+          <tr><td>Current Shipment Status</td><td>25 — RT-DS (Return Delivered to Shipper) ✓</td></tr>
+          <tr><td>Original Return Note</td><td><strong>590296</strong> — Hub 202, Rider 9423, 19 shipments — <span class="s-bad">Status: 0 (Still OPEN)</span></td></tr>
+          <tr><td>Duplicate Return Note</td><td><strong>591017</strong> — Hub 202, Rider 7394, 41 shipments — <span class="s-ok">Status: 1 (Closed)</span></td></tr>
+          <tr><td>Stuck Entry in return_note_shipments</td><td>return_note_id=590296, shipment_id=57705486, status=0 (unconfirmed)</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Why Return Note 590296 Cannot Close</h3>
+      <p>The close logic in <code>ReturnController::return_note_update_status()</code> counts unconfirmed shipments before closing:</p>
+      <pre>// line 3834 — ReturnController.php
+$shipment_status = ReturnNoteShipment::where(['return_note_id' => $return_note_id, 'status' => 0])->count();
+if ($shipment_status == 0) {
+    $return_note_details->status = 1; // close the return note
+}</pre>
+      <p>Shipment 57705486 is detected as belonging to a newer return note (591017 &gt; 590296) at line 3811, so it is <strong>skipped</strong> — its entry in return_note_shipments for 590296 is never updated to status=1. The count remains 1, so the return note stays open.</p>
+    </div>
+  </div>
+
+  <!-- ═══ 2. EXACT TIMELINE ═══ -->
+  <div class="card-section">
+    <div class="cs-head h-navy"><span class="cs-num">2</span> Exact Timeline — Shipment 57705486</div>
+    <div class="cs-body">
+      <p class="text-muted mb-3" style="font-size:.83rem;">Reconstructed from <code>shipments_journey</code> and <code>shipment_scanning_journeys</code> tables on production.</p>
+      <div class="tl">
+
+        <div class="tl-item">
+          <div class="tl-dot tl-ok"></div>
+          <div class="tl-time">2025-12-08 18:39</div>
+          <div class="tl-text"><strong>Status → 22 (RT-AOC)</strong> — Return bag arrives at origin hub. Admin 2575 receives it via quick receive. <em>Correct.</em></div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot tl-ok"></div>
+          <div class="tl-time">2026-01-17 16:28</div>
+          <div class="tl-text"><strong>Admin 4511 scans shipment on "Quick Receive Bag" screen (screen 20).</strong> Shipment is at status 22 — valid. Shipment is added to the screen's pending submission list. The admin has NOT submitted yet.</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot tl-ok"></div>
+          <div class="tl-time">2026-01-17 18:08</div>
+          <div class="tl-text"><strong>Return Note 590296 created</strong> (admin 2575, rider 9423). Shipment status → 23 (RT-DP — Return Dispatched). Entry created in return_note_shipments with status=0. <em>Correct — shipment is now committed to this return note.</em></div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot tl-bug"></div>
+          <div class="tl-time">2026-01-17 18:27 — <span class="bug-tag">BUG FIRES</span></div>
+          <div class="tl-text"><strong>Admin 4511 submits the pending quick receive list</strong> (scanned 2 hours earlier at 16:28). The system blindly overwrites the shipment status to <strong>22 (RT-AOC)</strong>, ignoring that the shipment was already on return note 590296 with status 23 (RT-DP).</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot tl-bug"></div>
+          <div class="tl-time">2026-01-20 16:13 — <span class="bug-tag">BUG FIRES AGAIN</span></div>
+          <div class="tl-text">Admin 4511 submits another quick receive. Status overwritten to 22 (RT-AOC) again.</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot tl-bug"></div>
+          <div class="tl-time">2026-01-20 17:29 — <span class="bug-tag">BUG FIRES AGAIN</span></div>
+          <div class="tl-text">Admin 2572 submits another quick receive. Status overwritten to 22 (RT-AOC) again.</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot tl-bug"></div>
+          <div class="tl-time">2026-01-20 17:52 — <span class="bug-tag">DUPLICATE RETURN NOTE</span></div>
+          <div class="tl-text"><strong>Return Note 591017 created</strong> (admin 4511, rider 7394). Because the shipment's status is back at 22 (RT-AOC), the return note creation logic allows it. Secondary guard bug (checked below) fails to block it. Shipment status → 23 (RT-DP) again, now on 591017.</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot tl-done"></div>
+          <div class="tl-time">2026-01-22 19:38</div>
+          <div class="tl-text">Return Note 591017 closed normally. Shipment status → 25 (RT-DS — Returned to Shipper). ✓</div>
+        </div>
+
+        <div class="tl-item">
+          <div class="tl-dot tl-warn"></div>
+          <div class="tl-time">Now</div>
+          <div class="tl-text"><strong>Return Note 590296 is stuck open.</strong> 18 of 19 shipments confirmed (status=1). Shipment 57705486 has status=0 in return_note_shipments for 590296 — it's skipped during closing because it belongs to a newer return note. Count never reaches 0 → return note never closes.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 3. ROOT CAUSE — TWO BUGS ═══ -->
+  <div class="card-section">
+    <div class="cs-head h-purple"><span class="cs-num">3</span> Root Cause — Two Bugs Working Together</div>
+    <div class="cs-body">
+
+      <h3 class="sh">Bug 1 — Primary: Quick Receive Bag Does Not Check for Active Return Notes</h3>
+      <p><strong>File:</strong> <code>app/Http/Controllers/Admins/AdminMasterCargoController.php</code><br>
+         <strong>Method:</strong> <code>master_cargo_bag_quick_receive_store()</code></p>
+
+      <p>When the admin submits the quick receive, the code processes each shipment in the submitted list and sets its status to 22 (RT-AOC). It checks that the bag shipment record exists and is pending, but it does <strong>not check</strong> the current status of the shipment or whether it is already dispatched on an active return note.</p>
+
+      <pre>// Current code — no guard against active return notes
+$shipment->shipper_status_id = $shipper_status_id; // always 22 for booking_type 1
+$shipment->consignee_status_id = $consignee_status_id;
+$shipment->save();
+ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, ...);</pre>
+
+      <p><strong>The gap:</strong> There is a 2-hour window between when admin 4511 <em>scanned</em> the shipment (16:28) and when they <em>submitted</em> (18:27). During that window, another admin had already dispatched the shipment on return note 590296. The submission did not check this.</p>
+
+      <p>The same issue exists in <code>AdminCargoController::quick_receive_store()</code> for cargo consignment quick receive.</p>
+
+      <h3 class="sh">Bug 2 — Secondary: Return Note Creation Guard Misses Status-0 Entries</h3>
+      <p><strong>File:</strong> <code>app/Http/Controllers/Admins/ReturnController.php</code><br>
+         <strong>Method:</strong> <code>return_note_create()</code> — line 3203</p>
+
+      <p>Before adding a shipment to a new return note, the code checks if the shipment is already in an open return note. But the query only looks for entries where <code>return_note_shipments.status = 1</code> (confirmed/received):</p>
+
+      <pre>// Current guard — MISSES status=0 entries
+$old_return_note_id = ReturnNoteShipment::where('shipment_id', $shipment_id)
+    ->where('status', '=', 1)  // ← ONLY looks for confirmed entries
+    ->orderBy('return_note_id', 'desc');
+
+if ($old_return_note_id->exists()) {
+    // checks if that return note is still open...
+}</pre>
+
+      <p>The shipment's entry for return note 590296 has <code>status = 0</code> (dispatched, not yet confirmed/received). The guard never detects it, so the system happily creates return note 591017 for the same shipment.</p>
+
+      <table class="table table-bordered table-sm mt-2">
+        <thead><tr><th>Guard Scenario</th><th>Detected?</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Shipment confirmed in an old open return note (status=1)</td>
+            <td><span class="s-ok">Yes</span></td>
+            <td>Covered by <code>where('status', 1)</code></td>
+          </tr>
+          <tr>
+            <td>Shipment dispatched but not yet confirmed in open return note (status=0)</td>
+            <td><span class="s-bad">No</span></td>
+            <td>status=0 is excluded from the query — <strong>this is the bug</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ 4. CODE FIX ═══ -->
+  <div class="card-section">
+    <div class="cs-head h-green"><span class="cs-num">4</span> Code Fix</div>
+    <div class="cs-body">
+
+      <h3 class="sh">Fix 1 — AdminMasterCargoController::master_cargo_bag_quick_receive_store()</h3>
+      <p>Before overwriting the shipment status to 22, check if the shipment is currently dispatched on an open return note. If so, skip the status update.</p>
+
+      <pre>// Add this check BEFORE setting $shipment->shipper_status_id = $shipper_status_id (for type != 1 bags)
+
+$in_active_return_note = \App\Http\Models\Admin\ReturnNoteShipment::where('shipment_id', $shipment_id)
+    ->where('status', 0)  // dispatched, not yet confirmed
+    ->whereHas('return_note', function ($q) {
+        $q->where('status', 0); // return note still open
+    })
+    ->exists();
+
+if ($in_active_return_note) {
+    // Shipment is already dispatched with a rider on an open return note.
+    // Do not reset its status. Log and skip.
+    \Illuminate\Support\Facades\Log::warning('Quick receive skipped for shipment already on active return note', [
+        'shipment_id' => $shipment_id,
+        'admin_id'    => Auth::id(),
+    ]);
+    continue;
+}
+
+// ... existing status assignment code below ...</pre>
+
+      <div class="alert-warn">
+        <strong>Apply the same fix to:</strong> <code>AdminCargoController::quick_receive_store()</code> — the same timing gap vulnerability exists there for cargo consignment receives.
+      </div>
+
+      <h3 class="sh">Fix 2 — ReturnController::return_note_create() — Secondary Guard</h3>
+      <p>Extend the existing guard to also block shipments that are already in open return notes at status=0 (dispatched but not yet confirmed).</p>
+
+      <pre>// BEFORE (line 3203) — misses status=0 entries:
+$old_return_note_id = ReturnNoteShipment::where('shipment_id', $shipment_id)
+    ->where('status', '=', 1)
+    ->orderBy('return_note_id', 'desc');
+
+// AFTER — check for ANY open return note (status=0 or status=1):
+$already_in_open_rn = ReturnNoteShipment::where('shipment_id', $shipment_id)
+    ->whereHas('return_note', function ($q) {
+        $q->where('status', 0); // return note is still open
+    })
+    ->exists();
+
+if ($already_in_open_rn) {
+    // Skip this shipment — it is already in an open return note
+    // Do not decrement $shipments_count; remove from valid_shipments
+    $shipments_count--;
+    continue;
+}</pre>
+
+      <div class="alert-info">
+        <strong>Note on the ReturnNoteShipment model:</strong> Ensure the <code>return_note()</code> relationship is defined on <code>ReturnNoteShipment</code> before using <code>whereHas</code>. It is already defined at line 34 of <code>app/Http/Models/Admin/ReturnNote.php</code> (inverse direction). Verify <code>ReturnNoteShipment::return_note()</code> exists or add: <code>public function return_note() { return $this->belongsTo(ReturnNote::class); }</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 5. IMMEDIATE MANUAL FIX ═══ -->
+  <div class="card-section">
+    <div class="cs-head h-orange"><span class="cs-num">5</span> Immediate Manual Fix for Return Note 590296</div>
+    <div class="cs-body">
+      <div class="alert-red">
+        <strong>Important:</strong> These SQL statements modify production data. Run only after confirming the current state matches the values shown. Run ONLY SELECT queries first to verify, then run the fix.
+      </div>
+
+      <h3 class="sh">Step 1 — Verify Current State (SELECT only)</h3>
+      <pre>-- Confirm the stuck entry
+SELECT return_note_id, shipment_id, status, update_type
+FROM return_note_shipments
+WHERE return_note_id = 590296 AND shipment_id = 57705486;
+-- Expected: 1 row, status = 0
+
+-- Confirm return note is still open
+SELECT id, shipments_count, status FROM return_notes WHERE id = 590296;
+-- Expected: status = 0, shipments_count = 19
+
+-- Confirm the shipment has been resolved elsewhere
+SELECT id, shipper_status_id FROM shipments WHERE id = 57705486;
+-- Expected: shipper_status_id = 25 (RT-DS — already returned to shipper via RN 591017)</pre>
+
+      <h3 class="sh">Step 2 — Remove the Stuck Entry</h3>
+      <pre>-- Remove the orphaned return note shipment entry
+DELETE FROM return_note_shipments
+WHERE return_note_id = 590296
+  AND shipment_id = 57705486;</pre>
+
+      <h3 class="sh">Step 3 — Correct the Shipments Count</h3>
+      <pre>-- Decrement shipments_count by 1 (was 19, should be 18)
+UPDATE return_notes
+SET shipments_count = 18
+WHERE id = 590296;</pre>
+
+      <h3 class="sh">Step 4 — Verify the Fix</h3>
+      <pre>-- Confirm no more status=0 entries remain for return note 590296
+SELECT status, COUNT(*) AS cnt
+FROM return_note_shipments
+WHERE return_note_id = 590296
+GROUP BY status;
+-- Expected: only status=1 rows (18 of them)
+
+-- Return note should now be closeable by the rider
+SELECT id, shipments_count, status FROM return_notes WHERE id = 590296;
+-- shipments_count = 18, status = 0 (admin still needs to process close it)</pre>
+
+      <div class="alert-ok mt-2">
+        After the manual fix, the rider/admin can go to return note 590296 and process the remaining 18 shipments normally. The note will close when all 18 reach status=1 in return_note_shipments.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 6. DB STATE PROOF ═══ -->
+  <div class="card-section">
+    <div class="cs-head h-teal"><span class="cs-num">6</span> Production DB State at Time of Report</div>
+    <div class="cs-body">
+
+      <h3 class="sh">return_note_shipments — shipment 57705486</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>return_note_id</th><th>shipment_id</th><th>status (rns)</th><th>update_type</th><th>rn_status</th><th>rn_created</th><th>rn_updated</th></tr></thead>
+        <tbody>
+          <tr class="table-danger">
+            <td><strong>590296</strong></td><td>57705486</td>
+            <td><span class="s-bad">0 (pending — STUCK)</span></td><td>0</td>
+            <td><span class="s-bad">0 (open)</span></td>
+            <td>2026-01-17 18:08</td><td>2026-01-20 19:50</td>
+          </tr>
+          <tr class="table-success">
+            <td>591017</td><td>57705486</td>
+            <td><span class="s-ok">1 (confirmed)</span></td><td>0</td>
+            <td><span class="s-ok">1 (closed)</span></td>
+            <td>2026-01-20 17:52</td><td>2026-01-22 20:17</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">return_note 590296 — Shipment Count Breakdown</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>return_note_shipments.status</th><th>Count</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr class="table-success"><td>1 (confirmed)</td><td>18</td><td>These 18 shipments have been received/processed. ✓</td></tr>
+          <tr class="table-danger"><td>0 (pending)</td><td><strong>1</strong></td><td>Shipment 57705486 — stuck because it was resolved via RN 591017. <span class="bug-tag">BLOCKS CLOSE</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Key Shipment Journey Events</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Journey ID</th><th>Status</th><th>Reference</th><th>Admin</th><th>Timestamp</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>479372063</td><td>22 — RT-AOC</td><td>—</td><td>2575</td><td>2025-12-08 18:39</td><td class="text-success">Correct: return bag received</td></tr>
+          <tr><td>490780774</td><td>23 — RT-DP</td><td>RN 590296</td><td>2575</td><td>2026-01-17 18:08</td><td class="text-success">Correct: return note 590296 created</td></tr>
+          <tr class="table-danger"><td>490786824</td><td>77</td><td>—</td><td>4511</td><td>2026-01-17 18:27</td><td><span class="bug-tag">BUG</span> Quick receive submission overwrites status</td></tr>
+          <tr class="table-danger"><td>490786825</td><td>22 — RT-AOC</td><td>—</td><td>4511</td><td>2026-01-17 18:27</td><td><span class="bug-tag">BUG</span> Status reset — voids RN 590296 dispatch</td></tr>
+          <tr class="table-danger"><td>491309467–68</td><td>77 → 22</td><td>—</td><td>4511</td><td>2026-01-20 16:22</td><td><span class="bug-tag">BUG</span> Same bag received again → status 22 again</td></tr>
+          <tr class="table-danger"><td>491330352–53</td><td>77 → 22</td><td>—</td><td>2572</td><td>2026-01-20 17:29</td><td><span class="bug-tag">BUG</span> Same bag received again → status 22 again</td></tr>
+          <tr class="table-danger"><td>491336394</td><td>23 — RT-DP</td><td>RN 591017</td><td>4511</td><td>2026-01-20 17:52</td><td><span class="bug-tag">DUPLICATE</span> New return note 591017 created</td></tr>
+          <tr class="table-success"><td>491860167</td><td>25 — RT-DS</td><td>RN 591017</td><td>2575</td><td>2026-01-22 19:38</td><td>Shipment returned to shipper via 591017</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="sh">Scan Screen History Around the Bug</h3>
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>Scan ID</th><th>Screen</th><th>Admin</th><th>Timestamp</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>472223391</td><td><strong>20 — Quick Receive Bag</strong></td><td>4511</td><td>2026-01-17 <strong>16:28</strong></td><td>Scanned into pending list — shipment still at status 22 ✓</td></tr>
+          <tr><td>472245432</td><td>7 — Return Create</td><td>2575</td><td>2026-01-17 18:06</td><td>Admin 2575 opens return create screen</td></tr>
+          <tr class="table-danger"><td>—</td><td><strong>20 — Quick Receive Bag (submit)</strong></td><td>4511</td><td>2026-01-17 <strong>18:27</strong></td><td>Admin 4511 submits the pending list (1h59m later) — <span class="bug-tag">BUG</span></td></tr>
+          <tr class="table-danger"><td>472804959</td><td><strong>20 — Quick Receive Bag</strong></td><td>4511</td><td>2026-01-20 16:13</td><td>Another quick receive — overwrites status 22 again</td></tr>
+          <tr class="table-danger"><td>472819522</td><td><strong>20 — Quick Receive Bag</strong></td><td>2572</td><td>2026-01-20 17:25</td><td>Another quick receive — overwrites status 22 again</td></tr>
+          <tr><td>472823201</td><td>7 — Return Create</td><td>7394</td><td>2026-01-20 17:50</td><td>Admin 7394 opens return create screen</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══ 7. PREVENTION ═══ -->
+  <div class="card-section">
+    <div class="cs-head h-grey"><span class="cs-num">7</span> Prevention — Summary of Changes Required</div>
+    <div class="cs-body">
+      <table class="table table-bordered table-sm">
+        <thead><tr><th>#</th><th>File</th><th>Method</th><th>Change</th><th>Priority</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><code>AdminMasterCargoController.php</code></td>
+            <td><code>master_cargo_bag_quick_receive_store()</code></td>
+            <td>Before overwriting shipment status to 22, check if shipment is in an active open return note (return_note_shipments.status=0 + return_notes.status=0). If yes, skip and log.</td>
+            <td><span class="s-bad">Critical</span></td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><code>AdminCargoController.php</code></td>
+            <td><code>quick_receive_store()</code></td>
+            <td>Same fix as #1 — applies to cargo consignment quick receive.</td>
+            <td><span class="s-bad">Critical</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><code>ReturnController.php</code></td>
+            <td><code>return_note_create()</code></td>
+            <td>Guard at line 3203 currently checks <code>status=1</code> only. Extend to block shipments in ANY open return note (status=0 or status=1) from being added to a new return note.</td>
+            <td><span class="s-warn">High</span></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Production DB</td>
+            <td>Manual SQL</td>
+            <td>Delete stuck entry in return_note_shipments (590296, 57705486). Decrement return_notes.shipments_count from 19 to 18 for return note 590296.</td>
+            <td><span class="s-bad">Immediate</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="alert-info mt-2">
+        <strong>Why does the same bag get received multiple times?</strong> The bag quick receive screen allows re-submission because a different bag record (or re-created bag shipment record) is involved each time. Each submission marks its own <code>bag_shipments.status = 1</code>, independently. There is no check that the underlying <em>shipment</em> was already received through a previous bag submission.
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

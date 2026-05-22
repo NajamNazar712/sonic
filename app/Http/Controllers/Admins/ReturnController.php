@@ -3185,6 +3185,19 @@ class ReturnController extends Controller
                 $shipment_details = Shipment::find($shipment_id);
                 if ($shipment_details) {
                     if (in_array($shipment_details->shipper_status_id, $return_statuses)) {
+                        // FIX: Previously the duplicate-guard only checked status=1 (confirmed entries),
+                        // so a shipment already sitting unconfirmed (status=0) in an open return note
+                        // was not blocked and could be added to a second note created within seconds
+                        // (double-submit / mobile retry). This caused the older note to get permanently
+                        // stuck open because the close logic skips shipments that appear in a newer note.
+                        // Now we also exclude shipments that are unconfirmed in any currently open note.
+                        $already_in_open = ReturnNoteShipment::where('shipment_id', $shipment_id)
+                            ->where('status', 0)
+                            ->whereHas('returnNote', fn($q) => $q->where('status', 0))
+                            ->exists();
+                        if ($already_in_open) {
+                            continue;
+                        }
                         $valid_shipments[] = $shipment_id;
                         $shipments_count++;
                     }

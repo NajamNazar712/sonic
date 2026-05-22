@@ -41,4 +41,8 @@ class ReturnNoteShipment extends Model
     public function shipment() {
 		return $this->belongsTo('App\Http\Models\Shipment');
 	}
+
+    public function returnNote() {
+        return $this->belongsTo(ReturnNote::class, 'return_note_id');
+    }
 }

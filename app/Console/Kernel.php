@@ -201,6 +201,7 @@ class Kernel extends ConsoleKernel
         '\App\Console\Commands\NonWalletMakeToDonePayment',
         'App\Console\Commands\AutoRejectLeaves',
         'App\Console\Commands\MoveDailyPayableRecordsToLogsTable',
+        'App\Console\Commands\FixStuckReturnNotes',
 
     ];
 
@@ -215,6 +216,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('bulk:status-sharing-wallet-replicate')->everyTenMinutes()->runInBackground();
 
         $schedule->command('create:service_ledger')->dailyAt('00:00')->runInBackground();
+
+        // Patch fix: detect and auto-remove shipments that are stuck (status=0) in an older open
+        // return note because they were re-added to a newer note via double-submit or quick-receive-bag bug.
+        // TODO: Enable this once connected to a writable database.
+        // $schedule->command('return_notes:fix_stuck')->dailyAt('07:00')->runInBackground();
         // $schedule->command('job:run email 25000')->dailyAt('02:02')->runInBackground();
         $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
 
