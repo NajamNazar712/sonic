@@ -47,6 +47,20 @@ class NonWalletMakeToDonePaymentNewFile extends Command
             return 0;
         }
 
+        // Temporary skip for coming Tuesday, Wednesday, Thursday -> due to Eid
+        $skipDates = [
+            '2026-05-25', // Tuesday
+            '2026-05-27', // Wednesday
+            '2026-05-28', // Thursday
+        ];
+
+        if (in_array($today->toDateString(), $skipDates, true)) {
+            Log::channel('non_wallet_payment_log')->info(
+                'Skipping: temporary skip date - ' . $today->toDateString()
+            );
+
+            return 0;
+        }
 
         // $excludedUserIds = GlobalSettings::where('type', 't_payment_exclude_shippers')->first()->text ?? '';
         // $excludedUserIds = array_filter(explode(',', $excludedUserIds));
