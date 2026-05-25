@@ -68,7 +68,7 @@ class TestEmailCheck extends Command
                         ->where('id', $record->id)
                         ->update(['payable' =>$payable, 'cod_sst' => $cod_sst, 'wht' => $wht]);
 
-                    DB::select('CALL update_done_payment_statistics(?)', $record->done_payment_id);
+                    DB::select('CALL update_done_payment_statistics(?)', [$record->done_payment_id]);
                 }
 
 
