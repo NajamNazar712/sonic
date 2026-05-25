@@ -98,6 +98,7 @@
                                         <th class="border-primary border-darken-1">Referral Code</th>
                                         <th class="border-primary border-darken-1">Payment Cycle</th>
                                         <th class="border-primary border-darken-1">Payment Cycle Days</th>
+                                        <th class="border-primary border-darken-1">T Series</th>
                                         <th class="border-primary border-darken-1">Lead Account Progress (%)</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
@@ -1302,6 +1303,7 @@
                         head.push('Referral Code');
                         head.push('Payment Cycle');
                         head.push('Payment Cycle Days');
+                        head.push('T Series');
                         head.push('Lead Account Progress (%)');
 
 
@@ -1351,6 +1353,7 @@
                             row.push(values.referral_name);
                             row.push(values.payment_cycle);
                             row.push(values.payment_cycle_days);
+                            row.push(values.t_payment_cycle_status);
                             row.push(values.lead_progress);
 
                             body.push(row);
@@ -1830,6 +1833,8 @@
                 {data: 'referral_name', name: 'ref.name', class: 'align-middle referral_name'},
                 {data: 'payment_cycle', name: 'pc.id', class: 'align-middle payment_cycle'},
                 {data: 'payment_cycle_days', name: 'users.payment_cycle_days', class: 'align-middle payment_cycle_days'},
+                {data: 't_payment_cycle_status', name: 't_payment_cycle_status', class: 'align-middle t_payment_cycle_status'},
+
                 {data: 'lead_progress', name: 'lead_progress', class: 'align-middle lead_progress', orderable: false, searchable: false},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],

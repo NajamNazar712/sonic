@@ -4555,7 +4555,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
 
-            return redirect()->back()->with('success', 'All Rates are updateddd');
+            return redirect()->route('admin.accounts.t_payments', $user_id)
+                ->with('success', 'All Rates are updated');
+            // return redirect()->back()->with('success', 'All Rates are updateddd');
         }
 
         if ($user['status'] == 3) {
@@ -7362,8 +7364,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             }
 
             NotificationsController::send(34, $id, Auth::id());
-
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
+            //return redirect()->back()->with('success', 'All Rates are updated');
         }
     }
     /**
@@ -9707,7 +9710,7 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
             ->leftJoin('wallet_users', 'wallet_users.user_id', 'users.id')
-            
+            ->leftJoin('t_payment_cycles as tpc', 'tpc.user_id', '=', 'users.id')
 
             // ->select(['users.ntn_no', 'users.blacklist', 'rrb.name as rates_rejected_by', 'users.disable_at as disable_at', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.disable_reason as disable_reason', 'users.rejected_reason as rejected_reason', 'users.rate_status as rate_status', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'p.product_name as product_type', 'rab.name as added_by', 'rabna.name as updated_by', 'users.created_at', 'rabb.name as approved_by', 'rabba.name as account_activated_by', 'users.activated_at as activated_date', 'users.status', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'users.auto_shipment_cancellation_days', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'users.brand_name as brand_name', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'poc.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.address as address', 'users.email', 't.name as territory', 'users.corporate_rate_type_id as corporate_rate_type_id', 'users.new_rate_type_id as new_rate_type_id', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name','ucs.status_count as status_count','z.name as zone', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso','scun.name as search','scun_r.name as search_user_type','users.lead_id', 'users.average_shipments', 'bdru.name as reason','users.sms_charges','faf_charges.status as fc_status'])
 
@@ -9780,7 +9783,8 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 'faf_charges.status as fc_status',
                 'wallet_users.user_id as wallet_shippers',
                 'users.sub_segment_id',
-                'faf_charges.percentage as percentage'
+                'faf_charges.percentage as percentage',
+                'tpc.user_id as tpc_user_id'
             ])
             ->where(function($query){
                 $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
@@ -9852,6 +9856,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                    return '';
                 }
 
+            })
+            ->addColumn('t_payment_cycle_status', function ($user) {
+                return !empty($user->tpc_user_id) ? 'Yes' : 'No';
             })
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
@@ -10513,12 +10520,13 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
             ->leftjoin('admins as k', 'k.id', '=', 'st.kam')
             ->leftjoin('riders as r', 'r.id', '=', 'st.ref')
             ->leftjoin('admins as e', 'e.id', '=', 'st.eso')
+            ->leftJoin('t_payment_cycles as tpc', 'tpc.user_id', '=', 'users.id')
             ->leftjoin('payment_cycles as pc', 'pc.id', '=', 'users.payment_cycle_id')
             ->leftjoin('faf_charges', function($join){
                 $join->on('faf_charges.user_id', '=', 'users.id')->where('faf_charges.status', '=', 1);
             })
             ->leftjoin('territories as t', 't.id', '=', 'users.territory_id')
-            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges', 'users.on_board_status', 'users.request_custom_quotation', 'faf_charges.status as fc_status','users.sub_segment_id'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)
+            ->select(['users.ntn_no','rrb.name as rates_rejected_by', 'users.rates_added_at as rates_added_at', 'users.rates_approved_at as rates_approved_at', 'users.rates_rejected_at as rates_rejected_at', 'users.rate_status as rate_status', 'users.rejected_reason as rejected_reason', 'users.id', 'ad.name as admin_tag_id', 'users.name', 'cities.name as city', 'users.poc', 'users.cnic', 'users.status', 'users.created_at', 'products.product_name as product_type', 'users.blacklist', 'rab.name as rates_added_by', 'rabb.name as rates_authorized_by', 'users.account_type_id', 'at.name as account_type', 'users.documents_status', 'users.documents_status_reason as documents_rejection_reason', 'users.other_product_name', 'du.phone as duplicate_phone', 'du.cnic as duplicate_cnic', 'du.iban as duplicate_iban', 'du.name as duplicate_name', 'uda.uploaded_at as documents_uploaded_at', 'uda.approved_at as documents_approved_at', 'dab.name as documents_approved_by', 'drb.name as documents_rejected_by', 'uda.rejected_at as documents_rejected_at', 'iui.status as international_status', 'iui.status as international_rate_status', 'iui.rejected_reason as international_rejected_reason', 'p.name as tagged_poc', 'k.name as kam', 'r.name as ref','r.trax_id as rider_id', 'users.corporate_rate_type_id', 'users.email', 't.name as territory', 'users.address as address', 'seg.name as segment', 'seg_sub.name as sub_segment', 'ref.name as referral_name', 'pc.id as payment_cycle_id','pc.name as payment_cycle','users.payment_cycle_days as payment_cycle_days','e.name as eso', 'users.status as status_id', 'users.lead_id','scun.name as search','scun_r.name as search_user_type' , 'users.sms_charges', 'users.on_board_status', 'users.request_custom_quotation', 'faf_charges.status as fc_status','users.sub_segment_id' ,'tpc.user_id as tpc_user_id'])->whereIn('users.status', [0, 1, 2, 5])->where('users.blacklist', 0)->where('users.email_verified', 1)
             ->where(function($query){
                 $idsToExclude = FilterTrait::class::getFilteredIds(auth()->user()->id);
                 if (!empty($idsToExclude)) {
@@ -10789,6 +10797,9 @@ $zero_cod_discount = HistoryZeroCodDiscountCharges::all()->where('user_id', $id)
                 } else {
                     $query->whereRaw('false');
                 }
+            })
+            ->addColumn('t_payment_cycle_status', function ($user) {
+                return !empty($user->tpc_user_id) ? 'Yes' : 'No';
             })
             ->addColumn('duplication', function ($users)  use ($request, $duplicateEmailCount){
                 $count = 0;

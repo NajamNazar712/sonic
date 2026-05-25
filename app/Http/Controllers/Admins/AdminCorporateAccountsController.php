@@ -4742,7 +4742,9 @@ class AdminCorporateAccountsController extends Controller
             }
             
 
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
+            //return redirect()->back()->with('success', 'All Rates are updated');
         }
 
         if ($user['status'] == 3 && $new_rate_type_id == null) {
@@ -7805,7 +7807,9 @@ class AdminCorporateAccountsController extends Controller
             }
 
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
+            //return redirect()->back()->with('success', 'All Rates are updated');
         }
 
         if ($user['status'] == 3 && $new_rate_type_id != null) {
@@ -12038,7 +12042,9 @@ class AdminCorporateAccountsController extends Controller
             }
 
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
+            //return redirect()->back()->with('success', 'All Rates are updated');
         }
 
     }
@@ -16007,7 +16013,9 @@ class AdminCorporateAccountsController extends Controller
                 return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
 
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
+            // return redirect()->back()->with('success', 'All Rates are updated');
         }
 
         if ($user['status'] == 3 && $user['new_rate_type_id'] == null) { 
@@ -18865,7 +18873,9 @@ class AdminCorporateAccountsController extends Controller
 
 
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
+            //return redirect()->back()->with('success', 'All Rates are updated');
         }
 
         if ($user['status'] == 3 && $user['new_rate_type_id'] == 2) {
@@ -22789,7 +22799,9 @@ class AdminCorporateAccountsController extends Controller
 
 
             User::where('id', $id)->update(['rate_status' => 1, 'rates_updated_by' => Auth::id()]);
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
+           // return redirect()->back()->with('success', 'All Rates are updated');
         }
     }
 
@@ -27047,7 +27059,9 @@ class AdminCorporateAccountsController extends Controller
                 return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
             }
 
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
+            //return redirect()->back()->with('success', 'All Rates are updated');
         }
 
         if ($user['status'] == 3 && $user['new_rate_type_id'] == null) {
@@ -29890,8 +29904,10 @@ class AdminCorporateAccountsController extends Controller
 
 
             //NotificationsController::send(34, $id, Auth::id());
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
 
-            return redirect()->back()->with('success', 'All Rates are updated');
+            //return redirect()->back()->with('success', 'All Rates are updated');
         }
 
         if ($user['status'] == 3 && $user['new_rate_type_id'] == 3) {
@@ -32777,7 +32793,9 @@ class AdminCorporateAccountsController extends Controller
 
             //NotificationsController::send(34, $id, Auth::id());
 
-            return redirect()->back()->with('success', 'All Rates are updated');
+            return redirect()->route('admin.accounts.t_payments', $id)
+                ->with('success', 'All Rates are updated');
+            //return redirect()->back()->with('success', 'All Rates are updated');
         }
     }
 
