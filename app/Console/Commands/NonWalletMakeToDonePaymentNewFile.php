@@ -49,7 +49,7 @@ class NonWalletMakeToDonePaymentNewFile extends Command
 
         // Temporary skip for coming Tuesday, Wednesday, Thursday -> due to Eid
         $skipDates = [
-            '2026-05-25', // Tuesday
+            '2026-05-26', // Tuesday
             '2026-05-27', // Wednesday
             '2026-05-28', // Thursday
         ];
