@@ -1584,6 +1584,11 @@ class ShipperAPIController extends Controller
         $date = Carbon::today();
         $user_id = $request->shipper_id;
         $user = User::find($user_id);
+
+        if (!$user) {
+            return response()->json(['status' => 1, 'message' => 'Account not found.'], 404);
+        }
+
 //        $booking_types = BookingType::whereNotIn('id', [4, 6])->get();
 //        $user_shipping_address = UserShippingInfo::join('cities as c', 'c.id', '=', 'user_shipping_infos.city_id')
 //            ->where('user_shipping_infos.user_id', $user_id)
